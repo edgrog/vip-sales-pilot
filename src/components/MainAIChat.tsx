@@ -56,19 +56,38 @@ export const MainAIChat = () => {
   const fetchSalesData = async () => {
     console.log('Starting to fetch sales data...');
     try {
-      // Remove the limit to get ALL records - Supabase was limiting to 1000
-      const { data, error } = await supabase
-        .from('vip_sales' as any)
-        .select('*');
+      // Fetch all records using pagination to bypass 1000 record limit
+      const pageSize = 1000;
+      let allData: VipSalesData[] = [];
+      let page = 0;
+      let hasMore = true;
 
-      console.log('Supabase response:', { data, error });
-      
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('vip_sales' as any)
+          .select('*')
+          .range(page * pageSize, (page + 1) * pageSize - 1);
+
+        console.log(`Fetched page ${page + 1}:`, data?.length || 0, 'records');
+        
+        if (error) {
+          console.error('Supabase error:', error);
+          throw error;
+        }
+
+        if (data && data.length > 0) {
+          allData = [...allData, ...(data as unknown as VipSalesData[])];
+          hasMore = data.length === pageSize; // Continue if we got a full page
+          page++;
+        } else {
+          hasMore = false;
+        }
       }
+
+      console.log('Total records fetched across all pages:', allData.length);
+      console.log('Supabase response complete');
       
-      const typedData = data as unknown as VipSalesData[];
+      const typedData = allData as unknown as VipSalesData[];
       console.log('Typed data length:', typedData?.length);
       setSalesData(typedData || []);
       calculateDashboardMetrics(typedData || []);
