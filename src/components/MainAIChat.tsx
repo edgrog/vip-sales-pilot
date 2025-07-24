@@ -1,4 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -1022,56 +1023,62 @@ export const MainAIChat = () => {
 
           <Card className="card-grog">
             <CardHeader>
-              <CardTitle className="text-lg font-semibold">Action Items</CardTitle>
-              <CardDescription>Priority accounts requiring immediate attention</CardDescription>
+              <CardTitle className="text-lg font-semibold">Chain Performance</CardTitle>
+              <CardDescription>Performance breakdown by retail chain ({dashboardData.chainPerformance.length} chains)</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {dashboardData.churnRiskAccounts > 0 && (
-                  <div className="p-4 rounded-lg border border-destructive/20 bg-destructive/5">
-                    <div className="flex items-start gap-3">
-                      <AlertTriangle className="w-5 h-5 text-destructive mt-0.5" />
-                      <div>
-                        <h4 className="font-medium text-foreground">Urgent: Churn Risk Accounts</h4>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {dashboardData.churnRiskAccounts} accounts showing significant decline (&gt;20% drop).
-                          <span className="font-medium text-destructive"> Immediate follow-up required.</span>
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {dashboardData.totalRevenueChange < 0 && (
-                  <div className="p-4 rounded-lg border border-warning/20 bg-warning/5">
-                    <div className="flex items-start gap-3">
-                      <TrendingDown className="w-5 h-5 text-warning mt-0.5" />
-                      <div>
-                        <h4 className="font-medium text-foreground">Revenue Decline</h4>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Overall revenue down {Math.abs(dashboardData.totalRevenueChange).toFixed(1)}% from June to July.
-                          <span className="font-medium text-warning"> Chain performance review needed.</span>
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {dashboardData.growingAccounts > 0 && (
-                  <div className="p-4 rounded-lg border border-success/20 bg-success/5">
-                    <div className="flex items-start gap-3">
-                      <TrendingUp className="w-5 h-5 text-success mt-0.5" />
-                      <div>
-                        <h4 className="font-medium text-foreground">Growth Opportunity</h4>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {dashboardData.growingAccounts} accounts showing strong growth (&gt;10% increase).
-                          <span className="font-medium text-success"> Consider expansion opportunities.</span>
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Chain</TableHead>
+                    <TableHead className="text-center">Stores</TableHead>
+                    <TableHead className="text-right">Cases/Week</TableHead>
+                    <TableHead className="text-right">Growth</TableHead>
+                    <TableHead className="text-center">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {dashboardData.chainPerformance.map((chain) => (
+                    <TableRow 
+                      key={chain.chain}
+                      className="cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => navigate(`/chains/${encodeURIComponent(chain.chain)}`)}
+                    >
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                            <span className="text-sm font-semibold text-primary">{chain.chain.charAt(0)}</span>
+                          </div>
+                          {chain.chain}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">{chain.accounts}</TableCell>
+                      <TableCell className="text-right font-medium">{chain.totalCases.toFixed(1)}</TableCell>
+                      <TableCell className={`text-right font-medium ${
+                        chain.avgGrowth >= 0 ? 'text-success' : 'text-destructive'
+                      }`}>
+                        {chain.avgGrowth >= 0 ? '+' : ''}{chain.avgGrowth.toFixed(1)}%
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge 
+                          variant={
+                            chain.status === 'growing' ? 'default' : 
+                            chain.status === 'declining' ? 'destructive' : 
+                            'secondary'
+                          }
+                          className={
+                            chain.status === 'growing' ? 'bg-success text-success-foreground' :
+                            chain.status === 'declining' ? 'bg-destructive text-destructive-foreground' :
+                            'bg-secondary text-secondary-foreground'
+                          }
+                        >
+                          {chain.status}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </div>
