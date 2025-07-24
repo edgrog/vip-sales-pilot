@@ -540,21 +540,6 @@ export const MainAIChat = () => {
                   }
                 </CardDescription>
               </div>
-              <Button 
-                className="btn-grog-outline" 
-                size="sm"
-                onClick={() => setActiveSection(
-                  activeSection === 'chain' ? 'churn' : 
-                  activeSection === 'churn' ? 'growing' : 
-                  activeSection === 'growing' ? 'accounts' :
-                  activeSection === 'accounts' ? 'velocity' : 'chain'
-                )}
-              >
-                Show {activeSection === 'chain' ? 'Churn Risk' : 
-                      activeSection === 'churn' ? 'Growing' : 
-                      activeSection === 'growing' ? 'All Accounts' :
-                      activeSection === 'accounts' ? 'Velocity' : 'Chain Performance'}
-              </Button>
             </div>
           </CardHeader>
           <CardContent>
