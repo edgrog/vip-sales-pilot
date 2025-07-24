@@ -301,14 +301,14 @@ export const MainAIChat = () => {
   const getVelocityData = () => {
     if (!dashboardData || !salesData.length) return [];
     
-    // Calculate velocity for each month
+    // Calculate velocity for each month using valid accounts only
     const validData = salesData.filter(account => 
       account["Retail Accounts"] && 
       account["Retail Accounts"].trim() !== '' && 
       account["Retail Accounts"] !== 'Total'
     );
 
-    const totalAccounts = salesData.length;
+    const validAccountsCount = validData.length; // Use valid accounts only (1,578)
     
     let totalMayCases = 0;
     let totalJuneCases = 0;
@@ -320,9 +320,9 @@ export const MainAIChat = () => {
       totalJulyCases += account["July 2025"] || 0;
     });
 
-    const mayVelocity = totalAccounts > 0 ? totalMayCases / totalAccounts : 0;
-    const juneVelocity = totalAccounts > 0 ? totalJuneCases / totalAccounts : 0;
-    const julyVelocity = totalAccounts > 0 ? totalJulyCases / totalAccounts : 0;
+    const mayVelocity = validAccountsCount > 0 ? totalMayCases / validAccountsCount : 0;
+    const juneVelocity = validAccountsCount > 0 ? totalJuneCases / validAccountsCount : 0;
+    const julyVelocity = validAccountsCount > 0 ? totalJulyCases / validAccountsCount : 0;
 
     return [
       {
