@@ -52,8 +52,9 @@ export const MainAIChat = () => {
   const [loading, setLoading] = useState(true);
   const [isChainPerformanceOpen, setIsChainPerformanceOpen] = useState(false);
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<'chain' | 'churn'>('chain'); // Track which section to show
+  const [activeSection, setActiveSection] = useState<'chain' | 'churn' | 'growing'>('chain'); // Track which section to show
   const [isChurnRiskOpen, setIsChurnRiskOpen] = useState(false); // For churn risk collapsible
+  const [isGrowingAccountsOpen, setIsGrowingAccountsOpen] = useState(false); // For growing accounts collapsible
 
   const fetchSalesData = async () => {
     console.log('Starting to fetch sales data...');
@@ -288,6 +289,14 @@ export const MainAIChat = () => {
       .sort((a, b) => a.growth - b.growth); // Sort by worst decline first
   };
 
+  const getGrowingStores = () => {
+    if (!dashboardData) return [];
+    
+    return dashboardData.accountPerformance
+      .filter(account => account.status === 'growing')
+      .sort((a, b) => b.growth - a.growth); // Sort by best growth first
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -385,7 +394,10 @@ export const MainAIChat = () => {
             </CardContent>
           </Card>
 
-          <Card className="shadow-card border-0">
+          <Card 
+            className="shadow-card border-0 cursor-pointer hover:shadow-lg transition-shadow" 
+            onClick={() => setActiveSection('growing')}
+          >
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Growing Accounts</CardTitle>
             </CardHeader>
@@ -394,7 +406,7 @@ export const MainAIChat = () => {
                 <div className="text-3xl font-bold text-success">{dashboardData.growingAccounts}</div>
                 <TrendingUp className="w-8 h-8 text-success" />
               </div>
-              <p className="text-xs text-muted-foreground mt-2">Accounts showing growth</p>
+              <p className="text-xs text-muted-foreground mt-2">Click to view details</p>
             </CardContent>
           </Card>
 
@@ -428,21 +440,28 @@ export const MainAIChat = () => {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-lg font-semibold">
-                  {activeSection === 'chain' ? 'Chain Performance Breakdown' : 'Churn Risk Analysis'}
+                  {activeSection === 'chain' ? 'Chain Performance Breakdown' : 
+                   activeSection === 'churn' ? 'Churn Risk Analysis' : 'Growing Accounts Performance'}
                 </CardTitle>
                 <CardDescription>
                   {activeSection === 'chain' 
                     ? 'Sales performance by retail chain (June to July 2025)' 
-                    : 'Stores requiring immediate attention'
+                    : activeSection === 'churn'
+                    ? 'Stores requiring immediate attention'
+                    : 'Top performing stores with strong growth'
                   }
                 </CardDescription>
               </div>
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => setActiveSection(activeSection === 'chain' ? 'churn' : 'chain')}
+                onClick={() => setActiveSection(
+                  activeSection === 'chain' ? 'churn' : 
+                  activeSection === 'churn' ? 'growing' : 'chain'
+                )}
               >
-                Show {activeSection === 'chain' ? 'Churn Risk' : 'Chain Performance'}
+                Show {activeSection === 'chain' ? 'Churn Risk' : 
+                      activeSection === 'churn' ? 'Growing' : 'Chain Performance'}
               </Button>
             </div>
           </CardHeader>
@@ -514,7 +533,7 @@ export const MainAIChat = () => {
                   </div>
                 </CollapsibleContent>
               </Collapsible>
-            ) : (
+            ) : activeSection === 'churn' ? (
               // Churn Risk Section
               <Collapsible open={isChurnRiskOpen} onOpenChange={setIsChurnRiskOpen}>
                 {getChurnRiskStores().length > 0 ? (
@@ -586,6 +605,81 @@ export const MainAIChat = () => {
                     </div>
                     <h3 className="text-lg font-medium text-foreground mb-2">No Churn Risk Detected</h3>
                     <p className="text-muted-foreground">All stores are performing within acceptable ranges.</p>
+                  </div>
+                )}
+              </Collapsible>
+            ) : (
+              // Growing Accounts Section
+              <Collapsible open={isGrowingAccountsOpen} onOpenChange={setIsGrowingAccountsOpen}>
+                {getGrowingStores().length > 0 ? (
+                  <>
+                    {/* Preview: First 3 growing stores */}
+                    <div className="space-y-4">
+                      {getGrowingStores().slice(0, 3).map((store, index) => (
+                        <div key={`${store.name}-${index}`} className="flex items-center justify-between p-4 rounded-lg border border-success/20 bg-success/5">
+                          <div className="flex items-center gap-3">
+                            <TrendingUp className="w-5 h-5 text-success" />
+                            <div>
+                              <h4 className="font-medium text-foreground">{store.name}</h4>
+                              <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week</p>
+                              <div className="mt-1">
+                                {getStatusBadge(store.status)}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-lg font-bold text-success">
+                              +{store.growth.toFixed(1)}%
+                            </div>
+                            <p className="text-xs text-muted-foreground">Growth Rate</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Collapsible trigger */}
+                    {getGrowingStores().length > 3 && (
+                      <CollapsibleTrigger className="flex items-center justify-center w-full mt-4 p-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                        <span className="mr-2">
+                          {isGrowingAccountsOpen ? `Hide ${getGrowingStores().length - 3} more stores` : `Show ${getGrowingStores().length - 3} more stores`}
+                        </span>
+                        <ChevronDown className={`w-4 h-4 transition-transform ${isGrowingAccountsOpen ? 'rotate-180' : ''}`} />
+                      </CollapsibleTrigger>
+                    )}
+
+                    {/* Collapsible content: Remaining growing stores */}
+                    <CollapsibleContent>
+                      <div className="space-y-4 mt-4">
+                        {getGrowingStores().slice(3).map((store, index) => (
+                          <div key={`${store.name}-${index + 3}`} className="flex items-center justify-between p-4 rounded-lg border border-success/20 bg-success/5">
+                            <div className="flex items-center gap-3">
+                              <TrendingUp className="w-5 h-5 text-success" />
+                              <div>
+                                <h4 className="font-medium text-foreground">{store.name}</h4>
+                                <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week</p>
+                                <div className="mt-1">
+                                  {getStatusBadge(store.status)}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-lg font-bold text-success">
+                                +{store.growth.toFixed(1)}%
+                              </div>
+                              <p className="text-xs text-muted-foreground">Growth Rate</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CollapsibleContent>
+                  </>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-muted/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <TrendingUp className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-medium text-foreground mb-2">No Growing Accounts</h3>
+                    <p className="text-muted-foreground">No stores are currently showing significant growth.</p>
                   </div>
                 )}
               </Collapsible>
