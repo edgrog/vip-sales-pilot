@@ -84,7 +84,20 @@ export const MainAIChat = () => {
     
     if (!validData.length) return;
 
-    const totalAccounts = validData.length;
+    // Count unique stores that have ordered at any time (May, June, or July)
+    const uniqueStoresWithSales = new Set();
+    validData.forEach(account => {
+      const may = account["May 2025"] || 0;
+      const june = account["June 2025"] || 0;
+      const july = account["July 2025"] || 0;
+      
+      // If store has any sales in any month, count it as active
+      if (may > 0 || june > 0 || july > 0) {
+        uniqueStoresWithSales.add(account["Retail Accounts"]);
+      }
+    });
+    
+    const totalAccounts = uniqueStoresWithSales.size;
     let churnRiskAccounts = 0;
     let growingAccounts = 0;
     let totalJuneCases = 0;
