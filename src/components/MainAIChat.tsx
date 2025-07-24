@@ -72,12 +72,9 @@ export const MainAIChat = () => {
   };
 
   const calculateDashboardMetrics = (data: VipSalesData[]) => {
-    // Filter out records with null/empty account names
-    const validData = data.filter(account => 
-      account["Retail Accounts"] && 
-      account["Retail Accounts"].trim() !== '' && 
-      account["Retail Accounts"] !== 'Total'
-    );
+    // TEMPORARILY REMOVE ALL FILTERING to test
+    const validData = data; // Use ALL data without any filtering
+    console.log('Using ALL data without filtering:', validData.length);
     
     console.log('Total records from database:', data.length);
     
