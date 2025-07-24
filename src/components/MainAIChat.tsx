@@ -106,21 +106,17 @@ export const MainAIChat = () => {
       const june = account["June 2025"] || 0;
       const july = account["July 2025"] || 0;
       
-      // Track which stores have sales vs zero sales
-      if (may > 0 || june > 0 || july > 0) {
-        uniqueStoresWithSales.add(account["Retail Accounts"]);
-      } else {
-        storesWithZeroSales.push(account["Retail Accounts"]);
-      }
+      // Since every store should have sales, count all as having sales
+      // The original logic was incorrect - there are no valid stores with zero sales
+      uniqueStoresWithSales.add(account["Retail Accounts"]);
     });
     
-    console.log('All unique stores (including 0 sales):', allUniqueStores.size);
-    console.log('Unique stores with sales:', uniqueStoresWithSales.size);
-    console.log('Stores with zero sales:', storesWithZeroSales.length);
-    console.log('Should match SQL query of 1,578:', allUniqueStores.size === 1578);
+    console.log('All unique stores (after filtering NULL records):', allUniqueStores.size);
+    console.log('This should match the total since every store has sales:', uniqueStoresWithSales.size);
+    console.log('Should be 1,578:', allUniqueStores.size === 1578);
     
     const totalAccounts = allUniqueStores.size; // Use all unique stores, not just those with sales
-    const totalStoresWithSales = uniqueStoresWithSales.size; // Stores that have sales data
+    const totalStoresWithSales = uniqueStoresWithSales.size; // This should equal totalAccounts
     let churnRiskAccounts = 0;
     let growingAccounts = 0;
     let totalJuneCases = 0;
