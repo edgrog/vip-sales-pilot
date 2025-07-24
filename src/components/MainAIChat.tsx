@@ -767,7 +767,7 @@ export const MainAIChat = () => {
               <div className="space-y-4">
                 {dashboardData.accountPerformance
                   .filter(account => account.julyCases > 0)
-                  .sort((a, b) => (b.julyCases / 4.3) - (a.julyCases / 4.3)) // Sort by sales per week (July cases / 4.3 weeks)
+                  .sort((a, b) => b.julyCases - a.julyCases) // Sort by sales per week
                   .slice(0, 3) // Show only first 3 by default
                   .map((account, index) => (
                     <div key={`${account.name}-${account.state}`} className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50">
@@ -785,7 +785,7 @@ export const MainAIChat = () => {
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-bold text-foreground">
-                          {(account.julyCases / 4.3).toFixed(1)}
+                          {account.julyCases.toFixed(1)}
                         </div>
                         <p className="text-xs text-muted-foreground">Cases/Week</p>
                         <div className={`text-xs font-medium ${
@@ -810,7 +810,7 @@ export const MainAIChat = () => {
                     <div className="space-y-4 mt-4">
                       {dashboardData.accountPerformance
                         .filter(account => account.julyCases > 0)
-                        .sort((a, b) => (b.julyCases / 4.3) - (a.julyCases / 4.3))
+                        .sort((a, b) => b.julyCases - a.julyCases)
                         .slice(3) // Skip first 3
                         .map((account, index) => (
                           <div key={`${account.name}-${account.state}-${index}`} className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50">
@@ -828,7 +828,7 @@ export const MainAIChat = () => {
                             </div>
                             <div className="text-right">
                               <div className="text-lg font-bold text-foreground">
-                                {(account.julyCases / 4.3).toFixed(1)}
+                                {account.julyCases.toFixed(1)}
                               </div>
                               <p className="text-xs text-muted-foreground">Cases/Week</p>
                               <div className={`text-xs font-medium ${
