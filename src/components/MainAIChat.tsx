@@ -668,28 +668,32 @@ export const MainAIChat = () => {
                      {/* Collapsible content: Remaining churn risk stores */}
                      <CollapsibleContent>
                        <div className="space-y-4 mt-4">
-                         {getChurnRiskStores().slice(3).map((store, index) => (
-                           <div key={`${store.name}-${index + 3}`} className="flex items-center justify-between p-4 rounded-lg border border-destructive/20 bg-destructive/5">
-                             <div className="flex items-center gap-3">
-                               <AlertTriangle className="w-5 h-5 text-destructive" />
-                               <div>
-                                 <h4 className="font-medium text-foreground">{store.name}</h4>
-                                 <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week (July)</p>
-                                 <p className="text-xs text-muted-foreground">June: {store.juneCases.toFixed(1)} cases/week</p>
-                                 <div className="mt-1">
-                                   {getStatusBadge(store.status)}
-                                 </div>
-                               </div>
-                             </div>
-                             <div className="text-right">
-                               <div className="text-lg font-bold text-destructive">
-                                 -{store.caseReduction.toFixed(1)}
-                               </div>
-                               <p className="text-xs text-muted-foreground">Cases Lost/Week</p>
-                               <p className="text-xs text-muted-foreground">({store.growth.toFixed(1)}%)</p>
-                             </div>
-                           </div>
-                         ))}
+                          {getChurnRiskStores().slice(3).map((store, index) => (
+                            <div 
+                              key={`${store.name}-${index + 3}`} 
+                              className="flex items-center justify-between p-4 rounded-lg border border-destructive/20 bg-destructive/5 cursor-pointer hover:bg-destructive/10 transition-colors"
+                              onClick={() => navigate(`/accounts/${encodeURIComponent(store.name)}`)}
+                            >
+                              <div className="flex items-center gap-3">
+                                <AlertTriangle className="w-5 h-5 text-destructive" />
+                                <div>
+                                  <h4 className="font-medium text-foreground">{store.name}</h4>
+                                  <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week (July)</p>
+                                  <p className="text-xs text-muted-foreground">June: {store.juneCases.toFixed(1)} cases/week</p>
+                                  <div className="mt-1">
+                                    {getStatusBadge(store.status)}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-lg font-bold text-destructive">
+                                  -{store.caseReduction.toFixed(1)}
+                                </div>
+                                <p className="text-xs text-muted-foreground">Cases Lost/Week</p>
+                                <p className="text-xs text-muted-foreground">({store.growth.toFixed(1)}%)</p>
+                              </div>
+                            </div>
+                          ))}
                        </div>
                      </CollapsibleContent>
                   </>
