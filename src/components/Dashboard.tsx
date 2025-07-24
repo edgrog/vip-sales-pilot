@@ -12,12 +12,54 @@ const mockData = {
   churnRisk: 18,
   topGrowing: 12,
   revenueChange: 8.4,
+  chainData: [
+    { 
+      name: "Woolworths", 
+      stores: 89, 
+      totalSales: [245000, 268000, 252000], 
+      avgPerStore: [2753, 3011, 2831],
+      growth: -6.0,
+      status: "declining"
+    },
+    { 
+      name: "Coles", 
+      stores: 76, 
+      totalSales: [198000, 215000, 234000], 
+      avgPerStore: [2605, 2829, 3079],
+      growth: 18.2,
+      status: "growing"
+    },
+    { 
+      name: "IGA", 
+      stores: 45, 
+      totalSales: [87000, 94000, 105000], 
+      avgPerStore: [1933, 2089, 2333],
+      growth: 20.7,
+      status: "growing"
+    },
+    { 
+      name: "7-Eleven", 
+      stores: 28, 
+      totalSales: [52000, 56000, 61000], 
+      avgPerStore: [1857, 2000, 2179],
+      growth: 17.3,
+      status: "growing"
+    },
+    { 
+      name: "Metro/Other", 
+      stores: 9, 
+      totalSales: [18000, 15000, 12000], 
+      avgPerStore: [2000, 1667, 1333],
+      growth: -33.3,
+      status: "declining"
+    }
+  ],
   accountsData: [
-    { name: "Woolworths Metro CBD", region: "NSW", sales: [45000, 52000, 38000], status: "churn-risk" },
-    { name: "Coles Express Kings Cross", region: "NSW", sales: [32000, 29000, 0], status: "dropped" },
-    { name: "IGA Bondi Junction", region: "NSW", sales: [18000, 22000, 28000], status: "growing" },
-    { name: "7-Eleven Central", region: "NSW", sales: [15000, 18000, 24000], status: "growing" },
-    { name: "Woolworths Parramatta", region: "NSW", sales: [67000, 71000, 65000], status: "stable" },
+    { name: "Woolworths Metro CBD", region: "NSW", chain: "Woolworths", sales: [45000, 52000, 38000], status: "churn-risk" },
+    { name: "Coles Express Kings Cross", region: "NSW", chain: "Coles", sales: [32000, 29000, 0], status: "dropped" },
+    { name: "IGA Bondi Junction", region: "NSW", chain: "IGA", sales: [18000, 22000, 28000], status: "growing" },
+    { name: "7-Eleven Central", region: "NSW", chain: "7-Eleven", sales: [15000, 18000, 24000], status: "growing" },
+    { name: "Woolworths Parramatta", region: "NSW", chain: "Woolworths", sales: [67000, 71000, 65000], status: "stable" },
   ]
 };
 
@@ -118,6 +160,99 @@ export const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <span className="text-2xl font-bold text-success">+{mockData.revenueChange}%</span>
                 <DollarSign className="w-5 h-5 text-success" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Chain Performance Breakdown */}
+        <div className="mb-8">
+          <Card className="shadow-card border-0">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold">Chain Performance Breakdown</CardTitle>
+              <CardDescription>Sales performance by retail chain (May-July 2024)</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {mockData.chainData.map((chain, index) => (
+                  <div key={index} className="p-4 rounded-lg border bg-gradient-to-r from-card to-card/50 hover:shadow-lg transition-all">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-foreground text-lg">{chain.name}</h4>
+                      <Badge variant={chain.status === "growing" ? "default" : "destructive"} className={
+                        chain.status === "growing" 
+                          ? "bg-success text-success-foreground" 
+                          : "bg-destructive text-destructive-foreground"
+                      }>
+                        {chain.growth > 0 ? `+${chain.growth}%` : `${chain.growth}%`}
+                      </Badge>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Stores</span>
+                        <span className="font-medium">{chain.stores}</span>
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-muted-foreground">July Sales</span>
+                          <span className="font-medium">${chain.totalSales[2].toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-muted-foreground">Avg per Store</span>
+                          <span className="font-medium">${chain.avgPerStore[2].toLocaleString()}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="pt-2">
+                        <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                          <span>May</span>
+                          <span>June</span>
+                          <span>July</span>
+                        </div>
+                        <div className="flex gap-1">
+                          {chain.totalSales.map((sales, monthIndex) => (
+                            <div 
+                              key={monthIndex}
+                              className="flex-1 bg-secondary rounded-sm overflow-hidden"
+                            >
+                              <div 
+                                className={`h-2 rounded-sm ${
+                                  chain.status === "growing" ? "bg-success" : "bg-destructive"
+                                }`}
+                                style={{
+                                  width: `${(sales / Math.max(...chain.totalSales)) * 100}%`
+                                }}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Chain Summary */}
+              <div className="mt-6 pt-6 border-t">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-success">3</div>
+                    <div className="text-sm text-muted-foreground">Growing Chains</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-destructive">2</div>
+                    <div className="text-sm text-muted-foreground">Declining Chains</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary">${mockData.chainData.reduce((sum, chain) => sum + chain.totalSales[2], 0).toLocaleString()}</div>
+                    <div className="text-sm text-muted-foreground">Total July Sales</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-accent">$2,684</div>
+                    <div className="text-sm text-muted-foreground">Avg Store Performance</div>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
