@@ -56,10 +56,10 @@ export const MainAIChat = () => {
   const fetchSalesData = async () => {
     console.log('Starting to fetch sales data...');
     try {
+      // Remove the limit to get ALL records - Supabase was limiting to 1000
       const { data, error } = await supabase
         .from('vip_sales' as any)
-        .select('*')
-        .limit(3000); // Increase limit further to ensure we get all records
+        .select('*');
 
       console.log('Supabase response:', { data, error });
       
