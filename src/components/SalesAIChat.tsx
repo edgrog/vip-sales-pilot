@@ -267,9 +267,9 @@ export const SalesAIChat = () => {
         </CardTitle>
       </CardHeader>
       
-      <CardContent className="flex-1 flex flex-col p-0">
-        <ScrollArea className="flex-1 p-4">
-          <div className="space-y-4">
+      <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
+        <ScrollArea className="flex-1 max-h-[350px] overflow-y-auto">
+          <div className="p-4 space-y-4">
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -278,12 +278,12 @@ export const SalesAIChat = () => {
                 }`}
               >
                 {message.type === 'assistant' && (
-                  <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
                     <Bot className="w-4 h-4 text-white" />
                   </div>
                 )}
                 <div
-                  className={`max-w-[70%] p-3 rounded-lg whitespace-pre-line ${
+                  className={`max-w-[70%] p-3 rounded-lg whitespace-pre-line break-words ${
                     message.type === 'user'
                       ? 'bg-primary text-white'
                       : 'bg-secondary'
@@ -292,7 +292,7 @@ export const SalesAIChat = () => {
                   {message.content}
                 </div>
                 {message.type === 'user' && (
-                  <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center flex-shrink-0">
                     <User className="w-4 h-4" />
                   </div>
                 )}
@@ -300,7 +300,7 @@ export const SalesAIChat = () => {
             ))}
             {isLoading && (
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
                   <Bot className="w-4 h-4 text-white" />
                 </div>
                 <div className="bg-secondary p-3 rounded-lg">
