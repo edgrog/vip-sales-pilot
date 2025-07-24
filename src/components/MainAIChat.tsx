@@ -17,6 +17,7 @@ interface VipSalesData {
   "May 2025": number;
   "June 2025": number;
   "July 2025": number;
+  normalized_chain?: string;
 }
 
 interface DashboardData {
@@ -121,8 +122,8 @@ export const MainAIChat = () => {
         status = 'stable';
       }
 
-      // Extract chain name (first part before "Store")
-      const chainName = account["Retail Accounts"].split(' Store')[0] || account["Retail Accounts"].split(' #')[0] || 'Other';
+      // Use normalized chain name from database
+      const chainName = account.normalized_chain || 'Other';
       
       if (!chainMap.has(chainName)) {
         chainMap.set(chainName, {
