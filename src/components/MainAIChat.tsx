@@ -114,7 +114,7 @@ export const MainAIChat = () => {
     console.log('Stores with no sales:', storesWithNoSales.length);
     console.log('Should match SQL query of 1,578:', allUniqueStores.size === 1578);
     
-    const totalAccounts = uniqueStoresWithSales.size;
+    const totalAccounts = allUniqueStores.size; // Use all unique stores, not just those with sales
     let churnRiskAccounts = 0;
     let growingAccounts = 0;
     let totalJuneCases = 0;
