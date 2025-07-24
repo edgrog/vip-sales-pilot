@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Send, Bot, User, TrendingDown, TrendingUp, AlertTriangle, Users, DollarSign, Target, BarChart3 } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Send, Bot, User, TrendingDown, TrendingUp, AlertTriangle, Users, DollarSign, Target, BarChart3, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
@@ -48,6 +49,7 @@ export const MainAIChat = () => {
   const [salesData, setSalesData] = useState<VipSalesData[]>([]);
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isChainPerformanceOpen, setIsChainPerformanceOpen] = useState(false);
 
   const fetchSalesData = async () => {
     console.log('Starting to fetch sales data...');
@@ -373,30 +375,71 @@ export const MainAIChat = () => {
             <CardDescription>Sales performance by retail chain (June to July 2025)</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {dashboardData.chainPerformance.map((chain, index) => (
-                <div key={chain.chain} className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <span className="text-primary font-semibold">{chain.chain.charAt(0)}</span>
+            <Collapsible open={isChainPerformanceOpen} onOpenChange={setIsChainPerformanceOpen}>
+              {/* Preview: Top 3 chains */}
+              <div className="space-y-4">
+                {dashboardData.chainPerformance.slice(0, 3).map((chain, index) => (
+                  <div key={chain.chain} className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-primary font-semibold">{chain.chain.charAt(0)}</span>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-foreground">{chain.chain}</h4>
+                        <p className="text-sm text-muted-foreground">{chain.accounts} accounts • {chain.totalCases.toFixed(1)} cases/week</p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-medium text-foreground">{chain.chain}</h4>
-                      <p className="text-sm text-muted-foreground">{chain.accounts} accounts • {chain.totalCases.toFixed(1)} cases/week</p>
+                    <div className="text-right">
+                      <div className={`text-sm font-medium ${
+                        chain.status === 'growing' ? 'text-success' : 
+                        chain.status === 'declining' ? 'text-destructive' : 'text-muted-foreground'
+                      }`}>
+                        {chain.avgGrowth >= 0 ? '+' : ''}{chain.avgGrowth.toFixed(1)}%
+                      </div>
+                      <div className="text-xs text-muted-foreground capitalize">{chain.status}</div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className={`text-sm font-medium ${
-                      chain.status === 'growing' ? 'text-success' : 
-                      chain.status === 'declining' ? 'text-destructive' : 'text-muted-foreground'
-                    }`}>
-                      {chain.avgGrowth >= 0 ? '+' : ''}{chain.avgGrowth.toFixed(1)}%
+                ))}
+              </div>
+
+              {/* Collapsible trigger */}
+              {dashboardData.chainPerformance.length > 3 && (
+                <CollapsibleTrigger className="flex items-center justify-center w-full mt-4 p-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  <span className="mr-2">
+                    {isChainPerformanceOpen ? `Hide ${dashboardData.chainPerformance.length - 3} more chains` : `Show ${dashboardData.chainPerformance.length - 3} more chains`}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${isChainPerformanceOpen ? 'rotate-180' : ''}`} />
+                </CollapsibleTrigger>
+              )}
+
+              {/* Collapsible content: Remaining chains */}
+              <CollapsibleContent>
+                <div className="space-y-4 mt-4">
+                  {dashboardData.chainPerformance.slice(3).map((chain, index) => (
+                    <div key={chain.chain} className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <span className="text-primary font-semibold">{chain.chain.charAt(0)}</span>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-foreground">{chain.chain}</h4>
+                          <p className="text-sm text-muted-foreground">{chain.accounts} accounts • {chain.totalCases.toFixed(1)} cases/week</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className={`text-sm font-medium ${
+                          chain.status === 'growing' ? 'text-success' : 
+                          chain.status === 'declining' ? 'text-destructive' : 'text-muted-foreground'
+                        }`}>
+                          {chain.avgGrowth >= 0 ? '+' : ''}{chain.avgGrowth.toFixed(1)}%
+                        </div>
+                        <div className="text-xs text-muted-foreground capitalize">{chain.status}</div>
+                      </div>
                     </div>
-                    <div className="text-xs text-muted-foreground capitalize">{chain.status}</div>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </CollapsibleContent>
+            </Collapsible>
           </CardContent>
         </Card>
 
