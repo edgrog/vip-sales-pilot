@@ -14,9 +14,12 @@ interface Message {
 }
 
 interface SalesData {
-  account_name: string;
-  sale_month: string;
-  case_equivs: number;
+  retail_accounts: string;
+  dist_state: string;
+  state: string;
+  may_2025_cases_per_week_per_store: number;
+  june_cases_per_week_per_store: number;
+  july_cases_per_week_per_store: number;
 }
 
 export const SalesAIChat = () => {
@@ -32,46 +35,38 @@ export const SalesAIChat = () => {
   const analyzeChurnRisk = async (): Promise<string> => {
     const { data: salesData, error } = await supabase
       .from('vip_sales_raw')
-      .select('*')
-      .order('account_name, sale_month');
+      .select('*');
 
     if (error || !salesData) {
       return "❌ Sorry, I couldn't retrieve the sales data. Please try again.";
     }
 
-    // Group by account and calculate trends
-    const accountMap = new Map<string, SalesData[]>();
-    salesData.forEach((row) => {
-      const accountName = row.account_name;
-      if (!accountMap.has(accountName)) {
-        accountMap.set(accountName, []);
-      }
-      accountMap.get(accountName)!.push({
-        account_name: row.account_name,
-        sale_month: row.sale_month,
-        case_equivs: Number(row.case_equivs)
-      });
-    });
-
     const churnRiskAccounts: string[] = [];
     const droppedAccounts: string[] = [];
 
-    accountMap.forEach((sales, accountName) => {
-      if (sales.length >= 2) {
-        const sortedSales = sales.sort((a, b) => new Date(a.sale_month).getTime() - new Date(b.sale_month).getTime());
-        const latestSales = sortedSales[sortedSales.length - 1];
-        const previousSales = sortedSales[sortedSales.length - 2];
+    salesData.forEach((row) => {
+      const may = row.may_2025_cases_per_week_per_store;
+      const june = row.june_cases_per_week_per_store;
+      const july = row.july_cases_per_week_per_store;
 
-        // Check for dropped accounts (zero sales in latest month)
-        if (latestSales.case_equivs === 0 && previousSales.case_equivs > 0) {
-          droppedAccounts.push(accountName);
+      // Check for dropped accounts (zero sales in July)
+      if (july === 0 && june > 0) {
+        droppedAccounts.push(row.retail_accounts);
+      }
+      // Check for declining trend from June to July (>20% decline)
+      else if (june > 0 && july > 0) {
+        const decline = ((june - july) / june) * 100;
+        if (decline > 20) {
+          churnRiskAccounts.push(`${row.retail_accounts} (${decline.toFixed(1)}% decline)`);
         }
-        // Check for declining trend (>20% decline)
-        else if (previousSales.case_equivs > 0) {
-          const decline = ((previousSales.case_equivs - latestSales.case_equivs) / previousSales.case_equivs) * 100;
-          if (decline > 20) {
-            churnRiskAccounts.push(`${accountName} (${decline.toFixed(1)}% decline)`);
-          }
+      }
+      // Check for consistent decline from May to July
+      else if (may > 0 && june > 0 && july > 0) {
+        const mayToJune = ((may - june) / may) * 100;
+        const juneToJuly = ((june - july) / june) * 100;
+        if (mayToJune > 10 && juneToJuly > 10) {
+          const totalDecline = ((may - july) / may) * 100;
+          churnRiskAccounts.push(`${row.retail_accounts} (${totalDecline.toFixed(1)}% total decline)`);
         }
       }
     });
@@ -79,7 +74,7 @@ export const SalesAIChat = () => {
     let response = "🔍 **Churn Risk Analysis:**\n\n";
 
     if (droppedAccounts.length > 0) {
-      response += `🚨 **URGENT - Zero Sales in Latest Month:**\n`;
+      response += `🚨 **URGENT - Zero Sales in July:**\n`;
       droppedAccounts.forEach(account => {
         response += `• ${account}\n`;
       });
@@ -87,7 +82,7 @@ export const SalesAIChat = () => {
     }
 
     if (churnRiskAccounts.length > 0) {
-      response += `⚠️ **Accounts with Significant Decline (>20%):**\n`;
+      response += `⚠️ **Accounts with Significant Decline:**\n`;
       churnRiskAccounts.forEach(account => {
         response += `• ${account}\n`;
       });
@@ -110,28 +105,26 @@ export const SalesAIChat = () => {
     const { data: salesData, error } = await supabase
       .from('vip_sales_raw')
       .select('*')
-      .order('case_equivs', { ascending: false });
+      .order('july_cases_per_week_per_store', { ascending: false });
 
     if (error || !salesData) {
       return "❌ Sorry, I couldn't retrieve the sales data. Please try again.";
     }
 
-    // Get latest month's top performers
-    const latestMonth = new Date(Math.max(...salesData.map(row => new Date(row.sale_month).getTime())));
-    const latestMonthStr = latestMonth.toISOString().split('T')[0];
-    
+    // Get top 5 performers based on July sales
     const topPerformers = salesData
-      .filter(row => row.sale_month === latestMonthStr)
+      .filter(row => row.july_cases_per_week_per_store > 0)
       .slice(0, 5);
 
-    let response = `🏆 **Top 5 Performing Accounts (${new Date(latestMonthStr).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}):**\n\n`;
+    let response = `🏆 **Top 5 Performing Accounts (July 2025):**\n\n`;
 
     topPerformers.forEach((account, index) => {
       const emoji = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}️⃣`;
-      response += `${emoji} **${account.account_name}** - ${Number(account.case_equivs).toLocaleString()} case equivalents\n`;
+      response += `${emoji} **${account.retail_accounts}** (${account.state})\n`;
+      response += `   📈 ${account.july_cases_per_week_per_store.toFixed(1)} cases/week/store\n\n`;
     });
 
-    response += "\n💡 **Insights:**\n";
+    response += "💡 **Insights:**\n";
     response += "• Consider expanding product lines with top performers\n";
     response += "• Use these accounts as case studies for best practices\n";
     response += "• Explore upselling opportunities";
@@ -142,66 +135,55 @@ export const SalesAIChat = () => {
   const analyzeDropoffs = async (): Promise<string> => {
     const { data: salesData, error } = await supabase
       .from('vip_sales_raw')
-      .select('*')
-      .order('account_name, sale_month');
+      .select('*');
 
     if (error || !salesData) {
       return "❌ Sorry, I couldn't retrieve the sales data. Please try again.";
     }
 
-    // Group by account
-    const accountMap = new Map<string, SalesData[]>();
+    const dropoffAccounts: Array<{name: string, state: string, lastMonth: string, amount: number}> = [];
+
     salesData.forEach((row) => {
-      const accountName = row.account_name;
-      if (!accountMap.has(accountName)) {
-        accountMap.set(accountName, []);
-      }
-      accountMap.get(accountName)!.push({
-        account_name: row.account_name,
-        sale_month: row.sale_month,
-        case_equivs: Number(row.case_equivs)
-      });
-    });
+      const may = row.may_2025_cases_per_week_per_store;
+      const june = row.june_cases_per_week_per_store;
+      const july = row.july_cases_per_week_per_store;
 
-    const dropoffAccounts: Array<{name: string, lastSale: string, amount: number}> = [];
-
-    accountMap.forEach((sales, accountName) => {
-      const sortedSales = sales.sort((a, b) => new Date(a.sale_month).getTime() - new Date(b.sale_month).getTime());
-      const latestSales = sortedSales[sortedSales.length - 1];
-      
-      // Find accounts with zero sales in latest month
-      if (latestSales.case_equivs === 0) {
-        // Find their last non-zero sale
-        for (let i = sortedSales.length - 2; i >= 0; i--) {
-          if (sortedSales[i].case_equivs > 0) {
-            dropoffAccounts.push({
-              name: accountName,
-              lastSale: sortedSales[i].sale_month,
-              amount: sortedSales[i].case_equivs
-            });
-            break;
-          }
+      // Find accounts with zero sales in July
+      if (july === 0) {
+        if (june > 0) {
+          dropoffAccounts.push({
+            name: row.retail_accounts,
+            state: row.state,
+            lastMonth: 'June',
+            amount: june
+          });
+        } else if (may > 0) {
+          dropoffAccounts.push({
+            name: row.retail_accounts,
+            state: row.state,
+            lastMonth: 'May',
+            amount: may
+          });
         }
       }
     });
 
-    let response = "📉 **Accounts That Dropped Off:**\n\n";
+    let response = "📉 **Accounts That Dropped Off in July:**\n\n";
 
     if (dropoffAccounts.length > 0) {
       dropoffAccounts.forEach(account => {
-        const lastSaleDate = new Date(account.lastSale).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-        response += `❌ **${account.name}**\n`;
-        response += `   Last sale: ${lastSaleDate} (${account.amount.toLocaleString()} case equivalents)\n\n`;
+        response += `❌ **${account.name}** (${account.state})\n`;
+        response += `   Last sale: ${account.lastMonth} (${account.amount.toFixed(1)} cases/week/store)\n\n`;
       });
 
-      const totalLostRevenue = dropoffAccounts.reduce((sum, account) => sum + account.amount, 0);
-      response += `💰 **Impact:** ${totalLostRevenue.toLocaleString()} case equivalents lost\n\n`;
+      const totalLostCases = dropoffAccounts.reduce((sum, account) => sum + account.amount, 0);
+      response += `💰 **Impact:** ${totalLostCases.toFixed(1)} cases/week/store lost\n\n`;
       response += "🎯 **Action Plan:**\n";
       response += "• Contact these accounts immediately\n";
       response += "• Investigate reasons for discontinuation\n";
       response += "• Offer incentives or promotions to re-engage";
     } else {
-      response += "✅ Great news! No accounts have completely dropped off based on current data.";
+      response += "✅ Great news! No accounts have completely dropped off in July.";
     }
 
     return response;
