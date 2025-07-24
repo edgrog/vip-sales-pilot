@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Send, Bot, User, TrendingDown, TrendingUp, AlertTriangle, Users, DollarSign, Target, BarChart3, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { SalesAIChat } from "./SalesAIChat";
@@ -48,6 +49,7 @@ interface DashboardData {
 }
 
 export const MainAIChat = () => {
+  const navigate = useNavigate();
   const [salesData, setSalesData] = useState<VipSalesData[]>([]);
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -697,7 +699,11 @@ export const MainAIChat = () => {
                     {/* Preview: First 3 growing stores */}
                     <div className="space-y-4">
                       {getGrowingStores().slice(0, 3).map((store, index) => (
-                        <div key={`${store.name}-${index}`} className="flex items-center justify-between p-4 rounded-lg border border-success/20 bg-success/5">
+                        <div 
+                          key={`${store.name}-${index}`} 
+                          className="flex items-center justify-between p-4 rounded-lg border border-success/20 bg-success/5 cursor-pointer hover:bg-success/10 transition-colors"
+                          onClick={() => navigate(`/accounts/${encodeURIComponent(store.name)}`)}
+                        >
                           <div className="flex items-center gap-3">
                             <TrendingUp className="w-5 h-5 text-success" />
                             <div>
@@ -735,7 +741,11 @@ export const MainAIChat = () => {
                     <CollapsibleContent>
                       <div className="space-y-4 mt-4">
                         {getGrowingStores().slice(3).map((store, index) => (
-                          <div key={`${store.name}-${index + 3}`} className="flex items-center justify-between p-4 rounded-lg border border-success/20 bg-success/5">
+                          <div 
+                            key={`${store.name}-${index + 3}`} 
+                            className="flex items-center justify-between p-4 rounded-lg border border-success/20 bg-success/5 cursor-pointer hover:bg-success/10 transition-colors"
+                            onClick={() => navigate(`/accounts/${encodeURIComponent(store.name)}`)}
+                          >
                             <div className="flex items-center gap-3">
                               <TrendingUp className="w-5 h-5 text-success" />
                               <div>
@@ -778,7 +788,11 @@ export const MainAIChat = () => {
                   .sort((a, b) => b.julyCases - a.julyCases) // Sort by sales per week
                   .slice(0, 3) // Show only first 3 by default
                   .map((account, index) => (
-                    <div key={`${account.name}-${account.state}`} className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50">
+                    <div 
+                      key={`${account.name}-${account.state}`} 
+                      className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50 cursor-pointer hover:bg-card/80 transition-colors"
+                      onClick={() => navigate(`/accounts/${encodeURIComponent(account.name)}`)}
+                    >
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                           <span className="text-primary font-semibold">{account.name.charAt(0)}</span>
@@ -821,7 +835,11 @@ export const MainAIChat = () => {
                         .sort((a, b) => b.julyCases - a.julyCases)
                         .slice(3) // Skip first 3
                         .map((account, index) => (
-                          <div key={`${account.name}-${account.state}-${index}`} className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50">
+                          <div 
+                            key={`${account.name}-${account.state}-${index}`} 
+                            className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50 cursor-pointer hover:bg-card/80 transition-colors"
+                            onClick={() => navigate(`/accounts/${encodeURIComponent(account.name)}`)}
+                          >
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                                 <span className="text-primary font-semibold">{account.name.charAt(0)}</span>
