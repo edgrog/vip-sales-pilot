@@ -399,7 +399,7 @@ export const MainAIChat = () => {
       <header className="border-b bg-card/95 backdrop-blur-sm sticky top-0 z-40">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-lg overflow-hidden">
+            <div className="w-16 h-16 rounded-lg overflow-hidden">
               <img 
                 src="/lovable-uploads/072fbba7-85ff-4594-94d0-c4f01498cf16.png" 
                 alt="Grog Logo" 
