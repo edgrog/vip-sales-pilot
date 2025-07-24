@@ -46,14 +46,21 @@ export const MainAIChat = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchSalesData = async () => {
+    console.log('Starting to fetch sales data...');
     try {
       const { data, error } = await supabase
         .from('vip_sales' as any)
         .select('*');
 
-      if (error) throw error;
+      console.log('Supabase response:', { data, error });
+      
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
       
       const typedData = data as unknown as VipSalesData[];
+      console.log('Typed data length:', typedData?.length);
       setSalesData(typedData || []);
       calculateDashboardMetrics(typedData || []);
     } catch (error) {

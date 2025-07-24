@@ -14,12 +14,12 @@ interface Message {
 }
 
 interface SalesData {
-  retail_accounts: string;
-  dist_state: string;
-  state: string;
-  may_2025_cases_per_week_per_store: number;
-  june_cases_per_week_per_store: number;
-  july_cases_per_week_per_store: number;
+  "Retail Accounts": string;
+  "Dist. STATE": string;
+  "State": string;
+  "May 2025": number;
+  "June 2025": number;
+  "July 2025": number;
 }
 
 export const SalesAIChat = () => {
@@ -34,7 +34,7 @@ export const SalesAIChat = () => {
 
   const analyzeChurnRisk = async (): Promise<string> => {
     const { data: salesData, error } = await supabase
-      .from('vip_sales_raw')
+      .from('vip_sales' as any)
       .select('*');
 
     if (error || !salesData) {
@@ -44,22 +44,22 @@ export const SalesAIChat = () => {
     const churnRiskAccounts: string[] = [];
     const droppedAccounts: string[] = [];
 
-    salesData.forEach((row) => {
-      const may = row.may_2025_cases_per_week_per_store;
-      const june = row.june_cases_per_week_per_store;
-      const july = row.july_cases_per_week_per_store;
+    salesData.forEach((row: any) => {
+      const may = row["May 2025"] || 0;
+      const june = row["June 2025"] || 0;
+      const july = row["July 2025"] || 0;
 
       // Check for dropped accounts (zero sales in July)
       if (july === 0 && june > 0) {
         const lastSaleAmount = june > 0 ? june : may;
-        droppedAccounts.push(`${row.retail_accounts} (Lost ${lastSaleAmount.toFixed(1)} cases/week from ${june > 0 ? 'June' : 'May'})`);
+        droppedAccounts.push(`${row["Retail Accounts"]} (Lost ${lastSaleAmount.toFixed(1)} cases/week from ${june > 0 ? 'June' : 'May'})`);
       }
       // Check for declining trend from June to July (>20% decline)
       else if (june > 0 && july > 0) {
         const decline = ((june - july) / june) * 100;
         const unitDrop = june - july;
         if (decline > 20) {
-          churnRiskAccounts.push(`${row.retail_accounts} (${decline.toFixed(1)}% decline, -${unitDrop.toFixed(1)} cases/week)`);
+          churnRiskAccounts.push(`${row["Retail Accounts"]} (${decline.toFixed(1)}% decline, -${unitDrop.toFixed(1)} cases/week)`);
         }
       }
       // Check for consistent decline from May to July
@@ -69,7 +69,7 @@ export const SalesAIChat = () => {
         if (mayToJune > 10 && juneToJuly > 10) {
           const totalDecline = ((may - july) / may) * 100;
           const totalUnitDrop = may - july;
-          churnRiskAccounts.push(`${row.retail_accounts} (${totalDecline.toFixed(1)}% total decline, -${totalUnitDrop.toFixed(1)} cases/week since May)`);
+          churnRiskAccounts.push(`${row["Retail Accounts"]} (${totalDecline.toFixed(1)}% total decline, -${totalUnitDrop.toFixed(1)} cases/week since May)`);
         }
       }
     });
@@ -106,25 +106,25 @@ export const SalesAIChat = () => {
 
   const analyzeTopPerformers = async (): Promise<string> => {
     const { data: salesData, error } = await supabase
-      .from('vip_sales_raw')
-      .select('*')
-      .order('july_cases_per_week_per_store', { ascending: false });
+      .from('vip_sales' as any)
+      .select('*');
 
     if (error || !salesData) {
       return "❌ Sorry, I couldn't retrieve the sales data. Please try again.";
     }
 
-    // Get top 5 performers based on July sales
+    // Get top 5 performers based on July sales and sort them
     const topPerformers = salesData
-      .filter(row => row.july_cases_per_week_per_store > 0)
+      .filter((row: any) => row["July 2025"] > 0)
+      .sort((a: any, b: any) => b["July 2025"] - a["July 2025"])
       .slice(0, 5);
 
     let response = `🏆 **Top 5 Performing Accounts (July 2025):**\n\n`;
 
-    topPerformers.forEach((account, index) => {
+    topPerformers.forEach((account: any, index) => {
       const emoji = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}️⃣`;
-      const june = account.june_cases_per_week_per_store;
-      const july = account.july_cases_per_week_per_store;
+      const june = account["June 2025"] || 0;
+      const july = account["July 2025"] || 0;
       
       let trendInfo = '';
       if (june > 0) {
@@ -139,7 +139,7 @@ export const SalesAIChat = () => {
         }
       }
       
-      response += `${emoji} **${account.retail_accounts}** (${account.state})\n`;
+      response += `${emoji} **${account["Retail Accounts"]}** (${account["State"]})\n`;
       response += `   📊 ${july.toFixed(1)} cases/week/store${trendInfo}\n\n`;
     });
 
@@ -153,7 +153,7 @@ export const SalesAIChat = () => {
 
   const analyzeDropoffs = async (): Promise<string> => {
     const { data: salesData, error } = await supabase
-      .from('vip_sales_raw')
+      .from('vip_sales' as any)
       .select('*');
 
     if (error || !salesData) {
@@ -162,9 +162,9 @@ export const SalesAIChat = () => {
 
     const reducedSalesAccounts: Array<{name: string, state: string, june: number, july: number, decline: number, unitDrop: number}> = [];
 
-    salesData.forEach((row) => {
-      const june = row.june_cases_per_week_per_store;
-      const july = row.july_cases_per_week_per_store;
+    salesData.forEach((row: any) => {
+      const june = row["June 2025"] || 0;
+      const july = row["July 2025"] || 0;
 
       // Find accounts with reduced sales from June to July
       if (june > 0 && july < june) {
@@ -172,8 +172,8 @@ export const SalesAIChat = () => {
         const unitDrop = june - july;
         
         reducedSalesAccounts.push({
-          name: row.retail_accounts,
-          state: row.state,
+          name: row["Retail Accounts"],
+          state: row["State"],
           june: june,
           july: july,
           decline: decline,
