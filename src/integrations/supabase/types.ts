@@ -17,9 +17,7 @@ export type Database = {
       vip_sales: {
         Row: {
           Address: string | null
-          Analysis: string | null
           City: string | null
-          "COPY THIS & PASTE": string | null
           "Dist. STATE": string | null
           "July 2025": number | null
           "June 2025": number | null
@@ -30,9 +28,7 @@ export type Database = {
         }
         Insert: {
           Address?: string | null
-          Analysis?: string | null
           City?: string | null
-          "COPY THIS & PASTE"?: string | null
           "Dist. STATE"?: string | null
           "July 2025"?: number | null
           "June 2025"?: number | null
@@ -43,9 +39,7 @@ export type Database = {
         }
         Update: {
           Address?: string | null
-          Analysis?: string | null
           City?: string | null
-          "COPY THIS & PASTE"?: string | null
           "Dist. STATE"?: string | null
           "July 2025"?: number | null
           "June 2025"?: number | null
