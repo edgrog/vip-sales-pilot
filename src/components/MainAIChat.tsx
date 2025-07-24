@@ -148,23 +148,25 @@ export const MainAIChat = () => {
       });
     });
 
-    // Calculate chain performance with status
-    const chainPerformance = Array.from(chainMap.entries()).map(([chain, data]) => {
-      const avgGrowth = data.accountGrowths.reduce((sum, g) => sum + g, 0) / data.accountGrowths.length;
-      let status: 'growing' | 'stable' | 'declining';
-      
-      if (avgGrowth > 5) status = 'growing';
-      else if (avgGrowth < -5) status = 'declining';
-      else status = 'stable';
+    // Calculate chain performance with status - only include chains with 5+ stores
+    const chainPerformance = Array.from(chainMap.entries())
+      .filter(([chain, data]) => data.accounts >= 5) // Only include chains with 5+ stores
+      .map(([chain, data]) => {
+        const avgGrowth = data.accountGrowths.reduce((sum, g) => sum + g, 0) / data.accountGrowths.length;
+        let status: 'growing' | 'stable' | 'declining';
+        
+        if (avgGrowth > 5) status = 'growing';
+        else if (avgGrowth < -5) status = 'declining';
+        else status = 'stable';
 
-      return {
-        chain,
-        accounts: data.accounts,
-        totalCases: data.totalCases,
-        avgGrowth,
-        status
-      };
-    }).sort((a, b) => b.totalCases - a.totalCases);
+        return {
+          chain,
+          accounts: data.accounts,
+          totalCases: data.totalCases,
+          avgGrowth,
+          status
+        };
+      }).sort((a, b) => b.totalCases - a.totalCases);
 
     // Sort account performance by July cases
     accountPerformance.sort((a, b) => b.julyCases - a.julyCases);
