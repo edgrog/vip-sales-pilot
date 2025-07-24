@@ -345,20 +345,7 @@ export const MainAIChat = () => {
         </Card>
 
         {/* Key Metrics Dashboard - Now properly spaced below chat */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          <Card className="shadow-card border-0">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Stores in Database</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="text-3xl font-bold text-foreground">{dashboardData.totalAccounts}</div>
-                <Users className="w-8 h-8 text-primary" />
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">All stores listed</p>
-            </CardContent>
-          </Card>
-
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <Card className="shadow-card border-0">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Stores with Sales Data</CardTitle>
@@ -366,7 +353,7 @@ export const MainAIChat = () => {
             <CardContent>
               <div className="flex items-center justify-between">
                 <div className="text-3xl font-bold text-foreground">{dashboardData.totalStoresWithSales}</div>
-                <DollarSign className="w-8 h-8 text-primary" />
+                <Users className="w-8 h-8 text-primary" />
               </div>
               <p className="text-xs text-muted-foreground mt-2">Stores with May-July sales</p>
             </CardContent>
