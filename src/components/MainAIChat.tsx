@@ -52,7 +52,7 @@ export const MainAIChat = () => {
       const { data, error } = await supabase
         .from('vip_sales' as any)
         .select('*')
-        .limit(2000); // Increase limit to get all records
+        .limit(3000); // Increase limit further to ensure we get all records
 
       console.log('Supabase response:', { data, error });
       
@@ -73,24 +73,16 @@ export const MainAIChat = () => {
   };
 
   const calculateDashboardMetrics = (data: VipSalesData[]) => {
-    // TEMPORARILY REMOVE ALL FILTERING to test
-    const validData = data; // Use ALL data without any filtering
-    console.log('Using ALL data without filtering:', validData.length);
-    
     console.log('Total records from database:', data.length);
     
-    // Debug filtering step by step
-    const nullAccounts = data.filter(account => !account["Retail Accounts"]);
-    const emptyAccounts = data.filter(account => account["Retail Accounts"] && account["Retail Accounts"].trim() === '');
-    const totalAccountsDebug = data.filter(account => account["Retail Accounts"] === 'Total');
-    
-    console.log('Records with null Retail Accounts:', nullAccounts.length);
-    console.log('Records with empty Retail Accounts:', emptyAccounts.length);
-    console.log('Records with "Total" as Retail Accounts:', totalAccountsDebug.length);
-    console.log('Total filtered out:', nullAccounts.length + emptyAccounts.length + totalAccountsDebug.length);
+    // Filter out invalid records
+    const validData = data.filter(account => 
+      account["Retail Accounts"] && 
+      account["Retail Accounts"].trim() !== '' && 
+      account["Retail Accounts"] !== 'Total'
+    );
     
     console.log('Valid records after filtering:', validData.length);
-    console.log('Expected vs Actual:', {expected: 1578, actual: validData.length, difference: 1578 - validData.length});
     
     if (!validData.length) return;
 
