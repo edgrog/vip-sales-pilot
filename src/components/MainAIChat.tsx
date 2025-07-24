@@ -53,10 +53,9 @@ export const MainAIChat = () => {
   const [loading, setLoading] = useState(true);
   const [isChainPerformanceOpen, setIsChainPerformanceOpen] = useState(false);
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<'chain' | 'churn' | 'growing' | 'velocity'>('chain'); // Track which section to show
+  const [activeSection, setActiveSection] = useState<'chain' | 'churn' | 'growing' | 'velocity' | 'accounts'>('chain'); // Track which section to show
   const [isChurnRiskOpen, setIsChurnRiskOpen] = useState(false); // For churn risk collapsible
   const [isGrowingAccountsOpen, setIsGrowingAccountsOpen] = useState(false); // For growing accounts collapsible
-  const [isTotalAccountsOpen, setIsTotalAccountsOpen] = useState(false); // For total accounts collapsible
 
   const fetchSalesData = async () => {
     console.log('Starting to fetch sales data...');
@@ -427,7 +426,7 @@ export const MainAIChat = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <Card 
             className="shadow-card border-0 cursor-pointer hover:shadow-lg transition-shadow" 
-            onClick={() => setIsTotalAccountsOpen(!isTotalAccountsOpen)}
+            onClick={() => setActiveSection('accounts')}
           >
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Total Accounts</CardTitle>
@@ -437,39 +436,7 @@ export const MainAIChat = () => {
                 <div className="text-3xl font-bold text-foreground">{dashboardData.totalStoresWithSales}</div>
                 <Users className="w-8 h-8 text-primary" />
               </div>
-              <div className="flex items-center justify-between mt-2">
-                <p className="text-xs text-muted-foreground">Stores with May-July sales</p>
-                <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isTotalAccountsOpen ? 'rotate-180' : ''}`} />
-              </div>
-              
-              <Collapsible open={isTotalAccountsOpen} onOpenChange={setIsTotalAccountsOpen}>
-                <CollapsibleContent>
-                  <div className="mt-4 space-y-2">
-                    {dashboardData.accountPerformance
-                      .filter(account => account.julyCases > 0)
-                      .sort((a, b) => (b.julyCases / 4.3) - (a.julyCases / 4.3)) // Sort by sales per week (July cases / 4.3 weeks)
-                      .slice(0, isTotalAccountsOpen ? undefined : 3)
-                      .map((account, index) => (
-                        <div key={`${account.name}-${account.state}`} className="flex items-center justify-between p-3 rounded-lg border border-border bg-card/30">
-                          <div>
-                            <h4 className="font-medium text-foreground text-sm">{account.name}</h4>
-                            <p className="text-xs text-muted-foreground">{account.state}</p>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-sm font-medium text-foreground">
-                              {(account.julyCases / 4.3).toFixed(1)} cases/week
-                            </div>
-                            <div className={`text-xs font-medium ${
-                              account.growth >= 0 ? 'text-success' : 'text-destructive'
-                            }`}>
-                              {account.growth >= 0 ? '+' : ''}{account.growth.toFixed(1)}%
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
+              <p className="text-xs text-muted-foreground mt-2">Click to view details</p>
             </CardContent>
           </Card>
 
@@ -540,7 +507,8 @@ export const MainAIChat = () => {
                 <CardTitle className="text-lg font-semibold">
                   {activeSection === 'chain' ? 'Chain Performance Breakdown' : 
                    activeSection === 'churn' ? 'Churn Risk Analysis' : 
-                   activeSection === 'growing' ? 'Growing Accounts Performance' : 'Sales Velocity Breakdown'}
+                   activeSection === 'growing' ? 'Growing Accounts Performance' : 
+                   activeSection === 'accounts' ? 'All Accounts Performance' : 'Sales Velocity Breakdown'}
                 </CardTitle>
                 <CardDescription>
                   {activeSection === 'chain' 
@@ -549,6 +517,8 @@ export const MainAIChat = () => {
                     ? 'Stores requiring immediate attention'
                     : activeSection === 'growing'
                     ? 'Top performing stores with strong growth'
+                    : activeSection === 'accounts'
+                    ? 'All stores ranked by sales per week (July 2025)'
                     : 'Monthly sales velocity trend (May - July 2025)'
                   }
                 </CardDescription>
@@ -559,12 +529,14 @@ export const MainAIChat = () => {
                 onClick={() => setActiveSection(
                   activeSection === 'chain' ? 'churn' : 
                   activeSection === 'churn' ? 'growing' : 
-                  activeSection === 'growing' ? 'velocity' : 'chain'
+                  activeSection === 'growing' ? 'accounts' :
+                  activeSection === 'accounts' ? 'velocity' : 'chain'
                 )}
               >
                 Show {activeSection === 'chain' ? 'Churn Risk' : 
                       activeSection === 'churn' ? 'Growing' : 
-                      activeSection === 'growing' ? 'Velocity' : 'Chain Performance'}
+                      activeSection === 'growing' ? 'All Accounts' :
+                      activeSection === 'accounts' ? 'Velocity' : 'Chain Performance'}
               </Button>
             </div>
           </CardHeader>
@@ -790,6 +762,87 @@ export const MainAIChat = () => {
                   </div>
                 )}
               </Collapsible>
+            ) : activeSection === 'accounts' ? (
+              // All Accounts Section
+              <div className="space-y-4">
+                {dashboardData.accountPerformance
+                  .filter(account => account.julyCases > 0)
+                  .sort((a, b) => (b.julyCases / 4.3) - (a.julyCases / 4.3)) // Sort by sales per week (July cases / 4.3 weeks)
+                  .slice(0, 3) // Show only first 3 by default
+                  .map((account, index) => (
+                    <div key={`${account.name}-${account.state}`} className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <span className="text-primary font-semibold">{account.name.charAt(0)}</span>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-foreground">{account.name}</h4>
+                          <p className="text-sm text-muted-foreground">{account.state}</p>
+                          <div className="mt-1">
+                            {getStatusBadge(account.status)}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-foreground">
+                          {(account.julyCases / 4.3).toFixed(1)}
+                        </div>
+                        <p className="text-xs text-muted-foreground">Cases/Week</p>
+                        <div className={`text-xs font-medium ${
+                          account.growth >= 0 ? 'text-success' : 'text-destructive'
+                        }`}>
+                          {account.growth >= 0 ? '+' : ''}{account.growth.toFixed(1)}%
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                
+                {/* Collapsible for remaining accounts */}
+                <Collapsible>
+                  <CollapsibleTrigger className="flex items-center justify-center w-full mt-4 p-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    <span className="mr-2">
+                      Show {dashboardData.accountPerformance.filter(account => account.julyCases > 0).length - 3} more accounts
+                    </span>
+                    <ChevronDown className="w-4 h-4 transition-transform ui-state-open:rotate-180" />
+                  </CollapsibleTrigger>
+                  
+                  <CollapsibleContent>
+                    <div className="space-y-4 mt-4">
+                      {dashboardData.accountPerformance
+                        .filter(account => account.julyCases > 0)
+                        .sort((a, b) => (b.julyCases / 4.3) - (a.julyCases / 4.3))
+                        .slice(3) // Skip first 3
+                        .map((account, index) => (
+                          <div key={`${account.name}-${account.state}-${index}`} className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                <span className="text-primary font-semibold">{account.name.charAt(0)}</span>
+                              </div>
+                              <div>
+                                <h4 className="font-medium text-foreground">{account.name}</h4>
+                                <p className="text-sm text-muted-foreground">{account.state}</p>
+                                <div className="mt-1">
+                                  {getStatusBadge(account.status)}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-lg font-bold text-foreground">
+                                {(account.julyCases / 4.3).toFixed(1)}
+                              </div>
+                              <p className="text-xs text-muted-foreground">Cases/Week</p>
+                              <div className={`text-xs font-medium ${
+                                account.growth >= 0 ? 'text-success' : 'text-destructive'
+                              }`}>
+                                {account.growth >= 0 ? '+' : ''}{account.growth.toFixed(1)}%
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
             ) : (
               // Sales Velocity Section
               <div className="space-y-6">
