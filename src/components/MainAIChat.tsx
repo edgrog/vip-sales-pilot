@@ -89,11 +89,14 @@ export const MainAIChat = () => {
     
     if (!validData.length) return;
 
-    // Count unique stores that have ordered at any time (May, June, or July)
+    // Count ALL unique stores (not filtering by sales) to debug
+    const allUniqueStores = new Set();
     const uniqueStoresWithSales = new Set();
     const storesWithNoSales = [];
     
     validData.forEach(account => {
+      allUniqueStores.add(account["Retail Accounts"]);
+      
       const may = account["May 2025"] || 0;
       const june = account["June 2025"] || 0;
       const july = account["July 2025"] || 0;
@@ -106,9 +109,10 @@ export const MainAIChat = () => {
       }
     });
     
+    console.log('All unique stores in filtered data:', allUniqueStores.size);
     console.log('Unique stores with sales:', uniqueStoresWithSales.size);
     console.log('Stores with no sales:', storesWithNoSales.length);
-    console.log('Sample stores with no sales:', storesWithNoSales.slice(0, 10));
+    console.log('Should match SQL query of 1,578:', allUniqueStores.size === 1578);
     
     const totalAccounts = uniqueStoresWithSales.size;
     let churnRiskAccounts = 0;
