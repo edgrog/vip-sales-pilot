@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { SalesAIChat } from "./SalesAIChat";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface VipSalesData {
   "Retail Accounts": string;
@@ -52,7 +53,7 @@ export const MainAIChat = () => {
   const [loading, setLoading] = useState(true);
   const [isChainPerformanceOpen, setIsChainPerformanceOpen] = useState(false);
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<'chain' | 'churn' | 'growing'>('chain'); // Track which section to show
+  const [activeSection, setActiveSection] = useState<'chain' | 'churn' | 'growing' | 'velocity'>('chain'); // Track which section to show
   const [isChurnRiskOpen, setIsChurnRiskOpen] = useState(false); // For churn risk collapsible
   const [isGrowingAccountsOpen, setIsGrowingAccountsOpen] = useState(false); // For growing accounts collapsible
 
@@ -297,6 +298,51 @@ export const MainAIChat = () => {
       .sort((a, b) => b.growth - a.growth); // Sort by best growth first
   };
 
+  const getVelocityData = () => {
+    if (!dashboardData || !salesData.length) return [];
+    
+    // Calculate velocity for each month
+    const validData = salesData.filter(account => 
+      account["Retail Accounts"] && 
+      account["Retail Accounts"].trim() !== '' && 
+      account["Retail Accounts"] !== 'Total'
+    );
+
+    const totalAccounts = salesData.length;
+    
+    let totalMayCases = 0;
+    let totalJuneCases = 0;
+    let totalJulyCases = 0;
+
+    validData.forEach(account => {
+      totalMayCases += account["May 2025"] || 0;
+      totalJuneCases += account["June 2025"] || 0;
+      totalJulyCases += account["July 2025"] || 0;
+    });
+
+    const mayVelocity = totalAccounts > 0 ? totalMayCases / totalAccounts : 0;
+    const juneVelocity = totalAccounts > 0 ? totalJuneCases / totalAccounts : 0;
+    const julyVelocity = totalAccounts > 0 ? totalJulyCases / totalAccounts : 0;
+
+    return [
+      {
+        month: 'May 2025',
+        velocity: Number(mayVelocity.toFixed(2)),
+        cases: totalMayCases
+      },
+      {
+        month: 'June 2025',
+        velocity: Number(juneVelocity.toFixed(2)),
+        cases: totalJuneCases
+      },
+      {
+        month: 'July 2025',
+        velocity: Number(julyVelocity.toFixed(2)),
+        cases: totalJulyCases
+      }
+    ];
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -410,7 +456,10 @@ export const MainAIChat = () => {
             </CardContent>
           </Card>
 
-          <Card className="shadow-card border-0">
+          <Card 
+            className="shadow-card border-0 cursor-pointer hover:shadow-lg transition-shadow" 
+            onClick={() => setActiveSection('velocity')}
+          >
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Sales Velocity (July 2025)</CardTitle>
             </CardHeader>
@@ -428,7 +477,7 @@ export const MainAIChat = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2 mt-1">
-                <p className="text-xs text-muted-foreground">All-time high: {dashboardData.allTimeHighVelocity.toFixed(1)}</p>
+                <p className="text-xs text-muted-foreground">Click to view monthly breakdown</p>
               </div>
             </CardContent>
           </Card>
@@ -441,14 +490,17 @@ export const MainAIChat = () => {
               <div>
                 <CardTitle className="text-lg font-semibold">
                   {activeSection === 'chain' ? 'Chain Performance Breakdown' : 
-                   activeSection === 'churn' ? 'Churn Risk Analysis' : 'Growing Accounts Performance'}
+                   activeSection === 'churn' ? 'Churn Risk Analysis' : 
+                   activeSection === 'growing' ? 'Growing Accounts Performance' : 'Sales Velocity Breakdown'}
                 </CardTitle>
                 <CardDescription>
                   {activeSection === 'chain' 
                     ? 'Sales performance by retail chain (June to July 2025)' 
                     : activeSection === 'churn'
                     ? 'Stores requiring immediate attention'
-                    : 'Top performing stores with strong growth'
+                    : activeSection === 'growing'
+                    ? 'Top performing stores with strong growth'
+                    : 'Monthly sales velocity trend (May - July 2025)'
                   }
                 </CardDescription>
               </div>
@@ -457,11 +509,13 @@ export const MainAIChat = () => {
                 size="sm"
                 onClick={() => setActiveSection(
                   activeSection === 'chain' ? 'churn' : 
-                  activeSection === 'churn' ? 'growing' : 'chain'
+                  activeSection === 'churn' ? 'growing' : 
+                  activeSection === 'growing' ? 'velocity' : 'chain'
                 )}
               >
                 Show {activeSection === 'chain' ? 'Churn Risk' : 
-                      activeSection === 'churn' ? 'Growing' : 'Chain Performance'}
+                      activeSection === 'churn' ? 'Growing' : 
+                      activeSection === 'growing' ? 'Velocity' : 'Chain Performance'}
               </Button>
             </div>
           </CardHeader>
@@ -608,7 +662,7 @@ export const MainAIChat = () => {
                   </div>
                 )}
               </Collapsible>
-            ) : (
+            ) : activeSection === 'growing' ? (
               // Growing Accounts Section
               <Collapsible open={isGrowingAccountsOpen} onOpenChange={setIsGrowingAccountsOpen}>
                 {getGrowingStores().length > 0 ? (
@@ -683,6 +737,103 @@ export const MainAIChat = () => {
                   </div>
                 )}
               </Collapsible>
+            ) : (
+              // Sales Velocity Section
+              <div className="space-y-6">
+                {/* Velocity Summary */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {getVelocityData().map((month) => (
+                    <div key={month.month} className="p-4 rounded-lg border border-border bg-card/30">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-foreground">{month.velocity}</div>
+                        <p className="text-sm text-muted-foreground">Cases/Store/Week</p>
+                        <p className="text-xs text-muted-foreground mt-1">{month.month}</p>
+                        <p className="text-xs text-muted-foreground">Total: {month.cases.toLocaleString()} cases</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Bar Chart */}
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={getVelocityData()} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                      <XAxis 
+                        dataKey="month" 
+                        fontSize={12}
+                        tickFormatter={(value) => value.split(' ')[0]} // Show only month name
+                      />
+                      <YAxis 
+                        fontSize={12}
+                        label={{ value: 'Cases per Store per Week', angle: -90, position: 'insideLeft' }}
+                      />
+                      <Tooltip 
+                        labelFormatter={(value) => value}
+                        formatter={(value: number, name: string) => [
+                          `${value} cases/store/week`,
+                          'Sales Velocity'
+                        ]}
+                        contentStyle={{
+                          backgroundColor: 'hsl(var(--card))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px'
+                        }}
+                      />
+                      <Bar 
+                        dataKey="velocity" 
+                        fill="hsl(var(--primary))"
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Velocity Insights */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-lg border border-border bg-card/30">
+                    <h4 className="font-medium text-foreground mb-2">Trend Analysis</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">June vs May:</span>
+                        <span className={`text-sm font-medium ${
+                          getVelocityData()[1]?.velocity >= getVelocityData()[0]?.velocity ? 'text-success' : 'text-destructive'
+                        }`}>
+                          {getVelocityData()[1]?.velocity >= getVelocityData()[0]?.velocity ? '+' : ''}
+                          {getVelocityData()[1] && getVelocityData()[0] ? 
+                            ((getVelocityData()[1].velocity - getVelocityData()[0].velocity) / getVelocityData()[0].velocity * 100).toFixed(1) : 0}%
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">July vs June:</span>
+                        <span className={`text-sm font-medium ${
+                          dashboardData.velocityChange >= 0 ? 'text-success' : 'text-destructive'
+                        }`}>
+                          {dashboardData.velocityChange >= 0 ? '+' : ''}{dashboardData.velocityChange.toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-lg border border-border bg-card/30">
+                    <h4 className="font-medium text-foreground mb-2">Performance Metrics</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Current Velocity:</span>
+                        <span className="text-sm font-medium">{dashboardData.averageSalesVelocity.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">All-Time High:</span>
+                        <span className="text-sm font-medium text-success">{dashboardData.allTimeHighVelocity.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Total Accounts:</span>
+                        <span className="text-sm font-medium">{dashboardData.totalStoresWithSales.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>
