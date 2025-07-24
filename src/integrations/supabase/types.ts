@@ -16,28 +16,28 @@ export type Database = {
     Tables: {
       vip_sales_raw: {
         Row: {
-          "Dist. STATE": string | null
-          "July 2025": number | null
-          "June 2025": number | null
-          "May 2025": number | null
-          "Retail Accounts": string | null
-          State: string | null
+          account_name: string
+          case_equivs: number
+          created_at: string
+          id: string
+          sale_month: string
+          updated_at: string
         }
         Insert: {
-          "Dist. STATE"?: string | null
-          "July 2025"?: number | null
-          "June 2025"?: number | null
-          "May 2025"?: number | null
-          "Retail Accounts"?: string | null
-          State?: string | null
+          account_name: string
+          case_equivs?: number
+          created_at?: string
+          id?: string
+          sale_month: string
+          updated_at?: string
         }
         Update: {
-          "Dist. STATE"?: string | null
-          "July 2025"?: number | null
-          "June 2025"?: number | null
-          "May 2025"?: number | null
-          "Retail Accounts"?: string | null
-          State?: string | null
+          account_name?: string
+          case_equivs?: number
+          created_at?: string
+          id?: string
+          sale_month?: string
+          updated_at?: string
         }
         Relationships: []
       }

@@ -5,8 +5,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Send, Bot, User, TrendingDown, TrendingUp, AlertTriangle, Users, DollarSign, Target, BarChart3 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
+import { SalesAIChat } from "./SalesAIChat";
 interface Message {
   id: string;
   type: 'user' | 'assistant';
@@ -176,8 +178,8 @@ export const MainAIChat = () => {
       </header>
 
       <div className="container mx-auto px-6 py-8 space-y-8">
-        {/* Compact AI Chat Interface */}
-        
+        {/* AI Chat Interface */}
+        <SalesAIChat />
 
         {/* Key Metrics Dashboard */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
