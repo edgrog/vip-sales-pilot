@@ -408,15 +408,15 @@ export const MainAIChat = () => {
             </div>
             <div>
               <h1 className="text-xl font-semibold text-foreground">Grog Sales Analyser 3000</h1>
-              <p className="text-sm text-muted-foreground">AI-Powered CPG Performance Analytics</p>
+              <p className="text-sm text-foreground/80">AI-Powered CPG Performance Analytics</p>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-6 py-6">
         {/* AI Chat Interface - Same width as chain performance */}
-        <Card className="shadow-card border-0 mb-8">
+        <Card className="card-grog mb-6">
           <CardHeader>
             <CardTitle className="text-lg font-semibold">VIP Sales AI Assistant</CardTitle>
             <CardDescription>Get insights and analysis for your sales performance data</CardDescription>
@@ -442,7 +442,7 @@ export const MainAIChat = () => {
         {/* Key Metrics Dashboard - Now properly spaced below chat */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <Card 
-            className="shadow-card border-0 cursor-pointer hover:shadow-lg transition-shadow" 
+            className="card-grog cursor-pointer hover:shadow-glow transition-all duration-300" 
             onClick={() => setActiveSection('accounts')}
           >
             <CardHeader className="pb-3">
@@ -458,7 +458,7 @@ export const MainAIChat = () => {
           </Card>
 
           <Card 
-            className="shadow-card border-0 cursor-pointer hover:shadow-lg transition-shadow" 
+            className="card-grog cursor-pointer hover:shadow-glow transition-all duration-300" 
             onClick={() => setActiveSection('churn')}
           >
             <CardHeader className="pb-3">
@@ -474,7 +474,7 @@ export const MainAIChat = () => {
           </Card>
 
           <Card 
-            className="shadow-card border-0 cursor-pointer hover:shadow-lg transition-shadow" 
+            className="card-grog cursor-pointer hover:shadow-glow transition-all duration-300" 
             onClick={() => setActiveSection('growing')}
           >
             <CardHeader className="pb-3">
@@ -490,7 +490,7 @@ export const MainAIChat = () => {
           </Card>
 
           <Card 
-            className="shadow-card border-0 cursor-pointer hover:shadow-lg transition-shadow" 
+            className="card-grog cursor-pointer hover:shadow-glow transition-all duration-300" 
             onClick={() => setActiveSection('velocity')}
           >
             <CardHeader className="pb-3">
@@ -517,7 +517,7 @@ export const MainAIChat = () => {
         </div>
 
         {/* Dynamic Section: Chain Performance or Churn Risk */}
-        <Card className="shadow-card border-0 mt-8">
+        <Card className="card-grog mt-6">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
@@ -541,7 +541,7 @@ export const MainAIChat = () => {
                 </CardDescription>
               </div>
               <Button 
-                variant="outline" 
+                className="btn-grog-outline" 
                 size="sm"
                 onClick={() => setActiveSection(
                   activeSection === 'chain' ? 'churn' : 
@@ -969,7 +969,7 @@ export const MainAIChat = () => {
 
         {/* Account Performance and Action Items */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-          <Card className="shadow-card border-0">
+          <Card className="card-grog">
             <CardHeader>
               <CardTitle className="text-lg font-semibold">Account Performance ({dashboardData.accountPerformance.length} accounts)</CardTitle>
               <CardDescription>Store-level performance data with status indicators</CardDescription>
@@ -1001,7 +1001,7 @@ export const MainAIChat = () => {
             </CardContent>
           </Card>
 
-          <Card className="shadow-card border-0">
+          <Card className="card-grog">
             <CardHeader>
               <CardTitle className="text-lg font-semibold">Action Items</CardTitle>
               <CardDescription>Priority accounts requiring immediate attention</CardDescription>
