@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -145,6 +145,26 @@ export const MainAIChat = () => {
     "Which stores dropped off in July?"
   ];
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "churn-risk":
+        return <Badge variant="destructive" className="flex items-center gap-1"><TrendingDown className="w-3 h-3" />Churn Risk</Badge>;
+      case "dropped":
+        return <Badge variant="destructive" className="flex items-center gap-1"><AlertTriangle className="w-3 h-3" />Dropped</Badge>;
+      case "growing":
+        return <Badge className="bg-success text-success-foreground flex items-center gap-1"><TrendingUp className="w-3 h-3" />Growing</Badge>;
+      default:
+        return <Badge variant="secondary">Stable</Badge>;
+    }
+  };
+
+  const calculateGrowth = (sales: number[]) => {
+    const [may, june, july] = sales;
+    if (july === 0) return "Dropped";
+    const growth = ((july - may) / may * 100).toFixed(1);
+    return `${growth}%`;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background">
       {/* Header */}
@@ -162,228 +182,325 @@ export const MainAIChat = () => {
         </div>
       </header>
 
-      <div className="container mx-auto px-6 py-8">
-        <Tabs defaultValue="chat" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="chat" className="flex items-center gap-2">
-              <Bot className="w-4 h-4" />
-              AI Assistant
-            </TabsTrigger>
-            <TabsTrigger value="dashboard" className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4" />
-              Data Overview
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="chat" className="space-y-6">
-            {/* Main AI Chat Interface */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Chat Area */}
-              <div className="lg:col-span-2">
-                <Card className="h-[600px] flex flex-col shadow-lg border-0">
-                  <CardHeader className="bg-gradient-to-r from-primary to-accent text-white rounded-t-lg">
-                    <CardTitle className="flex items-center gap-3">
-                      <Bot className="w-5 h-5" />
-                      Sales Intelligence Chat
-                    </CardTitle>
-                  </CardHeader>
-                  
-                  <CardContent className="flex-1 flex flex-col p-0">
-                    <ScrollArea className="flex-1 p-4">
-                      <div className="space-y-4">
-                        {messages.map((message) => (
-                          <div
-                            key={message.id}
-                            className={`flex gap-3 ${
-                              message.type === 'user' ? 'justify-end' : 'justify-start'
-                            }`}
-                          >
-                            {message.type === 'assistant' && (
-                              <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center flex-shrink-0">
-                                <Bot className="w-4 h-4 text-white" />
-                              </div>
-                            )}
-                            
-                            <div
-                              className={`max-w-[80%] rounded-lg p-4 ${
-                                message.type === 'user'
-                                  ? 'bg-primary text-primary-foreground'
-                                  : 'bg-secondary text-secondary-foreground'
-                              }`}
-                            >
-                              <p className="text-sm whitespace-pre-line">{message.content}</p>
-                              <span className="text-xs opacity-70 mt-2 block">
-                                {message.timestamp.toLocaleTimeString()}
-                              </span>
-                            </div>
-                            
-                            {message.type === 'user' && (
-                              <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center flex-shrink-0">
-                                <User className="w-4 h-4 text-accent-foreground" />
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                    
-                    <div className="p-4 border-t">
-                      <div className="flex gap-2">
-                        <Input
-                          value={input}
-                          onChange={(e) => setInput(e.target.value)}
-                          onKeyPress={handleKeyPress}
-                          placeholder="Ask about account performance, churn risks, or growth opportunities..."
-                          className="flex-1"
-                        />
-                        <Button onClick={handleSend} className="px-6">
-                          <Send className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Quick Actions & Metrics */}
-              <div className="space-y-6">
-                {/* Quick Questions */}
-                <Card className="shadow-lg border-0">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Quick Questions</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {quickQuestions.map((question, index) => (
-                      <Button
-                        key={index}
-                        variant="outline"
-                        onClick={() => setInput(question)}
-                        className="w-full text-left justify-start h-auto p-3 text-sm"
-                      >
-                        {question}
-                      </Button>
-                    ))}
-                  </CardContent>
-                </Card>
-
-                {/* Key Metrics */}
-                <Card className="shadow-lg border-0">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Key Metrics</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Total Accounts</span>
-                      <span className="text-lg font-bold">{mockData.totalAccounts}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Churn Risk</span>
-                      <span className="text-lg font-bold text-destructive">{mockData.churnRisk}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Growing</span>
-                      <span className="text-lg font-bold text-success">{mockData.topGrowing}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Revenue Change</span>
-                      <span className="text-lg font-bold text-success">+{mockData.revenueChange}%</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="dashboard" className="space-y-6">
-            {/* Traditional Dashboard View */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-              {/* Key Metrics Cards */}
-              <Card className="shadow-card border-0">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Accounts</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-foreground">{mockData.totalAccounts}</span>
-                    <Users className="w-5 h-5 text-primary" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="shadow-card border-0">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Churn Risk</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-destructive">{mockData.churnRisk}</span>
-                    <AlertTriangle className="w-5 h-5 text-destructive" />
-                  </div>
-                  <Progress value={(mockData.churnRisk / mockData.totalAccounts) * 100} className="mt-2" />
-                </CardContent>
-              </Card>
-
-              <Card className="shadow-card border-0">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Growing Accounts</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-success">{mockData.topGrowing}</span>
-                    <TrendingUp className="w-5 h-5 text-success" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="shadow-card border-0">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Revenue Change</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-success">+{mockData.revenueChange}%</span>
-                    <DollarSign className="w-5 h-5 text-success" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Chain Performance */}
-            <Card className="shadow-card border-0">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold">Chain Performance Breakdown</CardTitle>
+      <div className="container mx-auto px-6 py-8 space-y-8">
+        {/* Compact AI Chat Interface */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="lg:col-span-3">
+            <Card className="h-[350px] flex flex-col shadow-lg border-0">
+              <CardHeader className="bg-gradient-to-r from-primary to-accent text-white rounded-t-lg py-3">
+                <CardTitle className="flex items-center gap-3 text-lg">
+                  <Bot className="w-5 h-5" />
+                  Ask AI Assistant
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {mockData.chainData.map((chain, index) => (
-                    <div key={index} className="p-4 rounded-lg border bg-gradient-to-r from-card to-card/50">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-semibold text-foreground">{chain.name}</h4>
-                        <Badge variant={chain.status === "growing" ? "default" : "destructive"} className={
-                          chain.status === "growing" 
-                            ? "bg-success text-success-foreground" 
-                            : "bg-destructive text-destructive-foreground"
-                        }>
-                          {chain.growth > 0 ? `+${chain.growth}%` : `${chain.growth}%`}
-                        </Badge>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-sm text-muted-foreground">Stores</span>
-                          <span className="font-medium">{chain.stores}</span>
+              
+              <CardContent className="flex-1 flex flex-col p-0">
+                <ScrollArea className="flex-1 p-4">
+                  <div className="space-y-3">
+                    {messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex gap-2 ${
+                          message.type === 'user' ? 'justify-end' : 'justify-start'
+                        }`}
+                      >
+                        {message.type === 'assistant' && (
+                          <div className="w-6 h-6 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center flex-shrink-0">
+                            <Bot className="w-3 h-3 text-white" />
+                          </div>
+                        )}
+                        
+                        <div
+                          className={`max-w-[80%] rounded-lg p-3 ${
+                            message.type === 'user'
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-secondary text-secondary-foreground'
+                          }`}
+                        >
+                          <p className="text-sm whitespace-pre-line">{message.content}</p>
+                          <span className="text-xs opacity-70 mt-1 block">
+                            {message.timestamp.toLocaleTimeString()}
+                          </span>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-muted-foreground">July Sales</span>
-                          <span className="font-medium">${chain.totalSales[2].toLocaleString()}</span>
-                        </div>
+                        
+                        {message.type === 'user' && (
+                          <div className="w-6 h-6 bg-accent rounded-lg flex items-center justify-center flex-shrink-0">
+                            <User className="w-3 h-3 text-accent-foreground" />
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                </ScrollArea>
+                
+                <div className="p-4 border-t">
+                  <div className="flex gap-2">
+                    <Input
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Ask about account performance, churn risks, or growth opportunities..."
+                      className="flex-1"
+                    />
+                    <Button onClick={handleSend} className="px-4">
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+          </div>
+
+          {/* Quick Questions */}
+          <Card className="shadow-lg border-0">
+            <CardHeader>
+              <CardTitle className="text-base">Quick Questions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {quickQuestions.map((question, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  onClick={() => setInput(question)}
+                  className="w-full text-left justify-start h-auto p-2 text-xs"
+                >
+                  {question}
+                </Button>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Key Metrics Dashboard */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <Card className="shadow-card border-0">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Accounts</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <span className="text-2xl font-bold text-foreground">{mockData.totalAccounts}</span>
+                <Users className="w-5 h-5 text-primary" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-card border-0">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Churn Risk</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <span className="text-2xl font-bold text-destructive">{mockData.churnRisk}</span>
+                <AlertTriangle className="w-5 h-5 text-destructive" />
+              </div>
+              <Progress value={(mockData.churnRisk / mockData.totalAccounts) * 100} className="mt-2" />
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-card border-0">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Growing Accounts</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <span className="text-2xl font-bold text-success">{mockData.topGrowing}</span>
+                <TrendingUp className="w-5 h-5 text-success" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-card border-0">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Revenue Change</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <span className="text-2xl font-bold text-success">+{mockData.revenueChange}%</span>
+                <DollarSign className="w-5 h-5 text-success" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Chain Performance Breakdown */}
+        <Card className="shadow-card border-0">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold">Chain Performance Breakdown</CardTitle>
+            <CardDescription>Sales performance by retail chain (May-July 2024)</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {mockData.chainData.map((chain, index) => (
+                <div key={index} className="p-4 rounded-lg border bg-gradient-to-r from-card to-card/50 hover:shadow-lg transition-all">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-foreground text-lg">{chain.name}</h4>
+                    <Badge variant={chain.status === "growing" ? "default" : "destructive"} className={
+                      chain.status === "growing" 
+                        ? "bg-success text-success-foreground" 
+                        : "bg-destructive text-destructive-foreground"
+                    }>
+                      {chain.growth > 0 ? `+${chain.growth}%` : `${chain.growth}%`}
+                    </Badge>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Stores</span>
+                      <span className="font-medium">{chain.stores}</span>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">July Sales</span>
+                        <span className="font-medium">${chain.totalSales[2].toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Avg per Store</span>
+                        <span className="font-medium">${chain.avgPerStore[2].toLocaleString()}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="pt-2">
+                      <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                        <span>May</span>
+                        <span>June</span>
+                        <span>July</span>
+                      </div>
+                      <div className="flex gap-1">
+                        {chain.totalSales.map((sales, monthIndex) => (
+                          <div 
+                            key={monthIndex}
+                            className="flex-1 bg-secondary rounded-sm overflow-hidden"
+                          >
+                            <div 
+                              className={`h-2 rounded-sm ${
+                                chain.status === "growing" ? "bg-success" : "bg-destructive"
+                              }`}
+                              style={{
+                                width: `${(sales / Math.max(...chain.totalSales)) * 100}%`
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {/* Chain Summary */}
+            <div className="mt-6 pt-6 border-t">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-success">3</div>
+                  <div className="text-sm text-muted-foreground">Growing Chains</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-destructive">2</div>
+                  <div className="text-sm text-muted-foreground">Declining Chains</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">${mockData.chainData.reduce((sum, chain) => sum + chain.totalSales[2], 0).toLocaleString()}</div>
+                  <div className="text-sm text-muted-foreground">Total July Sales</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-accent">$2,684</div>
+                  <div className="text-sm text-muted-foreground">Avg Store Performance</div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Account Performance and Action Items */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="shadow-card border-0">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold">Account Performance (May-July)</CardTitle>
+              <CardDescription>Store-level depletion data with status indicators</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {mockData.accountsData.map((account, index) => (
+                  <div key={index} className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h4 className="font-medium text-foreground">{account.name}</h4>
+                        {getStatusBadge(account.status)}
+                      </div>
+                      <p className="text-sm text-muted-foreground">{account.region} • {account.chain}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        May: ${account.sales[0].toLocaleString()} | 
+                        June: ${account.sales[1].toLocaleString()} | 
+                        July: ${account.sales[2] === 0 ? "No sales" : `$${account.sales[2].toLocaleString()}`}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span className={`font-medium ${
+                        account.status === "growing" ? "text-success" : 
+                        account.status === "churn-risk" || account.status === "dropped" ? "text-destructive" : 
+                        "text-muted-foreground"
+                      }`}>
+                        {calculateGrowth(account.sales)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-card border-0">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold">Action Items</CardTitle>
+              <CardDescription>Priority accounts requiring immediate attention</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="p-4 rounded-lg border border-destructive/20 bg-destructive/5">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-destructive mt-0.5" />
+                    <div>
+                      <h4 className="font-medium text-foreground">Urgent: Account Dropped</h4>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Coles Express Kings Cross had no sales in July after consistent performance. 
+                        <span className="font-medium text-destructive"> Immediate follow-up required.</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-lg border border-warning/20 bg-warning/5">
+                  <div className="flex items-start gap-3">
+                    <TrendingDown className="w-5 h-5 text-warning mt-0.5" />
+                    <div>
+                      <h4 className="font-medium text-foreground">Churn Risk</h4>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Woolworths Metro CBD showing declining trend. Sales dropped 15.6% in July.
+                        <span className="font-medium text-warning"> Schedule account review.</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-lg border border-success/20 bg-success/5">
+                  <div className="flex items-start gap-3">
+                    <TrendingUp className="w-5 h-5 text-success mt-0.5" />
+                    <div>
+                      <h4 className="font-medium text-foreground">Growth Opportunity</h4>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        IGA Bondi Junction and 7-Eleven Central showing strong growth.
+                        <span className="font-medium text-success"> Consider upselling opportunities.</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
