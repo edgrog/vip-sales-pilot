@@ -403,7 +403,7 @@ export const MainAIChat = () => {
               <Bot className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-foreground">VIP Sales Co-Pilot</h1>
+              <h1 className="text-xl font-semibold text-foreground">Grog Sales Analyser 3000</h1>
               <p className="text-sm text-muted-foreground">AI-Powered CPG Performance Analytics</p>
             </div>
           </div>
