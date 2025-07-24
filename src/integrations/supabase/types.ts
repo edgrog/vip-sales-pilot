@@ -14,39 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
-      vip_sales_raw: {
+      vip_sales: {
         Row: {
-          created_at: string
-          dist_state: string
-          id: string
-          july_cases_per_week_per_store: number
-          june_cases_per_week_per_store: number
-          may_2025_cases_per_week_per_store: number
-          retail_accounts: string
-          state: string
-          updated_at: string
+          Address: string | null
+          Analysis: string | null
+          City: string | null
+          "COPY THIS & PASTE": string | null
+          "Dist. STATE": string | null
+          "July 2025": number | null
+          "June 2025": number | null
+          "May 2025": number | null
+          "Retail Accounts": string | null
+          State: string | null
         }
         Insert: {
-          created_at?: string
-          dist_state: string
-          id?: string
-          july_cases_per_week_per_store?: number
-          june_cases_per_week_per_store?: number
-          may_2025_cases_per_week_per_store?: number
-          retail_accounts: string
-          state: string
-          updated_at?: string
+          Address?: string | null
+          Analysis?: string | null
+          City?: string | null
+          "COPY THIS & PASTE"?: string | null
+          "Dist. STATE"?: string | null
+          "July 2025"?: number | null
+          "June 2025"?: number | null
+          "May 2025"?: number | null
+          "Retail Accounts"?: string | null
+          State?: string | null
         }
         Update: {
-          created_at?: string
-          dist_state?: string
-          id?: string
-          july_cases_per_week_per_store?: number
-          june_cases_per_week_per_store?: number
-          may_2025_cases_per_week_per_store?: number
-          retail_accounts?: string
-          state?: string
-          updated_at?: string
+          Address?: string | null
+          Analysis?: string | null
+          City?: string | null
+          "COPY THIS & PASTE"?: string | null
+          "Dist. STATE"?: string | null
+          "July 2025"?: number | null
+          "June 2025"?: number | null
+          "May 2025"?: number | null
+          "Retail Accounts"?: string | null
+          State?: string | null
         }
         Relationships: []
       }
