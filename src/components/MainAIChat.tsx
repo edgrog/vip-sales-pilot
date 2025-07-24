@@ -81,11 +81,18 @@ export const MainAIChat = () => {
     
     console.log('Total records from database:', data.length);
     console.log('Valid records after filtering:', validData.length);
+    console.log('Sample of filtered out records:', data.filter(account => 
+      !account["Retail Accounts"] || 
+      account["Retail Accounts"].trim() === '' || 
+      account["Retail Accounts"] === 'Total'
+    ).slice(0, 5));
     
     if (!validData.length) return;
 
     // Count unique stores that have ordered at any time (May, June, or July)
     const uniqueStoresWithSales = new Set();
+    const storesWithNoSales = [];
+    
     validData.forEach(account => {
       const may = account["May 2025"] || 0;
       const june = account["June 2025"] || 0;
@@ -94,8 +101,14 @@ export const MainAIChat = () => {
       // If store has any sales in any month, count it as active
       if (may > 0 || june > 0 || july > 0) {
         uniqueStoresWithSales.add(account["Retail Accounts"]);
+      } else {
+        storesWithNoSales.push(account["Retail Accounts"]);
       }
     });
+    
+    console.log('Unique stores with sales:', uniqueStoresWithSales.size);
+    console.log('Stores with no sales:', storesWithNoSales.length);
+    console.log('Sample stores with no sales:', storesWithNoSales.slice(0, 10));
     
     const totalAccounts = uniqueStoresWithSales.size;
     let churnRiskAccounts = 0;
