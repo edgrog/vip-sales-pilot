@@ -8,8 +8,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Grog Brand Colors - Updated to match website */
-    --background: 0 0% 98%;
+    --background: 210 20% 98%;
     --foreground: 213 31% 12%;
 
     --card: 0 0% 100%;
@@ -18,9 +17,8 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 213 31% 12%;
 
-    /* Grog Yellow/Gold Primary */
-    --primary: 48 100% 67%;
-    --primary-foreground: 213 31% 12%;
+    --primary: 213 94% 53%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96%;
     --secondary-foreground: 213 31% 12%;
@@ -28,8 +26,7 @@ All colors MUST be HSL.
     --muted: 210 40% 96%;
     --muted-foreground: 215 20% 45%;
 
-    /* Grog Green Accent */
-    --accent: 142 69% 58%;
+    --accent: 175 70% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -37,28 +34,26 @@ All colors MUST be HSL.
 
     --border: 214 31% 91%;
     --input: 214 31% 91%;
-    --ring: 48 100% 67%;
+    --ring: 213 94% 53%;
 
-    /* Grog Sales Dashboard Colors */
-    --success: 142 69% 58%;
+    /* Sales Dashboard Colors */
+    --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
-    --warning: 48 100% 67%;
+    --warning: 48 96% 53%;
     --warning-foreground: 213 31% 12%;
     --info: 199 89% 48%;
     --info-foreground: 0 0% 100%;
 
-    /* Grog Brand Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(48 100% 67%), hsl(55 100% 62%));
-    --gradient-accent: linear-gradient(135deg, hsl(142 69% 58%), hsl(175 70% 50%));
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(213 94% 53%), hsl(199 89% 48%));
+    --gradient-accent: linear-gradient(135deg, hsl(175 70% 50%), hsl(142 71% 45%));
     --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(210 40% 98%));
-    --gradient-grog: linear-gradient(135deg, hsl(48 100% 67%), hsl(142 69% 58%));
 
-    /* Enhanced Shadows with Grog colors */
-    --shadow-dashboard: 0 4px 20px -2px hsl(48 100% 67% / 0.15);
-    --shadow-card: 0 2px 8px -1px hsl(213 31% 12% / 0.08);
-    --shadow-glow: 0 0 30px hsl(48 100% 67% / 0.3);
+    /* Shadows */
+    --shadow-dashboard: 0 4px 20px -2px hsl(213 94% 53% / 0.1);
+    --shadow-card: 0 2px 8px -1px hsl(213 31% 12% / 0.1);
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -132,31 +127,5 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
-    /* Add Grog-style grid background */
-    background-image: 
-      linear-gradient(rgba(213, 213, 213, 0.1) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(213, 213, 213, 0.1) 1px, transparent 1px);
-    background-size: 20px 20px;
-  }
-}
-
-@layer components {
-  /* Grog-style button variants */
-  .btn-grog {
-    @apply bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-2 rounded-full transition-all duration-200 shadow-md hover:shadow-lg;
-  }
-  
-  .btn-grog-outline {
-    @apply border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-6 py-2 rounded-full transition-all duration-200;
-  }
-
-  /* Enhanced card styling to match Grog aesthetic */
-  .card-grog {
-    @apply bg-card border border-border rounded-xl shadow-card hover:shadow-lg transition-all duration-200;
-  }
-
-  /* Grog-style accent backgrounds */
-  .bg-grog-gradient {
-    background: var(--gradient-grog);
   }
 }
