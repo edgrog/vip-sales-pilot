@@ -80,9 +80,9 @@ export const MainAIChat = () => {
   };
 
   const calculateDashboardMetrics = (data: VipSalesData[]) => {
-    console.log('Total records from database:', data.length);
+    console.log('Total records from database (including NULL):', data.length);
     
-    // Filter out invalid records
+    // Filter out invalid records for calculations, but keep count of all records
     const validData = data.filter(account => 
       account["Retail Accounts"] && 
       account["Retail Accounts"].trim() !== '' && 
@@ -90,6 +90,7 @@ export const MainAIChat = () => {
     );
     
     console.log('Valid records after filtering:', validData.length);
+    console.log('NULL/invalid records:', data.length - validData.length);
     
     if (!validData.length) return;
 
@@ -115,8 +116,8 @@ export const MainAIChat = () => {
     console.log('This should match the total since every store has sales:', uniqueStoresWithSales.size);
     console.log('Should be 1,578:', allUniqueStores.size === 1578);
     
-    const totalAccounts = allUniqueStores.size; // Use all unique stores, not just those with sales
-    const totalStoresWithSales = uniqueStoresWithSales.size; // This should equal totalAccounts
+    const totalAccounts = data.length; // Include ALL records (including NULL entries)
+    const totalStoresWithSales = allUniqueStores.size; // Only stores with valid names
     let churnRiskAccounts = 0;
     let growingAccounts = 0;
     let totalJuneCases = 0;
