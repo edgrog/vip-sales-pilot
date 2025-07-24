@@ -26,6 +26,7 @@ interface DashboardData {
   growingAccounts: number;
   totalRevenueChange: number;
   averageSalesVelocity: number;
+  velocityChange: number;
   chainPerformance: Array<{
     chain: string;
     accounts: number;
@@ -202,6 +203,8 @@ export const MainAIChat = () => {
 
     const totalRevenueChange = totalJuneCases > 0 ? ((totalJulyCases - totalJuneCases) / totalJuneCases) * 100 : 0;
     const averageSalesVelocity = totalAccounts > 0 ? totalJulyCases / totalAccounts : 0;
+    const juneVelocity = totalAccounts > 0 ? totalJuneCases / totalAccounts : 0;
+    const velocityChange = juneVelocity > 0 ? ((averageSalesVelocity - juneVelocity) / juneVelocity) * 100 : 0;
 
     setDashboardData({
       totalAccounts,
@@ -209,6 +212,7 @@ export const MainAIChat = () => {
       growingAccounts,
       totalRevenueChange,
       averageSalesVelocity,
+      velocityChange,
       chainPerformance,
       accountPerformance: accountPerformance // Show all accounts, not just top 10
     });
@@ -329,14 +333,21 @@ export const MainAIChat = () => {
 
           <Card className="shadow-card border-0">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Sales Velocity</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Sales Velocity (July 2025)</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div className="text-3xl font-bold text-foreground">{dashboardData.averageSalesVelocity.toFixed(1)}</div>
                 <BarChart3 className="w-8 h-8 text-primary" />
               </div>
-              <p className="text-xs text-muted-foreground mt-2">Cases per store per week</p>
+              <div className="flex items-center gap-2 mt-2">
+                <p className="text-xs text-muted-foreground">Cases per store per week</p>
+                <div className={`text-xs font-medium ${
+                  dashboardData.velocityChange >= 0 ? 'text-success' : 'text-destructive'
+                }`}>
+                  {dashboardData.velocityChange >= 0 ? '+' : ''}{dashboardData.velocityChange.toFixed(1)}%
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
