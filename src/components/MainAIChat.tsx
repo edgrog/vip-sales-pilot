@@ -385,7 +385,7 @@ export const MainAIChat = () => {
               <ScrollArea className="h-[400px]">
                 <div className="space-y-3 pr-4">
                   {dashboardData.accountPerformance.map((account, index) => (
-                    <div key={account.name} className="flex items-center justify-between p-3 rounded-lg border border-border bg-card/30">
+                    <div key={`${account.name}-${index}`} className="flex items-center justify-between p-3 rounded-lg border border-border bg-card/30">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <h4 className="font-medium text-foreground text-sm">{account.name}</h4>
