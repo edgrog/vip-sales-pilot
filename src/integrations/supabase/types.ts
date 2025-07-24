@@ -24,6 +24,7 @@ export type Database = {
           "July 2025": number | null
           "June 2025": number | null
           "May 2025": number | null
+          normalized_chain: string | null
           "Retail Accounts": string | null
           State: string | null
         }
@@ -36,6 +37,7 @@ export type Database = {
           "July 2025"?: number | null
           "June 2025"?: number | null
           "May 2025"?: number | null
+          normalized_chain?: string | null
           "Retail Accounts"?: string | null
           State?: string | null
         }
@@ -48,6 +50,7 @@ export type Database = {
           "July 2025"?: number | null
           "June 2025"?: number | null
           "May 2025"?: number | null
+          normalized_chain?: string | null
           "Retail Accounts"?: string | null
           State?: string | null
         }
@@ -58,7 +61,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      normalize_chain_name: {
+        Args: { retail_account: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
