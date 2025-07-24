@@ -287,7 +287,20 @@ export const MainAIChat = () => {
     
     return dashboardData.accountPerformance
       .filter(account => account.status === 'churn-risk' || account.status === 'dropped')
-      .sort((a, b) => a.growth - b.growth); // Sort by worst decline first
+      .map(account => {
+        // Calculate actual case reduction (we need to get the June data for this)
+        const storeData = salesData.find(data => data["Retail Accounts"] === account.name);
+        const juneCases = storeData ? (storeData["June 2025"] || 0) : 0;
+        const julyCases = account.julyCases;
+        const caseReduction = juneCases - julyCases; // Positive number = cases lost
+        
+        return {
+          ...account,
+          caseReduction: caseReduction,
+          juneCases: juneCases
+        };
+      })
+      .sort((a, b) => b.caseReduction - a.caseReduction); // Sort by largest case reduction first
   };
 
   const getGrowingStores = () => {
@@ -592,29 +605,31 @@ export const MainAIChat = () => {
               <Collapsible open={isChurnRiskOpen} onOpenChange={setIsChurnRiskOpen}>
                 {getChurnRiskStores().length > 0 ? (
                   <>
-                    {/* Preview: First 3 churn risk stores */}
-                    <div className="space-y-4">
-                      {getChurnRiskStores().slice(0, 3).map((store, index) => (
-                        <div key={`${store.name}-${index}`} className="flex items-center justify-between p-4 rounded-lg border border-destructive/20 bg-destructive/5">
-                          <div className="flex items-center gap-3">
-                            <AlertTriangle className="w-5 h-5 text-destructive" />
-                            <div>
-                              <h4 className="font-medium text-foreground">{store.name}</h4>
-                              <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week</p>
-                              <div className="mt-1">
-                                {getStatusBadge(store.status)}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-lg font-bold text-destructive">
-                              {store.growth.toFixed(1)}%
-                            </div>
-                            <p className="text-xs text-muted-foreground">Growth Rate</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                     {/* Preview: First 3 churn risk stores */}
+                     <div className="space-y-4">
+                       {getChurnRiskStores().slice(0, 3).map((store, index) => (
+                         <div key={`${store.name}-${index}`} className="flex items-center justify-between p-4 rounded-lg border border-destructive/20 bg-destructive/5">
+                           <div className="flex items-center gap-3">
+                             <AlertTriangle className="w-5 h-5 text-destructive" />
+                             <div>
+                               <h4 className="font-medium text-foreground">{store.name}</h4>
+                               <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week (July)</p>
+                               <p className="text-xs text-muted-foreground">June: {store.juneCases.toFixed(1)} cases/week</p>
+                               <div className="mt-1">
+                                 {getStatusBadge(store.status)}
+                               </div>
+                             </div>
+                           </div>
+                           <div className="text-right">
+                             <div className="text-lg font-bold text-destructive">
+                               -{store.caseReduction.toFixed(1)}
+                             </div>
+                             <p className="text-xs text-muted-foreground">Cases Lost/Week</p>
+                             <p className="text-xs text-muted-foreground">({store.growth.toFixed(1)}%)</p>
+                           </div>
+                         </div>
+                       ))}
+                     </div>
 
                     {/* Collapsible trigger */}
                     {getChurnRiskStores().length > 3 && (
@@ -626,31 +641,33 @@ export const MainAIChat = () => {
                       </CollapsibleTrigger>
                     )}
 
-                    {/* Collapsible content: Remaining churn risk stores */}
-                    <CollapsibleContent>
-                      <div className="space-y-4 mt-4">
-                        {getChurnRiskStores().slice(3).map((store, index) => (
-                          <div key={`${store.name}-${index + 3}`} className="flex items-center justify-between p-4 rounded-lg border border-destructive/20 bg-destructive/5">
-                            <div className="flex items-center gap-3">
-                              <AlertTriangle className="w-5 h-5 text-destructive" />
-                              <div>
-                                <h4 className="font-medium text-foreground">{store.name}</h4>
-                                <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week</p>
-                                <div className="mt-1">
-                                  {getStatusBadge(store.status)}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-lg font-bold text-destructive">
-                                {store.growth.toFixed(1)}%
-                              </div>
-                              <p className="text-xs text-muted-foreground">Growth Rate</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CollapsibleContent>
+                     {/* Collapsible content: Remaining churn risk stores */}
+                     <CollapsibleContent>
+                       <div className="space-y-4 mt-4">
+                         {getChurnRiskStores().slice(3).map((store, index) => (
+                           <div key={`${store.name}-${index + 3}`} className="flex items-center justify-between p-4 rounded-lg border border-destructive/20 bg-destructive/5">
+                             <div className="flex items-center gap-3">
+                               <AlertTriangle className="w-5 h-5 text-destructive" />
+                               <div>
+                                 <h4 className="font-medium text-foreground">{store.name}</h4>
+                                 <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week (July)</p>
+                                 <p className="text-xs text-muted-foreground">June: {store.juneCases.toFixed(1)} cases/week</p>
+                                 <div className="mt-1">
+                                   {getStatusBadge(store.status)}
+                                 </div>
+                               </div>
+                             </div>
+                             <div className="text-right">
+                               <div className="text-lg font-bold text-destructive">
+                                 -{store.caseReduction.toFixed(1)}
+                               </div>
+                               <p className="text-xs text-muted-foreground">Cases Lost/Week</p>
+                               <p className="text-xs text-muted-foreground">({store.growth.toFixed(1)}%)</p>
+                             </div>
+                           </div>
+                         ))}
+                       </div>
+                     </CollapsibleContent>
                   </>
                 ) : (
                   <div className="text-center py-8">
