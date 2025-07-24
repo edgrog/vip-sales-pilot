@@ -80,7 +80,9 @@ export const MainAIChat = () => {
   };
 
   const calculateDashboardMetrics = (data: VipSalesData[]) => {
-    console.log('Total records from database (including NULL):', data.length);
+    console.log('DEBUG: Total records from database (including NULL):', data.length);
+    console.log('DEBUG: First few records:', data.slice(0, 3));
+    console.log('DEBUG: Last few records:', data.slice(-3));
     
     // Filter out invalid records for calculations, but keep count of all records
     const validData = data.filter(account => 
@@ -89,8 +91,8 @@ export const MainAIChat = () => {
       account["Retail Accounts"] !== 'Total'
     );
     
-    console.log('Valid records after filtering:', validData.length);
-    console.log('NULL/invalid records:', data.length - validData.length);
+    console.log('DEBUG: Valid records after filtering:', validData.length);
+    console.log('DEBUG: NULL/invalid records:', data.length - validData.length);
     
     if (!validData.length) return;
 
