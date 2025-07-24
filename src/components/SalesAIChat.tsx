@@ -259,7 +259,7 @@ export const SalesAIChat = () => {
   ];
 
   return (
-    <Card className="w-full max-w-4xl mx-auto h-[600px] flex flex-col">
+    <Card className="w-full max-w-4xl mx-auto h-[80vh] flex flex-col">
       <CardHeader className="border-b">
         <CardTitle className="flex items-center gap-2">
           <Bot className="w-5 h-5" />
