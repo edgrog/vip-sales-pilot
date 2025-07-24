@@ -367,7 +367,7 @@ export const MainAIChat = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <Card className="shadow-card border-0">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Stores with Sales Data</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Accounts</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
