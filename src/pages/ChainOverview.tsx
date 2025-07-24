@@ -1,10 +1,11 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Store, TrendingUp, TrendingDown, AlertCircle, Users, Target } from "lucide-react";
+import { ArrowLeft, Store, TrendingUp, TrendingDown, AlertCircle, Users, Target, Filter, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { supabase } from "@/integrations/supabase/client";
 
@@ -19,6 +20,7 @@ interface ChainData {
     june_2025: number;
     july_2025: number;
     growth: number;
+    weeklyAverage: number;
     status: 'growing' | 'declining' | 'stable';
   }>;
   totalStores: number;
@@ -32,6 +34,8 @@ const ChainOverview = () => {
   const navigate = useNavigate();
   const [chainData, setChainData] = useState<ChainData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [trendFilter, setTrendFilter] = useState<'all' | 'growing' | 'stable' | 'declining'>('all');
+  const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
 
   useEffect(() => {
     if (chainId) {
@@ -63,11 +67,14 @@ const ChainOverview = () => {
           const may = store["May 2025"] || 0;
           const june = store["June 2025"] || 0;
           const july = store["July 2025"] || 0;
-          const growth = june > 0 ? ((july - june) / june) * 100 : 0;
+          
+          // Calculate more robust growth trend
+          const growth = calculateGrowthTrend(may, june, july);
+          const weeklyAverage = (may + june + july) / 3;
           
           let status: 'growing' | 'declining' | 'stable' = 'stable';
-          if (growth > 5) status = 'growing';
-          else if (growth < -5) status = 'declining';
+          if (growth > 10) status = 'growing';
+          else if (growth < -10) status = 'declining';
 
           return {
             name: store["Retail Accounts"] || '',
@@ -78,23 +85,26 @@ const ChainOverview = () => {
             june_2025: june,
             july_2025: july,
             growth,
+            weeklyAverage,
             status
           };
         });
 
-        const totalCases = stores.reduce((sum, store) => sum + store.july_2025, 0);
-        const avgGrowth = stores.length > 0 
-          ? stores.reduce((sum, store) => sum + store.growth, 0) / stores.length 
+        // Sort by weekly average descending by default
+        const sortedStores = stores.sort((a, b) => b.weeklyAverage - a.weeklyAverage);
+        const totalCases = sortedStores.reduce((sum, store) => sum + store.july_2025, 0);
+        const avgGrowth = sortedStores.length > 0 
+          ? sortedStores.reduce((sum, store) => sum + store.growth, 0) / sortedStores.length 
           : 0;
 
         let chainStatus: 'growing' | 'declining' | 'stable' = 'stable';
-        if (avgGrowth > 5) chainStatus = 'growing';
-        else if (avgGrowth < -5) chainStatus = 'declining';
+        if (avgGrowth > 10) chainStatus = 'growing';
+        else if (avgGrowth < -10) chainStatus = 'declining';
 
         const chainData: ChainData = {
           chainName: decodedChainId,
-          stores: stores.sort((a, b) => b.july_2025 - a.july_2025), // Sort by current sales
-          totalStores: stores.length,
+          stores: sortedStores,
+          totalStores: sortedStores.length,
           totalCases,
           avgGrowth,
           chainStatus
@@ -107,6 +117,57 @@ const ChainOverview = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper function to calculate growth trend using 3-month data
+  const calculateGrowthTrend = (may: number, june: number, july: number) => {
+    // Handle edge cases
+    if (may === 0 && june === 0 && july === 0) return 0; // No data
+    if (may === 0 && june === 0) return july > 0 ? 100 : 0; // New launch
+    
+    // Calculate trend using linear regression approach for 3 points
+    const dataPoints = [
+      { month: 1, value: may },
+      { month: 2, value: june },
+      { month: 3, value: july }
+    ];
+    
+    // Simple slope calculation
+    const avgMonth = 2; // (1+2+3)/3
+    const avgValue = (may + june + july) / 3;
+    
+    let numerator = 0;
+    let denominator = 0;
+    
+    dataPoints.forEach(point => {
+      numerator += (point.month - avgMonth) * (point.value - avgValue);
+      denominator += (point.month - avgMonth) ** 2;
+    });
+    
+    const slope = denominator === 0 ? 0 : numerator / denominator;
+    
+    // Convert slope to percentage change relative to average
+    return avgValue > 0 ? (slope / avgValue) * 100 : 0;
+  };
+
+  // Filter and sort stores based on current selections
+  const getFilteredAndSortedStores = () => {
+    if (!chainData) return [];
+    
+    let filteredStores = chainData.stores;
+    
+    // Apply trend filter
+    if (trendFilter !== 'all') {
+      filteredStores = filteredStores.filter(store => store.status === trendFilter);
+    }
+    
+    // Apply sorting
+    return [...filteredStores].sort((a, b) => {
+      const compareValue = sortOrder === 'desc' 
+        ? b.weeklyAverage - a.weeklyAverage 
+        : a.weeklyAverage - b.weeklyAverage;
+      return compareValue;
+    });
   };
 
   const getStatusColor = (status: string) => {
@@ -345,12 +406,51 @@ const ChainOverview = () => {
         {/* All Stores List */}
         <Card className="mt-6">
           <CardHeader>
-            <CardTitle>All Stores in {chainData.chainName}</CardTitle>
-            <CardDescription>{chainData.totalStores} stores total</CardDescription>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <CardTitle>All Stores in {chainData.chainName}</CardTitle>
+                <CardDescription>
+                  {getFilteredAndSortedStores().length} of {chainData.totalStores} stores
+                  {trendFilter !== 'all' && ` (${trendFilter})`}
+                </CardDescription>
+              </div>
+              
+              {/* Filter and Sort Controls */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex items-center gap-2">
+                  <Filter className="w-4 h-4 text-muted-foreground" />
+                  <Select value={trendFilter} onValueChange={(value: any) => setTrendFilter(value)}>
+                    <SelectTrigger className="w-[140px] bg-background">
+                      <SelectValue placeholder="Filter by trend" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border shadow-lg z-50">
+                      <SelectItem value="all">All Trends</SelectItem>
+                      <SelectItem value="growing">📈 Growing</SelectItem>
+                      <SelectItem value="stable">➖ Stable</SelectItem>
+                      <SelectItem value="declining">📉 Declining</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <ArrowUpDown className="w-4 h-4 text-muted-foreground" />
+                  <Select value={sortOrder} onValueChange={(value: any) => setSortOrder(value)}>
+                    <SelectTrigger className="w-[160px] bg-background">
+                      <SelectValue placeholder="Sort by cases" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border shadow-lg z-50">
+                      <SelectItem value="desc">Highest to Lowest</SelectItem>
+                      <SelectItem value="asc">Lowest to Highest</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {chainData.stores.map((store) => (
+              {getFilteredAndSortedStores().length > 0 ? (
+                getFilteredAndSortedStores().map((store) => (
                 <div 
                   key={store.name}
                   className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50 cursor-pointer hover:bg-card/80 transition-colors"
@@ -372,9 +472,9 @@ const ChainOverview = () => {
                   </div>
                   <div className="text-right">
                     <div className="text-lg font-bold text-foreground">
-                      {store.july_2025.toFixed(1)}
+                      {store.weeklyAverage.toFixed(1)}
                     </div>
-                    <p className="text-xs text-muted-foreground">Cases/Week</p>
+                    <p className="text-xs text-muted-foreground">Avg Cases/Week</p>
                     <div className={`text-xs font-medium ${
                       store.growth >= 0 ? 'text-success' : 'text-destructive'
                     }`}>
@@ -382,7 +482,18 @@ const ChainOverview = () => {
                     </div>
                   </div>
                 </div>
-              ))}
+                ))
+              ) : (
+                <div className="col-span-full text-center py-8">
+                  <div className="w-16 h-16 bg-muted/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Store className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-medium text-foreground mb-2">No Stores Found</h3>
+                  <p className="text-muted-foreground">
+                    No stores match the current filter criteria. Try adjusting your filters.
+                  </p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
