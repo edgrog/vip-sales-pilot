@@ -551,7 +551,23 @@ export const MainAIChat = () => {
                 {/* Preview: Top 3 chains */}
                 <div className="space-y-4">
                   {dashboardData.chainPerformance.slice(0, 3).map((chain, index) => (
-                    <div key={chain.chain} className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50">
+                    <div 
+                      key={chain.chain} 
+                      className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50 cursor-pointer hover:bg-card/80 transition-colors"
+                      onClick={() => {
+                        // For chains, we could navigate to a chain overview or show accounts in that chain
+                        // For now, let's find the first account in this chain and navigate to it
+                        const firstAccountInChain = salesData.find(account => 
+                          account["normalized_chain"] === chain.chain && 
+                          account["Retail Accounts"] && 
+                          account["Retail Accounts"].trim() !== '' && 
+                          account["Retail Accounts"] !== 'Total'
+                        );
+                        if (firstAccountInChain) {
+                          navigate(`/accounts/${encodeURIComponent(firstAccountInChain["Retail Accounts"])}`);
+                        }
+                      }}
+                    >
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                           <span className="text-primary font-semibold">{chain.chain.charAt(0)}</span>
@@ -588,7 +604,22 @@ export const MainAIChat = () => {
                 <CollapsibleContent>
                   <div className="space-y-4 mt-4">
                     {dashboardData.chainPerformance.slice(3).map((chain, index) => (
-                      <div key={chain.chain} className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50">
+                      <div 
+                        key={chain.chain} 
+                        className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50 cursor-pointer hover:bg-card/80 transition-colors"
+                        onClick={() => {
+                          // For chains, find the first account in this chain and navigate to it
+                          const firstAccountInChain = salesData.find(account => 
+                            account["normalized_chain"] === chain.chain && 
+                            account["Retail Accounts"] && 
+                            account["Retail Accounts"].trim() !== '' && 
+                            account["Retail Accounts"] !== 'Total'
+                          );
+                          if (firstAccountInChain) {
+                            navigate(`/accounts/${encodeURIComponent(firstAccountInChain["Retail Accounts"])}`);
+                          }
+                        }}
+                      >
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                             <span className="text-primary font-semibold">{chain.chain.charAt(0)}</span>
@@ -619,28 +650,32 @@ export const MainAIChat = () => {
                   <>
                      {/* Preview: First 3 churn risk stores */}
                      <div className="space-y-4">
-                       {getChurnRiskStores().slice(0, 3).map((store, index) => (
-                         <div key={`${store.name}-${index}`} className="flex items-center justify-between p-4 rounded-lg border border-destructive/20 bg-destructive/5">
-                           <div className="flex items-center gap-3">
-                             <AlertTriangle className="w-5 h-5 text-destructive" />
-                             <div>
-                               <h4 className="font-medium text-foreground">{store.name}</h4>
-                               <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week (July)</p>
-                               <p className="text-xs text-muted-foreground">June: {store.juneCases.toFixed(1)} cases/week</p>
-                               <div className="mt-1">
-                                 {getStatusBadge(store.status)}
-                               </div>
-                             </div>
-                           </div>
-                           <div className="text-right">
-                             <div className="text-lg font-bold text-destructive">
-                               -{store.caseReduction.toFixed(1)}
-                             </div>
-                             <p className="text-xs text-muted-foreground">Cases Lost/Week</p>
-                             <p className="text-xs text-muted-foreground">({store.growth.toFixed(1)}%)</p>
-                           </div>
-                         </div>
-                       ))}
+                        {getChurnRiskStores().slice(0, 3).map((store, index) => (
+                          <div 
+                            key={`${store.name}-${index}`} 
+                            className="flex items-center justify-between p-4 rounded-lg border border-destructive/20 bg-destructive/5 cursor-pointer hover:bg-destructive/10 transition-colors"
+                            onClick={() => navigate(`/accounts/${encodeURIComponent(store.name)}`)}
+                          >
+                            <div className="flex items-center gap-3">
+                              <AlertTriangle className="w-5 h-5 text-destructive" />
+                              <div>
+                                <h4 className="font-medium text-foreground">{store.name}</h4>
+                                <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week (July)</p>
+                                <p className="text-xs text-muted-foreground">June: {store.juneCases.toFixed(1)} cases/week</p>
+                                <div className="mt-1">
+                                  {getStatusBadge(store.status)}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-lg font-bold text-destructive">
+                                -{store.caseReduction.toFixed(1)}
+                              </div>
+                              <p className="text-xs text-muted-foreground">Cases Lost/Week</p>
+                              <p className="text-xs text-muted-foreground">({store.growth.toFixed(1)}%)</p>
+                            </div>
+                          </div>
+                        ))}
                      </div>
 
                     {/* Collapsible trigger */}
