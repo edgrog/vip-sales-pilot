@@ -25,6 +25,7 @@ interface DashboardData {
   churnRiskAccounts: number;
   growingAccounts: number;
   totalRevenueChange: number;
+  averageSalesVelocity: number;
   chainPerformance: Array<{
     chain: string;
     accounts: number;
@@ -200,12 +201,14 @@ export const MainAIChat = () => {
     accountPerformance.sort((a, b) => b.julyCases - a.julyCases);
 
     const totalRevenueChange = totalJuneCases > 0 ? ((totalJulyCases - totalJuneCases) / totalJuneCases) * 100 : 0;
+    const averageSalesVelocity = totalAccounts > 0 ? totalJulyCases / totalAccounts : 0;
 
     setDashboardData({
       totalAccounts,
       churnRiskAccounts,
       growingAccounts,
       totalRevenueChange,
+      averageSalesVelocity,
       chainPerformance,
       accountPerformance: accountPerformance // Show all accounts, not just top 10
     });
@@ -326,16 +329,14 @@ export const MainAIChat = () => {
 
           <Card className="shadow-card border-0">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Revenue Change</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Sales Velocity</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
-                <div className={`text-3xl font-bold ${dashboardData.totalRevenueChange >= 0 ? 'text-success' : 'text-destructive'}`}>
-                  {dashboardData.totalRevenueChange >= 0 ? '+' : ''}{dashboardData.totalRevenueChange.toFixed(1)}%
-                </div>
-                <DollarSign className={`w-8 h-8 ${dashboardData.totalRevenueChange >= 0 ? 'text-success' : 'text-destructive'}`} />
+                <div className="text-3xl font-bold text-foreground">{dashboardData.averageSalesVelocity.toFixed(1)}</div>
+                <BarChart3 className="w-8 h-8 text-primary" />
               </div>
-              <p className="text-xs text-muted-foreground mt-2">June to July change</p>
+              <p className="text-xs text-muted-foreground mt-2">Cases per store per week</p>
             </CardContent>
           </Card>
         </div>
