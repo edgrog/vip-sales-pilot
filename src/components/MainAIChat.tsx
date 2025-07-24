@@ -80,12 +80,19 @@ export const MainAIChat = () => {
     );
     
     console.log('Total records from database:', data.length);
+    
+    // Debug filtering step by step
+    const nullAccounts = data.filter(account => !account["Retail Accounts"]);
+    const emptyAccounts = data.filter(account => account["Retail Accounts"] && account["Retail Accounts"].trim() === '');
+    const totalAccountsDebug = data.filter(account => account["Retail Accounts"] === 'Total');
+    
+    console.log('Records with null Retail Accounts:', nullAccounts.length);
+    console.log('Records with empty Retail Accounts:', emptyAccounts.length);
+    console.log('Records with "Total" as Retail Accounts:', totalAccountsDebug.length);
+    console.log('Total filtered out:', nullAccounts.length + emptyAccounts.length + totalAccountsDebug.length);
+    
     console.log('Valid records after filtering:', validData.length);
-    console.log('Sample of filtered out records:', data.filter(account => 
-      !account["Retail Accounts"] || 
-      account["Retail Accounts"].trim() === '' || 
-      account["Retail Accounts"] === 'Total'
-    ).slice(0, 5));
+    console.log('Expected vs Actual:', {expected: 1578, actual: validData.length, difference: 1578 - validData.length});
     
     if (!validData.length) return;
 
