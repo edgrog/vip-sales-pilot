@@ -26,7 +26,7 @@ export const SalesAIChat = () => {
   const [messages, setMessages] = useState<Message[]>([{
     id: '1',
     type: 'assistant',
-    content: "👋 I'm your VIP Sales Co-Pilot! I can analyze your store-level sales data to help identify churn risks, top performers, and growth opportunities.\n\nTry asking:\n• \"Who are our churn-risk accounts?\"\n• \"Which stores dropped off in July?\"\n• \"What are our top-performing accounts?\"\n• \"Show me accounts with declining sales\"",
+    content: "👋 I'm your VIP Sales Co-Pilot! I can analyze your store-level sales data to help identify churn risks, top performers, and sales reductions.\n\nTry asking:\n• \"Who are our churn-risk accounts?\"\n• \"What accounts had reduced sales in July?\"\n• \"What are our top-performing accounts?\"\n• \"Show me accounts with declining sales\"",
     timestamp: new Date()
   }]);
   const [input, setInput] = useState('');
@@ -160,63 +160,54 @@ export const SalesAIChat = () => {
       return "❌ Sorry, I couldn't retrieve the sales data. Please try again.";
     }
 
-    const dropoffAccounts: Array<{name: string, state: string, lastMonth: string, amount: number, previousAmount: number, hasGrowthBeforeDrop: boolean}> = [];
+    const reducedSalesAccounts: Array<{name: string, state: string, june: number, july: number, decline: number, unitDrop: number}> = [];
 
     salesData.forEach((row) => {
-      const may = row.may_2025_cases_per_week_per_store;
       const june = row.june_cases_per_week_per_store;
       const july = row.july_cases_per_week_per_store;
 
-      // Find accounts with zero sales in July
-      if (july === 0) {
-        if (june > 0) {
-          dropoffAccounts.push({
-            name: row.retail_accounts,
-            state: row.state,
-            lastMonth: 'June',
-            amount: june,
-            previousAmount: may,
-            hasGrowthBeforeDrop: may > 0 && june > may
-          });
-        } else if (may > 0) {
-          dropoffAccounts.push({
-            name: row.retail_accounts,
-            state: row.state,
-            lastMonth: 'May',
-            amount: may,
-            previousAmount: 0,
-            hasGrowthBeforeDrop: false
-          });
-        }
+      // Find accounts with reduced sales from June to July
+      if (june > 0 && july < june) {
+        const decline = ((june - july) / june) * 100;
+        const unitDrop = june - july;
+        
+        reducedSalesAccounts.push({
+          name: row.retail_accounts,
+          state: row.state,
+          june: june,
+          july: july,
+          decline: decline,
+          unitDrop: unitDrop
+        });
       }
     });
 
-    let response = "📉 **Accounts That Dropped Off in July:**\n\n";
+    // Sort by decline percentage (highest decline first)
+    reducedSalesAccounts.sort((a, b) => b.decline - a.decline);
 
-    if (dropoffAccounts.length > 0) {
-      dropoffAccounts.forEach(account => {
-        let impactInfo = '';
-        if (account.hasGrowthBeforeDrop && account.previousAmount > 0) {
-          const lostGrowth = account.amount - account.previousAmount;
-          impactInfo = ` (Was growing by +${lostGrowth.toFixed(1)} cases/week)`;
-        }
+    let response = "📉 **Accounts with Reduced Sales in July:**\n\n";
+
+    if (reducedSalesAccounts.length > 0) {
+      reducedSalesAccounts.forEach(account => {
+        const severity = account.decline > 50 ? '🚨' : account.decline > 25 ? '⚠️' : '📉';
         
-        response += `❌ **${account.name}** (${account.state})\n`;
-        response += `   Last sale: ${account.lastMonth} (${account.amount.toFixed(1)} cases/week/store)${impactInfo}\n`;
-        response += `   💸 Lost revenue: ${account.amount.toFixed(1)} cases/week/store\n\n`;
+        response += `${severity} **${account.name}** (${account.state})\n`;
+        response += `   June: ${account.june.toFixed(1)} → July: ${account.july.toFixed(1)} cases/week/store\n`;
+        response += `   📊 -${account.decline.toFixed(1)}% (-${account.unitDrop.toFixed(1)} cases/week)\n\n`;
       });
 
-      const totalLostCases = dropoffAccounts.reduce((sum, account) => sum + account.amount, 0);
-      const avgLostPerAccount = totalLostCases / dropoffAccounts.length;
+      const totalUnitDrop = reducedSalesAccounts.reduce((sum, account) => sum + account.unitDrop, 0);
+      const avgDecline = reducedSalesAccounts.reduce((sum, account) => sum + account.decline, 0) / reducedSalesAccounts.length;
+      
       response += `💰 **Total Impact:**\n`;
-      response += `• ${totalLostCases.toFixed(1)} cases/week/store lost across ${dropoffAccounts.length} accounts\n`;
-      response += `• Average loss: ${avgLostPerAccount.toFixed(1)} cases/week/store per account\n\n`;
+      response += `• ${totalUnitDrop.toFixed(1)} cases/week/store lost across ${reducedSalesAccounts.length} accounts\n`;
+      response += `• Average decline: ${avgDecline.toFixed(1)}% per account\n\n`;
       response += "🎯 **Action Plan:**\n";
-      response += "• Contact these accounts immediately\n";
-      response += "• Investigate reasons for discontinuation\n";
-      response += "• Offer incentives or promotions to re-engage";
+      response += "• Prioritize accounts with >50% decline for immediate contact\n";
+      response += "• Investigate supply chain or competitive issues\n";
+      response += "• Schedule account reviews for declining performers";
     } else {
-      response += "✅ Great news! No accounts have completely dropped off in July.";
+      response += "✅ Great news! No accounts had reduced sales in July compared to June.";
     }
 
     return response;
@@ -233,12 +224,12 @@ export const SalesAIChat = () => {
       return await analyzeTopPerformers();
     }
     
-    if (lowerQuery.includes('dropped') || lowerQuery.includes('drop') || lowerQuery.includes('july') || lowerQuery.includes('june') || lowerQuery.includes('may')) {
+    if (lowerQuery.includes('dropped') || lowerQuery.includes('drop') || lowerQuery.includes('reduced') || lowerQuery.includes('decline') || lowerQuery.includes('july') || lowerQuery.includes('june') || lowerQuery.includes('may')) {
       return await analyzeDropoffs();
     }
 
     // Default response with available queries
-    return "I can help you analyze your sales data! Try asking:\n\n🔍 **Churn Analysis:**\n• \"Who are our churn-risk accounts?\"\n• \"Show me accounts with declining sales\"\n\n📈 **Performance Analysis:**\n• \"What are our top-performing accounts?\"\n• \"Show me our best stores\"\n\n📉 **Dropoff Analysis:**\n• \"Which stores dropped off in July?\"\n• \"Show me accounts that stopped buying\"";
+    return "I can help you analyze your sales data! Try asking:\n\n🔍 **Churn Analysis:**\n• \"Who are our churn-risk accounts?\"\n• \"Show me accounts with declining sales\"\n\n📈 **Performance Analysis:**\n• \"What are our top-performing accounts?\"\n• \"Show me our best stores\"\n\n📉 **Sales Reduction Analysis:**\n• \"What accounts had reduced sales in July?\"\n• \"Show me accounts with declining performance\"";
   };
 
   const handleSend = async () => {
@@ -287,7 +278,7 @@ export const SalesAIChat = () => {
   const quickQuestions = [
     "Who are our churn-risk accounts?",
     "What are our top-performing accounts?",
-    "Which stores dropped off in July?",
+    "What accounts had reduced sales in July?",
     "Show me accounts with declining sales"
   ];
 
