@@ -27,6 +27,7 @@ interface DashboardData {
   totalRevenueChange: number;
   averageSalesVelocity: number;
   velocityChange: number;
+  allTimeHighVelocity: number;
   chainPerformance: Array<{
     chain: string;
     accounts: number;
@@ -205,6 +206,15 @@ export const MainAIChat = () => {
     const averageSalesVelocity = totalAccounts > 0 ? totalJulyCases / totalAccounts : 0;
     const juneVelocity = totalAccounts > 0 ? totalJuneCases / totalAccounts : 0;
     const velocityChange = juneVelocity > 0 ? ((averageSalesVelocity - juneVelocity) / juneVelocity) * 100 : 0;
+    
+    // Calculate all-time high velocity from all three months
+    let totalMayCases = 0;
+    validData.forEach(account => {
+      totalMayCases += account["May 2025"] || 0;
+    });
+    
+    const mayVelocity = totalAccounts > 0 ? totalMayCases / totalAccounts : 0;
+    const allTimeHighVelocity = Math.max(mayVelocity, juneVelocity, averageSalesVelocity);
 
     setDashboardData({
       totalAccounts,
@@ -213,6 +223,7 @@ export const MainAIChat = () => {
       totalRevenueChange,
       averageSalesVelocity,
       velocityChange,
+      allTimeHighVelocity,
       chainPerformance,
       accountPerformance: accountPerformance // Show all accounts, not just top 10
     });
@@ -347,6 +358,9 @@ export const MainAIChat = () => {
                 }`}>
                   {dashboardData.velocityChange >= 0 ? '+' : ''}{dashboardData.velocityChange.toFixed(1)}%
                 </div>
+              </div>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-xs text-muted-foreground">All-time high: {dashboardData.allTimeHighVelocity.toFixed(1)}</p>
               </div>
             </CardContent>
           </Card>
