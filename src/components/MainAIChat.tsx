@@ -554,19 +554,7 @@ export const MainAIChat = () => {
                     <div 
                       key={chain.chain} 
                       className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50 cursor-pointer hover:bg-card/80 transition-colors"
-                      onClick={() => {
-                        // For chains, we could navigate to a chain overview or show accounts in that chain
-                        // For now, let's find the first account in this chain and navigate to it
-                        const firstAccountInChain = salesData.find(account => 
-                          account["normalized_chain"] === chain.chain && 
-                          account["Retail Accounts"] && 
-                          account["Retail Accounts"].trim() !== '' && 
-                          account["Retail Accounts"] !== 'Total'
-                        );
-                        if (firstAccountInChain) {
-                          navigate(`/accounts/${encodeURIComponent(firstAccountInChain["Retail Accounts"])}`);
-                        }
-                      }}
+                      onClick={() => navigate(`/chains/${encodeURIComponent(chain.chain)}`)}
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -607,18 +595,7 @@ export const MainAIChat = () => {
                       <div 
                         key={chain.chain} 
                         className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50 cursor-pointer hover:bg-card/80 transition-colors"
-                        onClick={() => {
-                          // For chains, find the first account in this chain and navigate to it
-                          const firstAccountInChain = salesData.find(account => 
-                            account["normalized_chain"] === chain.chain && 
-                            account["Retail Accounts"] && 
-                            account["Retail Accounts"].trim() !== '' && 
-                            account["Retail Accounts"] !== 'Total'
-                          );
-                          if (firstAccountInChain) {
-                            navigate(`/accounts/${encodeURIComponent(firstAccountInChain["Retail Accounts"])}`);
-                          }
-                        }}
+                        onClick={() => navigate(`/chains/${encodeURIComponent(chain.chain)}`)}
                       >
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
