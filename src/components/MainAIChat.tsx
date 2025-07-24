@@ -11,13 +11,12 @@ import { Progress } from "@/components/ui/progress";
 import { SalesAIChat } from "./SalesAIChat";
 
 interface VipSalesData {
-  id: string;
-  retail_accounts: string;
-  dist_state: string;
-  state: string;
-  may_2025_cases_per_week_per_store: number;
-  june_cases_per_week_per_store: number;
-  july_cases_per_week_per_store: number;
+  "Retail Accounts": string;
+  "State": string;
+  "Dist. STATE": string;
+  "May 2025": number;
+  "June 2025": number;
+  "July 2025": number;
 }
 
 interface DashboardData {
@@ -49,13 +48,14 @@ export const MainAIChat = () => {
   const fetchSalesData = async () => {
     try {
       const { data, error } = await supabase
-        .from('vip_sales_raw')
+        .from('vip_sales' as any)
         .select('*');
 
       if (error) throw error;
       
-      setSalesData(data || []);
-      calculateDashboardMetrics(data || []);
+      const typedData = data as unknown as VipSalesData[];
+      setSalesData(typedData || []);
+      calculateDashboardMetrics(typedData || []);
     } catch (error) {
       console.error('Error fetching sales data:', error);
     } finally {
@@ -83,8 +83,8 @@ export const MainAIChat = () => {
     const accountPerformance: DashboardData['accountPerformance'] = [];
 
     data.forEach(account => {
-      const june = account.june_cases_per_week_per_store;
-      const july = account.july_cases_per_week_per_store;
+      const june = account["June 2025"] || 0;
+      const july = account["July 2025"] || 0;
       const growth = june > 0 ? ((july - june) / june) * 100 : 0;
       
       totalJuneCases += june;
@@ -105,7 +105,7 @@ export const MainAIChat = () => {
       }
 
       // Extract chain name (first part before "Store")
-      const chainName = account.retail_accounts.split(' Store')[0] || account.retail_accounts.split(' #')[0] || 'Other';
+      const chainName = account["Retail Accounts"].split(' Store')[0] || account["Retail Accounts"].split(' #')[0] || 'Other';
       
       if (!chainMap.has(chainName)) {
         chainMap.set(chainName, {
@@ -122,8 +122,8 @@ export const MainAIChat = () => {
       chainData.accountGrowths.push(growth);
 
       accountPerformance.push({
-        name: account.retail_accounts,
-        state: account.state,
+        name: account["Retail Accounts"],
+        state: account["State"],
         julyCases: july,
         growth,
         status
