@@ -64,9 +64,19 @@ export const MainAIChat = () => {
   };
 
   const calculateDashboardMetrics = (data: VipSalesData[]) => {
-    if (!data.length) return;
+    // Filter out records with null/empty account names
+    const validData = data.filter(account => 
+      account["Retail Accounts"] && 
+      account["Retail Accounts"].trim() !== '' && 
+      account["Retail Accounts"] !== 'Total'
+    );
+    
+    console.log('Total records from database:', data.length);
+    console.log('Valid records after filtering:', validData.length);
+    
+    if (!validData.length) return;
 
-    const totalAccounts = data.length;
+    const totalAccounts = validData.length;
     let churnRiskAccounts = 0;
     let growingAccounts = 0;
     let totalJuneCases = 0;
@@ -82,7 +92,7 @@ export const MainAIChat = () => {
 
     const accountPerformance: DashboardData['accountPerformance'] = [];
 
-    data.forEach(account => {
+    validData.forEach(account => {
       const june = account["June 2025"] || 0;
       const july = account["July 2025"] || 0;
       const growth = june > 0 ? ((july - june) / june) * 100 : 0;
