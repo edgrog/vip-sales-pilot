@@ -96,29 +96,30 @@ export const MainAIChat = () => {
     
     if (!validData.length) return;
 
-    // Count ALL unique stores (not filtering by sales) to debug
+    // Count ALL unique stores (not filtering by sales) - even those with 0 sales
     const allUniqueStores = new Set();
     const uniqueStoresWithSales = new Set();
-    const storesWithNoSales = [];
+    const storesWithZeroSales = [];
     
     validData.forEach(account => {
+      // Add every store to the total count, regardless of sales
       allUniqueStores.add(account["Retail Accounts"]);
       
       const may = account["May 2025"] || 0;
       const june = account["June 2025"] || 0;
       const july = account["July 2025"] || 0;
       
-      // If store has any sales in any month, count it as active
+      // Track which stores have sales vs zero sales
       if (may > 0 || june > 0 || july > 0) {
         uniqueStoresWithSales.add(account["Retail Accounts"]);
       } else {
-        storesWithNoSales.push(account["Retail Accounts"]);
+        storesWithZeroSales.push(account["Retail Accounts"]);
       }
     });
     
-    console.log('All unique stores in filtered data:', allUniqueStores.size);
+    console.log('All unique stores (including 0 sales):', allUniqueStores.size);
     console.log('Unique stores with sales:', uniqueStoresWithSales.size);
-    console.log('Stores with no sales:', storesWithNoSales.length);
+    console.log('Stores with zero sales:', storesWithZeroSales.length);
     console.log('Should match SQL query of 1,578:', allUniqueStores.size === 1578);
     
     const totalAccounts = allUniqueStores.size; // Use all unique stores, not just those with sales
