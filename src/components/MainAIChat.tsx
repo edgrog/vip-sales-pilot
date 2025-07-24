@@ -52,6 +52,7 @@ export const MainAIChat = () => {
   const [loading, setLoading] = useState(true);
   const [isChainPerformanceOpen, setIsChainPerformanceOpen] = useState(false);
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<'chain' | 'churn'>('chain'); // Track which section to show
 
   const fetchSalesData = async () => {
     console.log('Starting to fetch sales data...');
@@ -278,6 +279,14 @@ export const MainAIChat = () => {
     return growth >= 0 ? `+${growth.toFixed(1)}%` : `${growth.toFixed(1)}%`;
   };
 
+  const getChurnRiskStores = () => {
+    if (!dashboardData) return [];
+    
+    return dashboardData.accountPerformance
+      .filter(account => account.status === 'churn-risk' || account.status === 'dropped')
+      .sort((a, b) => a.growth - b.growth); // Sort by worst decline first
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -359,7 +368,10 @@ export const MainAIChat = () => {
             </CardContent>
           </Card>
 
-          <Card className="shadow-card border-0">
+          <Card 
+            className="shadow-card border-0 cursor-pointer hover:shadow-lg transition-shadow" 
+            onClick={() => setActiveSection('churn')}
+          >
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Churn Risk</CardTitle>
             </CardHeader>
@@ -368,7 +380,7 @@ export const MainAIChat = () => {
                 <div className="text-3xl font-bold text-destructive">{dashboardData.churnRiskAccounts}</div>
                 <AlertTriangle className="w-8 h-8 text-destructive" />
               </div>
-              <p className="text-xs text-muted-foreground mt-2">Accounts requiring attention</p>
+              <p className="text-xs text-muted-foreground mt-2">Click to view details</p>
             </CardContent>
           </Card>
 
@@ -409,54 +421,37 @@ export const MainAIChat = () => {
           </Card>
         </div>
 
-        {/* Chain Performance Breakdown */}
+        {/* Dynamic Section: Chain Performance or Churn Risk */}
         <Card className="shadow-card border-0 mt-8">
           <CardHeader>
-            <CardTitle className="text-lg font-semibold">Chain Performance Breakdown</CardTitle>
-            <CardDescription>Sales performance by retail chain (June to July 2025)</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg font-semibold">
+                  {activeSection === 'chain' ? 'Chain Performance Breakdown' : 'Churn Risk Analysis'}
+                </CardTitle>
+                <CardDescription>
+                  {activeSection === 'chain' 
+                    ? 'Sales performance by retail chain (June to July 2025)' 
+                    : 'Stores requiring immediate attention'
+                  }
+                </CardDescription>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setActiveSection(activeSection === 'chain' ? 'churn' : 'chain')}
+              >
+                Show {activeSection === 'chain' ? 'Churn Risk' : 'Chain Performance'}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            <Collapsible open={isChainPerformanceOpen} onOpenChange={setIsChainPerformanceOpen}>
-              {/* Preview: Top 3 chains */}
-              <div className="space-y-4">
-                {dashboardData.chainPerformance.slice(0, 3).map((chain, index) => (
-                  <div key={chain.chain} className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <span className="text-primary font-semibold">{chain.chain.charAt(0)}</span>
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-foreground">{chain.chain}</h4>
-                        <p className="text-sm text-muted-foreground">{chain.accounts} accounts • {chain.totalCases.toFixed(1)} cases/week</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className={`text-sm font-medium ${
-                        chain.status === 'growing' ? 'text-success' : 
-                        chain.status === 'declining' ? 'text-destructive' : 'text-muted-foreground'
-                      }`}>
-                        {chain.avgGrowth >= 0 ? '+' : ''}{chain.avgGrowth.toFixed(1)}%
-                      </div>
-                      <div className="text-xs text-muted-foreground capitalize">{chain.status}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Collapsible trigger */}
-              {dashboardData.chainPerformance.length > 3 && (
-                <CollapsibleTrigger className="flex items-center justify-center w-full mt-4 p-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  <span className="mr-2">
-                    {isChainPerformanceOpen ? `Hide ${dashboardData.chainPerformance.length - 3} more chains` : `Show ${dashboardData.chainPerformance.length - 3} more chains`}
-                  </span>
-                  <ChevronDown className={`w-4 h-4 transition-transform ${isChainPerformanceOpen ? 'rotate-180' : ''}`} />
-                </CollapsibleTrigger>
-              )}
-
-              {/* Collapsible content: Remaining chains */}
-              <CollapsibleContent>
-                <div className="space-y-4 mt-4">
-                  {dashboardData.chainPerformance.slice(3).map((chain, index) => (
+            {activeSection === 'chain' ? (
+              // Chain Performance Section
+              <Collapsible open={isChainPerformanceOpen} onOpenChange={setIsChainPerformanceOpen}>
+                {/* Preview: Top 3 chains */}
+                <div className="space-y-4">
+                  {dashboardData.chainPerformance.slice(0, 3).map((chain, index) => (
                     <div key={chain.chain} className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -479,8 +474,80 @@ export const MainAIChat = () => {
                     </div>
                   ))}
                 </div>
-              </CollapsibleContent>
-            </Collapsible>
+
+                {/* Collapsible trigger */}
+                {dashboardData.chainPerformance.length > 3 && (
+                  <CollapsibleTrigger className="flex items-center justify-center w-full mt-4 p-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    <span className="mr-2">
+                      {isChainPerformanceOpen ? `Hide ${dashboardData.chainPerformance.length - 3} more chains` : `Show ${dashboardData.chainPerformance.length - 3} more chains`}
+                    </span>
+                    <ChevronDown className={`w-4 h-4 transition-transform ${isChainPerformanceOpen ? 'rotate-180' : ''}`} />
+                  </CollapsibleTrigger>
+                )}
+
+                {/* Collapsible content: Remaining chains */}
+                <CollapsibleContent>
+                  <div className="space-y-4 mt-4">
+                    {dashboardData.chainPerformance.slice(3).map((chain, index) => (
+                      <div key={chain.chain} className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                            <span className="text-primary font-semibold">{chain.chain.charAt(0)}</span>
+                          </div>
+                          <div>
+                            <h4 className="font-medium text-foreground">{chain.chain}</h4>
+                            <p className="text-sm text-muted-foreground">{chain.accounts} accounts • {chain.totalCases.toFixed(1)} cases/week</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className={`text-sm font-medium ${
+                            chain.status === 'growing' ? 'text-success' : 
+                            chain.status === 'declining' ? 'text-destructive' : 'text-muted-foreground'
+                          }`}>
+                            {chain.avgGrowth >= 0 ? '+' : ''}{chain.avgGrowth.toFixed(1)}%
+                          </div>
+                          <div className="text-xs text-muted-foreground capitalize">{chain.status}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            ) : (
+              // Churn Risk Section
+              <div className="space-y-4">
+                {getChurnRiskStores().length > 0 ? (
+                  getChurnRiskStores().map((store, index) => (
+                    <div key={`${store.name}-${index}`} className="flex items-center justify-between p-4 rounded-lg border border-destructive/20 bg-destructive/5">
+                      <div className="flex items-center gap-3">
+                        <AlertTriangle className="w-5 h-5 text-destructive" />
+                        <div>
+                          <h4 className="font-medium text-foreground">{store.name}</h4>
+                          <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week</p>
+                          <div className="mt-1">
+                            {getStatusBadge(store.status)}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-destructive">
+                          {store.growth.toFixed(1)}%
+                        </div>
+                        <p className="text-xs text-muted-foreground">Growth Rate</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <TrendingUp className="w-8 h-8 text-success" />
+                    </div>
+                    <h3 className="text-lg font-medium text-foreground mb-2">No Churn Risk Detected</h3>
+                    <p className="text-muted-foreground">All stores are performing within acceptable ranges.</p>
+                  </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
 
