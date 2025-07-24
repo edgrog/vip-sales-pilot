@@ -53,6 +53,7 @@ export const MainAIChat = () => {
   const [isChainPerformanceOpen, setIsChainPerformanceOpen] = useState(false);
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<'chain' | 'churn'>('chain'); // Track which section to show
+  const [isChurnRiskOpen, setIsChurnRiskOpen] = useState(false); // For churn risk collapsible
 
   const fetchSalesData = async () => {
     console.log('Starting to fetch sales data...');
@@ -515,28 +516,69 @@ export const MainAIChat = () => {
               </Collapsible>
             ) : (
               // Churn Risk Section
-              <div className="space-y-4">
+              <Collapsible open={isChurnRiskOpen} onOpenChange={setIsChurnRiskOpen}>
                 {getChurnRiskStores().length > 0 ? (
-                  getChurnRiskStores().map((store, index) => (
-                    <div key={`${store.name}-${index}`} className="flex items-center justify-between p-4 rounded-lg border border-destructive/20 bg-destructive/5">
-                      <div className="flex items-center gap-3">
-                        <AlertTriangle className="w-5 h-5 text-destructive" />
-                        <div>
-                          <h4 className="font-medium text-foreground">{store.name}</h4>
-                          <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week</p>
-                          <div className="mt-1">
-                            {getStatusBadge(store.status)}
+                  <>
+                    {/* Preview: First 3 churn risk stores */}
+                    <div className="space-y-4">
+                      {getChurnRiskStores().slice(0, 3).map((store, index) => (
+                        <div key={`${store.name}-${index}`} className="flex items-center justify-between p-4 rounded-lg border border-destructive/20 bg-destructive/5">
+                          <div className="flex items-center gap-3">
+                            <AlertTriangle className="w-5 h-5 text-destructive" />
+                            <div>
+                              <h4 className="font-medium text-foreground">{store.name}</h4>
+                              <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week</p>
+                              <div className="mt-1">
+                                {getStatusBadge(store.status)}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-lg font-bold text-destructive">
+                              {store.growth.toFixed(1)}%
+                            </div>
+                            <p className="text-xs text-muted-foreground">Growth Rate</p>
                           </div>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-destructive">
-                          {store.growth.toFixed(1)}%
-                        </div>
-                        <p className="text-xs text-muted-foreground">Growth Rate</p>
-                      </div>
+                      ))}
                     </div>
-                  ))
+
+                    {/* Collapsible trigger */}
+                    {getChurnRiskStores().length > 3 && (
+                      <CollapsibleTrigger className="flex items-center justify-center w-full mt-4 p-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                        <span className="mr-2">
+                          {isChurnRiskOpen ? `Hide ${getChurnRiskStores().length - 3} more stores` : `Show ${getChurnRiskStores().length - 3} more stores`}
+                        </span>
+                        <ChevronDown className={`w-4 h-4 transition-transform ${isChurnRiskOpen ? 'rotate-180' : ''}`} />
+                      </CollapsibleTrigger>
+                    )}
+
+                    {/* Collapsible content: Remaining churn risk stores */}
+                    <CollapsibleContent>
+                      <div className="space-y-4 mt-4">
+                        {getChurnRiskStores().slice(3).map((store, index) => (
+                          <div key={`${store.name}-${index + 3}`} className="flex items-center justify-between p-4 rounded-lg border border-destructive/20 bg-destructive/5">
+                            <div className="flex items-center gap-3">
+                              <AlertTriangle className="w-5 h-5 text-destructive" />
+                              <div>
+                                <h4 className="font-medium text-foreground">{store.name}</h4>
+                                <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week</p>
+                                <div className="mt-1">
+                                  {getStatusBadge(store.status)}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-lg font-bold text-destructive">
+                                {store.growth.toFixed(1)}%
+                              </div>
+                              <p className="text-xs text-muted-foreground">Growth Rate</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CollapsibleContent>
+                  </>
                 ) : (
                   <div className="text-center py-8">
                     <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -546,7 +588,7 @@ export const MainAIChat = () => {
                     <p className="text-muted-foreground">All stores are performing within acceptable ranges.</p>
                   </div>
                 )}
-              </div>
+              </Collapsible>
             )}
           </CardContent>
         </Card>
