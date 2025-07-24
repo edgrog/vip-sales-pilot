@@ -51,7 +51,8 @@ export const MainAIChat = () => {
     try {
       const { data, error } = await supabase
         .from('vip_sales' as any)
-        .select('*');
+        .select('*')
+        .limit(2000); // Increase limit to get all records
 
       console.log('Supabase response:', { data, error });
       
