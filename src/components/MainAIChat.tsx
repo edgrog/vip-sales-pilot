@@ -302,7 +302,7 @@ export const MainAIChat = () => {
                 <div className="text-3xl font-bold text-foreground">{dashboardData.totalAccounts}</div>
                 <Users className="w-8 h-8 text-primary" />
               </div>
-              <p className="text-xs text-muted-foreground mt-2">Distinct stores with sales activity</p>
+              <p className="text-xs text-muted-foreground mt-2">All stores listed</p>
             </CardContent>
           </Card>
 
