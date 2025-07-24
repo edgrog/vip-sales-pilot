@@ -159,7 +159,7 @@ export const MainAIChat = () => {
       growingAccounts,
       totalRevenueChange,
       chainPerformance,
-      accountPerformance: accountPerformance.slice(0, 10) // Top 10
+      accountPerformance: accountPerformance // Show all accounts, not just top 10
     });
   };
 
@@ -330,31 +330,33 @@ export const MainAIChat = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           <Card className="shadow-card border-0">
             <CardHeader>
-              <CardTitle className="text-lg font-semibold">Top Account Performance</CardTitle>
+              <CardTitle className="text-lg font-semibold">Account Performance ({dashboardData.accountPerformance.length} accounts)</CardTitle>
               <CardDescription>Store-level performance data with status indicators</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {dashboardData.accountPerformance.map((account, index) => (
-                  <div key={account.name} className="flex items-center justify-between p-3 rounded-lg border border-border bg-card/30">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-medium text-foreground text-sm">{account.name}</h4>
-                        {getStatusBadge(account.status)}
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-3 pr-4">
+                  {dashboardData.accountPerformance.map((account, index) => (
+                    <div key={account.name} className="flex items-center justify-between p-3 rounded-lg border border-border bg-card/30">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium text-foreground text-sm">{account.name}</h4>
+                          {getStatusBadge(account.status)}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">{account.state} • {account.julyCases.toFixed(1)} cases/week</p>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">{account.state} • {account.julyCases.toFixed(1)} cases/week</p>
-                    </div>
-                    <div className="text-right">
-                      <div className={`text-sm font-medium ${
-                        account.growth > 0 ? 'text-success' : 
-                        account.growth < -10 ? 'text-destructive' : 'text-muted-foreground'
-                      }`}>
-                        {account.growth >= 0 ? '+' : ''}{account.growth.toFixed(1)}%
+                      <div className="text-right">
+                        <div className={`text-sm font-medium ${
+                          account.growth > 0 ? 'text-success' : 
+                          account.growth < -10 ? 'text-destructive' : 'text-muted-foreground'
+                        }`}>
+                          {account.growth >= 0 ? '+' : ''}{account.growth.toFixed(1)}%
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </ScrollArea>
             </CardContent>
           </Card>
 
