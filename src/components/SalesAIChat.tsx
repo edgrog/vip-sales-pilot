@@ -214,22 +214,30 @@ export const SalesAIChat = () => {
   };
 
   const getAIResponse = async (query: string): Promise<string> => {
-    const lowerQuery = query.toLowerCase();
-    
-    if (lowerQuery.includes('churn') || lowerQuery.includes('risk')) {
-      return await analyzeChurnRisk();
-    }
-    
-    if (lowerQuery.includes('top') || lowerQuery.includes('best') || lowerQuery.includes('perform')) {
-      return await analyzeTopPerformers();
-    }
-    
-    if (lowerQuery.includes('dropped') || lowerQuery.includes('drop') || lowerQuery.includes('reduced') || lowerQuery.includes('decline') || lowerQuery.includes('july') || lowerQuery.includes('june') || lowerQuery.includes('may')) {
-      return await analyzeDropoffs();
-    }
+    try {
+      // Get current sales data for context
+      const { data: salesData, error } = await supabase
+        .from('vip_sales' as any)
+        .select('*');
 
-    // Default response with available queries
-    return "I can help you analyze your sales data! Try asking:\n\n🔍 **Churn Analysis:**\n• \"Who are our churn-risk accounts?\"\n• \"Show me accounts with declining sales\"\n\n📈 **Performance Analysis:**\n• \"What are our top-performing accounts?\"\n• \"Show me our best stores\"\n\n📉 **Sales Reduction Analysis:**\n• \"What accounts had reduced sales in July?\"\n• \"Show me accounts with declining performance\"";
+      // Call the OpenAI edge function
+      const { data, error: functionError } = await supabase.functions.invoke('ai-chat', {
+        body: {
+          message: query,
+          salesData: salesData || null
+        }
+      });
+
+      if (functionError) {
+        console.error('Edge function error:', functionError);
+        return "❌ Sorry, I encountered an error processing your request. Please try again.";
+      }
+
+      return data.response || "I couldn't generate a response. Please try again.";
+    } catch (error) {
+      console.error('Error calling AI chat:', error);
+      return "❌ Sorry, I encountered an error processing your request. Please try again.";
+    }
   };
 
   const handleSend = async () => {
