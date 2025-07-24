@@ -308,7 +308,20 @@ export const MainAIChat = () => {
     
     return dashboardData.accountPerformance
       .filter(account => account.status === 'growing')
-      .sort((a, b) => b.growth - a.growth); // Sort by best growth first
+      .map(account => {
+        // Calculate actual case increase (we need to get the June data for this)
+        const storeData = salesData.find(data => data["Retail Accounts"] === account.name);
+        const juneCases = storeData ? (storeData["June 2025"] || 0) : 0;
+        const julyCases = account.julyCases;
+        const caseIncrease = julyCases - juneCases; // Positive number = cases gained
+        
+        return {
+          ...account,
+          caseIncrease: caseIncrease,
+          juneCases: juneCases
+        };
+      })
+      .sort((a, b) => b.caseIncrease - a.caseIncrease); // Sort by largest case increase first
   };
 
   const getVelocityData = () => {
@@ -700,7 +713,7 @@ export const MainAIChat = () => {
                             <TrendingUp className="w-5 h-5 text-success" />
                             <div>
                               <h4 className="font-medium text-foreground">{store.name}</h4>
-                              <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week</p>
+                              <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week • June: {store.juneCases.toFixed(1)}</p>
                               <div className="mt-1">
                                 {getStatusBadge(store.status)}
                               </div>
@@ -708,9 +721,12 @@ export const MainAIChat = () => {
                           </div>
                           <div className="text-right">
                             <div className="text-lg font-bold text-success">
+                              +{store.caseIncrease.toFixed(1)}
+                            </div>
+                            <p className="text-xs text-muted-foreground">Cases/Week Gained</p>
+                            <div className="text-xs text-success font-medium">
                               +{store.growth.toFixed(1)}%
                             </div>
-                            <p className="text-xs text-muted-foreground">Growth Rate</p>
                           </div>
                         </div>
                       ))}
@@ -735,7 +751,7 @@ export const MainAIChat = () => {
                               <TrendingUp className="w-5 h-5 text-success" />
                               <div>
                                 <h4 className="font-medium text-foreground">{store.name}</h4>
-                                <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week</p>
+                                <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week • June: {store.juneCases.toFixed(1)}</p>
                                 <div className="mt-1">
                                   {getStatusBadge(store.status)}
                                 </div>
@@ -743,9 +759,12 @@ export const MainAIChat = () => {
                             </div>
                             <div className="text-right">
                               <div className="text-lg font-bold text-success">
+                                +{store.caseIncrease.toFixed(1)}
+                              </div>
+                              <p className="text-xs text-muted-foreground">Cases/Week Gained</p>
+                              <div className="text-xs text-success font-medium">
                                 +{store.growth.toFixed(1)}%
                               </div>
-                              <p className="text-xs text-muted-foreground">Growth Rate</p>
                             </div>
                           </div>
                         ))}
