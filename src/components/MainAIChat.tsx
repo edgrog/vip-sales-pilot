@@ -399,8 +399,12 @@ export const MainAIChat = () => {
       <header className="border-b bg-card/95 backdrop-blur-sm sticky top-0 z-40">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center">
-              <Bot className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 rounded-lg overflow-hidden">
+              <img 
+                src="/lovable-uploads/072fbba7-85ff-4594-94d0-c4f01498cf16.png" 
+                alt="Grog Logo" 
+                className="w-full h-full object-cover"
+              />
             </div>
             <div>
               <h1 className="text-xl font-semibold text-foreground">Grog Sales Analyser 3000</h1>
