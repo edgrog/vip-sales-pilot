@@ -51,13 +51,15 @@ export const SalesAIChat = () => {
 
       // Check for dropped accounts (zero sales in July)
       if (july === 0 && june > 0) {
-        droppedAccounts.push(row.retail_accounts);
+        const lastSaleAmount = june > 0 ? june : may;
+        droppedAccounts.push(`${row.retail_accounts} (Lost ${lastSaleAmount.toFixed(1)} cases/week from ${june > 0 ? 'June' : 'May'})`);
       }
       // Check for declining trend from June to July (>20% decline)
       else if (june > 0 && july > 0) {
         const decline = ((june - july) / june) * 100;
+        const unitDrop = june - july;
         if (decline > 20) {
-          churnRiskAccounts.push(`${row.retail_accounts} (${decline.toFixed(1)}% decline)`);
+          churnRiskAccounts.push(`${row.retail_accounts} (${decline.toFixed(1)}% decline, -${unitDrop.toFixed(1)} cases/week)`);
         }
       }
       // Check for consistent decline from May to July
@@ -66,7 +68,8 @@ export const SalesAIChat = () => {
         const juneToJuly = ((june - july) / june) * 100;
         if (mayToJune > 10 && juneToJuly > 10) {
           const totalDecline = ((may - july) / may) * 100;
-          churnRiskAccounts.push(`${row.retail_accounts} (${totalDecline.toFixed(1)}% total decline)`);
+          const totalUnitDrop = may - july;
+          churnRiskAccounts.push(`${row.retail_accounts} (${totalDecline.toFixed(1)}% total decline, -${totalUnitDrop.toFixed(1)} cases/week since May)`);
         }
       }
     });
@@ -120,8 +123,24 @@ export const SalesAIChat = () => {
 
     topPerformers.forEach((account, index) => {
       const emoji = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}️⃣`;
+      const june = account.june_cases_per_week_per_store;
+      const july = account.july_cases_per_week_per_store;
+      
+      let trendInfo = '';
+      if (june > 0) {
+        const growth = ((july - june) / june) * 100;
+        const unitChange = july - june;
+        if (growth > 0) {
+          trendInfo = ` 📈 (+${growth.toFixed(1)}%, +${unitChange.toFixed(1)} cases/week vs June)`;
+        } else if (growth < 0) {
+          trendInfo = ` 📉 (${growth.toFixed(1)}%, ${unitChange.toFixed(1)} cases/week vs June)`;
+        } else {
+          trendInfo = ` ➡️ (No change from June)`;
+        }
+      }
+      
       response += `${emoji} **${account.retail_accounts}** (${account.state})\n`;
-      response += `   📈 ${account.july_cases_per_week_per_store.toFixed(1)} cases/week/store\n\n`;
+      response += `   📊 ${july.toFixed(1)} cases/week/store${trendInfo}\n\n`;
     });
 
     response += "💡 **Insights:**\n";
@@ -141,7 +160,7 @@ export const SalesAIChat = () => {
       return "❌ Sorry, I couldn't retrieve the sales data. Please try again.";
     }
 
-    const dropoffAccounts: Array<{name: string, state: string, lastMonth: string, amount: number}> = [];
+    const dropoffAccounts: Array<{name: string, state: string, lastMonth: string, amount: number, previousAmount: number, hasGrowthBeforeDrop: boolean}> = [];
 
     salesData.forEach((row) => {
       const may = row.may_2025_cases_per_week_per_store;
@@ -155,14 +174,18 @@ export const SalesAIChat = () => {
             name: row.retail_accounts,
             state: row.state,
             lastMonth: 'June',
-            amount: june
+            amount: june,
+            previousAmount: may,
+            hasGrowthBeforeDrop: may > 0 && june > may
           });
         } else if (may > 0) {
           dropoffAccounts.push({
             name: row.retail_accounts,
             state: row.state,
             lastMonth: 'May',
-            amount: may
+            amount: may,
+            previousAmount: 0,
+            hasGrowthBeforeDrop: false
           });
         }
       }
@@ -172,12 +195,22 @@ export const SalesAIChat = () => {
 
     if (dropoffAccounts.length > 0) {
       dropoffAccounts.forEach(account => {
+        let impactInfo = '';
+        if (account.hasGrowthBeforeDrop && account.previousAmount > 0) {
+          const lostGrowth = account.amount - account.previousAmount;
+          impactInfo = ` (Was growing by +${lostGrowth.toFixed(1)} cases/week)`;
+        }
+        
         response += `❌ **${account.name}** (${account.state})\n`;
-        response += `   Last sale: ${account.lastMonth} (${account.amount.toFixed(1)} cases/week/store)\n\n`;
+        response += `   Last sale: ${account.lastMonth} (${account.amount.toFixed(1)} cases/week/store)${impactInfo}\n`;
+        response += `   💸 Lost revenue: ${account.amount.toFixed(1)} cases/week/store\n\n`;
       });
 
       const totalLostCases = dropoffAccounts.reduce((sum, account) => sum + account.amount, 0);
-      response += `💰 **Impact:** ${totalLostCases.toFixed(1)} cases/week/store lost\n\n`;
+      const avgLostPerAccount = totalLostCases / dropoffAccounts.length;
+      response += `💰 **Total Impact:**\n`;
+      response += `• ${totalLostCases.toFixed(1)} cases/week/store lost across ${dropoffAccounts.length} accounts\n`;
+      response += `• Average loss: ${avgLostPerAccount.toFixed(1)} cases/week/store per account\n\n`;
       response += "🎯 **Action Plan:**\n";
       response += "• Contact these accounts immediately\n";
       response += "• Investigate reasons for discontinuation\n";
