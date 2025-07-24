@@ -16,27 +16,36 @@ export type Database = {
     Tables: {
       vip_sales_raw: {
         Row: {
-          account_name: string
-          case_equivs: number
           created_at: string
+          dist_state: string
           id: string
-          sale_month: string
+          july_cases_per_week_per_store: number
+          june_cases_per_week_per_store: number
+          may_2025_cases_per_week_per_store: number
+          retail_accounts: string
+          state: string
           updated_at: string
         }
         Insert: {
-          account_name: string
-          case_equivs?: number
           created_at?: string
+          dist_state: string
           id?: string
-          sale_month: string
+          july_cases_per_week_per_store?: number
+          june_cases_per_week_per_store?: number
+          may_2025_cases_per_week_per_store?: number
+          retail_accounts: string
+          state: string
           updated_at?: string
         }
         Update: {
-          account_name?: string
-          case_equivs?: number
           created_at?: string
+          dist_state?: string
           id?: string
-          sale_month?: string
+          july_cases_per_week_per_store?: number
+          june_cases_per_week_per_store?: number
+          may_2025_cases_per_week_per_store?: number
+          retail_accounts?: string
+          state?: string
           updated_at?: string
         }
         Relationships: []
