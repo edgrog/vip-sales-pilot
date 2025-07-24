@@ -23,6 +23,7 @@ interface VipSalesData {
 
 interface DashboardData {
   totalAccounts: number;
+  totalStoresWithSales: number; // Add this new field
   churnRiskAccounts: number;
   growingAccounts: number;
   totalRevenueChange: number;
@@ -119,6 +120,7 @@ export const MainAIChat = () => {
     console.log('Should match SQL query of 1,578:', allUniqueStores.size === 1578);
     
     const totalAccounts = allUniqueStores.size; // Use all unique stores, not just those with sales
+    const totalStoresWithSales = uniqueStoresWithSales.size; // Stores that have sales data
     let churnRiskAccounts = 0;
     let growingAccounts = 0;
     let totalJuneCases = 0;
@@ -221,6 +223,7 @@ export const MainAIChat = () => {
 
     setDashboardData({
       totalAccounts,
+      totalStoresWithSales, // Add this field
       churnRiskAccounts,
       growingAccounts,
       totalRevenueChange,
@@ -324,10 +327,10 @@ export const MainAIChat = () => {
         </Card>
 
         {/* Key Metrics Dashboard - Now properly spaced below chat */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           <Card className="shadow-card border-0">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Unique Retail Locations</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Stores in Database</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
@@ -335,6 +338,19 @@ export const MainAIChat = () => {
                 <Users className="w-8 h-8 text-primary" />
               </div>
               <p className="text-xs text-muted-foreground mt-2">All stores listed</p>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-card border-0">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Stores with Sales Data</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="text-3xl font-bold text-foreground">{dashboardData.totalStoresWithSales}</div>
+                <DollarSign className="w-8 h-8 text-primary" />
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">Stores with May-July sales</p>
             </CardContent>
           </Card>
 
