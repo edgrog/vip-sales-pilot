@@ -177,13 +177,13 @@ export const MainAIChat = () => {
         </div>
       </header>
 
-      <div className="container mx-auto px-6 py-8 space-y-8 min-h-screen">
-        {/* AI Chat Interface - Fixed height with proper spacing */}
-        <div className="mb-8">
+      <div className="container mx-auto px-6 py-8">
+        {/* AI Chat Interface - Fixed height to prevent overlap */}
+        <div className="mb-12">
           <SalesAIChat />
         </div>
 
-        {/* Key Metrics Dashboard */}
+        {/* Key Metrics Dashboard - Now properly spaced below chat */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <Card className="shadow-card border-0">
             <CardHeader className="pb-3">
