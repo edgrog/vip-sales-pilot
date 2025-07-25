@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Bot, User } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Send, Bot, User, X } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
@@ -13,7 +14,7 @@ interface Message {
   timestamp: Date;
 }
 
-interface SalesData {
+interface VipSalesData {
   "Retail Accounts": string;
   "Dist. STATE": string;
   "State": string;
@@ -22,7 +23,26 @@ interface SalesData {
   "July 2025": number;
 }
 
-export const SalesAIChat = () => {
+interface DashboardData {
+  totalActivePODs: number;
+  activePODsChange: number;
+  totalStoresWithSales: number;
+  churnRiskAccounts: number;
+  growingAccounts: number;
+  totalRevenueChange: number;
+  averageSalesVelocity: number;
+  velocityChange: number;
+  allTimeHighVelocity: number;
+}
+
+interface SalesAIChatProps {
+  isOpen: boolean;
+  onClose: () => void;
+  salesData: VipSalesData[];
+  dashboardData: DashboardData | null;
+}
+
+export const SalesAIChat = ({ isOpen, onClose, salesData, dashboardData }: SalesAIChatProps) => {
   const [messages, setMessages] = useState<Message[]>([{
     id: '1',
     type: 'assistant',
@@ -291,91 +311,93 @@ export const SalesAIChat = () => {
   ];
 
   return (
-    <Card className="w-full max-w-4xl mx-auto h-[500px] flex flex-col mb-8 shadow-lg">
-      <CardHeader className="border-b">
-        <CardTitle className="flex items-center gap-2">
-          <Bot className="w-5 h-5" />
-          Ask AI - Sales Analytics
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-        <ScrollArea className="flex-1 max-h-[350px] overflow-y-auto">
-          <div className="p-4 space-y-4">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex items-start gap-3 ${
-                  message.type === 'user' ? 'justify-end' : 'justify-start'
-                }`}
-              >
-                {message.type === 'assistant' && (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl h-[600px] flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Bot className="w-5 h-5" />
+            AI Sales Assistant
+          </DialogTitle>
+        </DialogHeader>
+        
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <ScrollArea className="flex-1 max-h-[350px] overflow-y-auto">
+            <div className="p-4 space-y-4">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex items-start gap-3 ${
+                    message.type === 'user' ? 'justify-end' : 'justify-start'
+                  }`}
+                >
+                  {message.type === 'assistant' && (
+                    <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                      <Bot className="w-4 h-4 text-white" />
+                    </div>
+                  )}
+                  <div
+                    className={`max-w-[70%] p-3 rounded-lg whitespace-pre-line break-words ${
+                      message.type === 'user'
+                        ? 'bg-primary text-white'
+                        : 'bg-secondary'
+                    }`}
+                  >
+                    {message.content}
+                  </div>
+                  {message.type === 'user' && (
+                    <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center flex-shrink-0">
+                      <User className="w-4 h-4" />
+                    </div>
+                  )}
+                </div>
+              ))}
+              {isLoading && (
+                <div className="flex items-start gap-3">
                   <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
                     <Bot className="w-4 h-4 text-white" />
                   </div>
-                )}
-                <div
-                  className={`max-w-[70%] p-3 rounded-lg whitespace-pre-line break-words ${
-                    message.type === 'user'
-                      ? 'bg-primary text-white'
-                      : 'bg-secondary'
-                  }`}
-                >
-                  {message.content}
-                </div>
-                {message.type === 'user' && (
-                  <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center flex-shrink-0">
-                    <User className="w-4 h-4" />
-                  </div>
-                )}
-              </div>
-            ))}
-            {isLoading && (
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                  <Bot className="w-4 h-4 text-white" />
-                </div>
-                <div className="bg-secondary p-3 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="bg-secondary p-3 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
-        </ScrollArea>
+              )}
+            </div>
+          </ScrollArea>
 
-        <div className="border-t p-4 space-y-3">
-          <div className="flex flex-wrap gap-2">
-            {quickQuestions.map((question, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                size="sm"
-                onClick={() => setInput(question)}
-                className="text-xs"
-              >
-                {question}
+          <div className="border-t p-4 space-y-3">
+            <div className="flex flex-wrap gap-2">
+              {quickQuestions.map((question, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setInput(question)}
+                  className="text-xs"
+                >
+                  {question}
+                </Button>
+              ))}
+            </div>
+            
+            <div className="flex gap-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask about your sales data..."
+                disabled={isLoading}
+              />
+              <Button onClick={handleSend} disabled={!input.trim() || isLoading}>
+                <Send className="w-4 h-4" />
               </Button>
-            ))}
-          </div>
-          
-          <div className="flex gap-2">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Ask about your sales data..."
-              disabled={isLoading}
-            />
-            <Button onClick={handleSend} disabled={!input.trim() || isLoading}>
-              <Send className="w-4 h-4" />
-            </Button>
+            </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </DialogContent>
+    </Dialog>
   );
 };

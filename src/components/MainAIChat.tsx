@@ -1171,47 +1171,30 @@ export const MainAIChat = () => {
           </CardContent>
         </Card>
 
-        {/* Account Performance and Action Items */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-          <Card className="card-grog">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">Account Performance ({dashboardData.accountPerformance.length} accounts)</CardTitle>
-              <CardDescription>Store-level performance data with status indicators</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[500px]">
-                <div className="space-y-3 pr-4">
-                  {dashboardData.accountPerformance.map((account, index) => (
-                    <div key={`${account.name}-${index}`} className="flex items-center justify-between p-3 rounded-lg border border-border bg-card/30">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-medium text-foreground text-sm">{account.name}</h4>
-                          {getStatusBadge(account.status)}
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">{account.state} • {account.julyCases.toFixed(1)} cases/week</p>
-                      </div>
-                      <div className="text-right">
-                        <div className={`text-sm font-medium ${
-                          account.growth > 0 ? 'text-success' : 
-                          account.growth < -10 ? 'text-destructive' : 'text-muted-foreground'
-                        }`}>
-                          {account.growth >= 0 ? '+' : ''}{account.growth.toFixed(1)}%
-                        </div>
-                      </div>
+        {/* Chain Performance */}
+        <Card className="card-grog">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold">Chain Performance</CardTitle>
+            <CardDescription>Performance breakdown by retail chain ({dashboardData.chainPerformance.length} chains)</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {/* Chain summary cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {dashboardData.chainPerformance.slice(0, 3).map((chain) => (
+                  <div key={chain.chain} className="p-4 rounded-lg border border-border bg-card/30">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-foreground">{chain.totalCases.toFixed(1)}</div>
+                      <p className="text-sm text-muted-foreground">Cases/Week</p>
+                      <p className="text-xs text-muted-foreground mt-1">{chain.chain}</p>
+                      <p className="text-xs text-muted-foreground">{chain.accounts} stores</p>
                     </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
+                  </div>
+                ))}
+              </div>
 
-          <Card className="card-grog">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">Chain Performance</CardTitle>
-              <CardDescription>Performance breakdown by retail chain ({dashboardData.chainPerformance.length} chains)</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[500px]">
+              {/* Chain Performance Table */}
+              <ScrollArea className="h-[400px]">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -1265,9 +1248,120 @@ export const MainAIChat = () => {
                   </TableBody>
                 </Table>
               </ScrollArea>
+
+              {/* Chain Performance Insights */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 rounded-lg border border-border bg-card/30">
+                  <h4 className="font-medium text-foreground mb-2">Growth Leaders</h4>
+                  <div className="space-y-2">
+                    {dashboardData.chainPerformance
+                      .filter(chain => chain.status === 'growing')
+                      .slice(0, 3)
+                      .map((chain) => (
+                        <div key={chain.chain} className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">{chain.chain}:</span>
+                          <span className="text-sm font-medium text-success">+{chain.avgGrowth.toFixed(1)}%</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-lg border border-border bg-card/30">
+                  <h4 className="font-medium text-foreground mb-2">Key Metrics</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Total Chains:</span>
+                      <span className="text-sm font-medium">{dashboardData.chainPerformance.length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Growing Chains:</span>
+                      <span className="text-sm font-medium text-success">
+                        {dashboardData.chainPerformance.filter(c => c.status === 'growing').length}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Declining Chains:</span>
+                      <span className="text-sm font-medium text-destructive">
+                        {dashboardData.chainPerformance.filter(c => c.status === 'declining').length}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Account Performance and Action Items */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+          <Card className="card-grog">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold">Account Performance ({dashboardData.accountPerformance.length} accounts)</CardTitle>
+              <CardDescription>Store-level performance data with status indicators</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[500px]">
+                <div className="space-y-3 pr-4">
+                  {dashboardData.accountPerformance.map((account, index) => (
+                    <div key={`${account.name}-${index}`} className="flex items-center justify-between p-3 rounded-lg border border-border bg-card/30">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium text-foreground text-sm">{account.name}</h4>
+                          {getStatusBadge(account.status)}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">{account.state} • {account.julyCases.toFixed(1)} cases/week</p>
+                      </div>
+                      <div className="text-right">
+                        <div className={`text-sm font-medium ${
+                          account.growth > 0 ? 'text-success' : 
+                          account.growth < -10 ? 'text-destructive' : 'text-muted-foreground'
+                        }`}>
+                          {account.growth >= 0 ? '+' : ''}{account.growth.toFixed(1)}%
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+
+          <Card className="card-grog">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold">AI Sales Assistant</CardTitle>
+              <CardDescription>Chat with our AI to analyze your sales data and get actionable insights</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col h-[500px]">
+                <div className="flex-1 mb-4">
+                  <Button 
+                    onClick={() => setIsAIChatOpen(true)} 
+                    className="w-full h-full flex flex-col items-center justify-center gap-4 border-2 border-dashed border-border hover:border-primary/50 transition-colors bg-card/50 hover:bg-card/80"
+                    variant="outline"
+                  >
+                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Bot className="w-8 h-8 text-primary" />
+                    </div>
+                    <div className="text-center">
+                      <h3 className="font-medium text-foreground mb-2">Start AI Analysis</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Ask questions about your sales data, get insights on performance trends, or request action plans for improving results.
+                      </p>
+                    </div>
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* Sales AI Chat Dialog */}
+        <SalesAIChat 
+          isOpen={isAIChatOpen} 
+          onClose={() => setIsAIChatOpen(false)}
+          salesData={salesData}
+          dashboardData={dashboardData}
+        />
       </div>
     </div>;
 };
