@@ -972,7 +972,7 @@ export const MainAIChat = () => {
               <CardDescription>Store-level performance data with status indicators</CardDescription>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[400px]">
+              <ScrollArea className="h-[600px]">
                 <div className="space-y-3 pr-4">
                   {dashboardData.accountPerformance.map((account, index) => (
                     <div key={`${account.name}-${index}`} className="flex items-center justify-between p-3 rounded-lg border border-border bg-card/30">
