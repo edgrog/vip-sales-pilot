@@ -386,6 +386,118 @@ export const MainAIChat = () => {
     ];
   };
 
+  const getChurnRiskData = () => {
+    if (!salesData.length) return [];
+    
+    // Calculate churn risk accounts for each month
+    const validData = salesData.filter(account => 
+      account["Retail Accounts"] && 
+      account["Retail Accounts"].trim() !== '' && 
+      account["Retail Accounts"] !== 'Total'
+    );
+
+    const mayChurnRisk = new Set();
+    const juneChurnRisk = new Set();
+    const julyChurnRisk = new Set();
+    
+    validData.forEach(account => {
+      const may = account["May 2025"] || 0;
+      const june = account["June 2025"] || 0;
+      const july = account["July 2025"] || 0;
+      
+      // Calculate growth for each month vs previous month
+      const juneVsMayGrowth = may > 0 ? ((june - may) / may) * 100 : 0;
+      const julyVsJuneGrowth = june > 0 ? ((july - june) / june) * 100 : 0;
+      const julyVsMayGrowth = may > 0 ? ((july - may) / may) * 100 : 0;
+      
+      // Churn risk: significant decline (>20%) or zero sales when previously had sales
+      if (may > 0 && (june === 0 || juneVsMayGrowth < -20)) {
+        mayChurnRisk.add(account["Retail Accounts"]);
+      }
+      if (june > 0 && (july === 0 || julyVsJuneGrowth < -20)) {
+        juneChurnRisk.add(account["Retail Accounts"]);
+      }
+      // For July, check both June and May comparisons
+      if ((june > 0 && july === 0) || (june > 0 && julyVsJuneGrowth < -20) || (may > 0 && julyVsMayGrowth < -20)) {
+        julyChurnRisk.add(account["Retail Accounts"]);
+      }
+    });
+
+    return [
+      {
+        month: 'May 2025',
+        churnRisk: mayChurnRisk.size,
+        shortMonth: 'May'
+      },
+      {
+        month: 'June 2025',
+        churnRisk: juneChurnRisk.size,
+        shortMonth: 'June'
+      },
+      {
+        month: 'July 2025',
+        churnRisk: julyChurnRisk.size,
+        shortMonth: 'July'
+      }
+    ];
+  };
+
+  const getGrowingAccountsData = () => {
+    if (!salesData.length) return [];
+    
+    // Calculate growing accounts for each month
+    const validData = salesData.filter(account => 
+      account["Retail Accounts"] && 
+      account["Retail Accounts"].trim() !== '' && 
+      account["Retail Accounts"] !== 'Total'
+    );
+
+    const mayGrowing = new Set();
+    const juneGrowing = new Set();
+    const julyGrowing = new Set();
+    
+    validData.forEach(account => {
+      const may = account["May 2025"] || 0;
+      const june = account["June 2025"] || 0;
+      const july = account["July 2025"] || 0;
+      
+      // Calculate growth for each month vs previous month
+      const juneVsMayGrowth = may > 0 ? ((june - may) / may) * 100 : 0;
+      const julyVsJuneGrowth = june > 0 ? ((july - june) / june) * 100 : 0;
+      const julyVsMayGrowth = may > 0 ? ((july - may) / may) * 100 : 0;
+      
+      // Growing: significant growth (>10%)
+      if (may > 0 && june > 0 && juneVsMayGrowth > 10) {
+        mayGrowing.add(account["Retail Accounts"]);
+      }
+      if (june > 0 && july > 0 && julyVsJuneGrowth > 10) {
+        juneGrowing.add(account["Retail Accounts"]);
+      }
+      // For July, check growth vs June primarily
+      if (june > 0 && july > 0 && julyVsJuneGrowth > 10) {
+        julyGrowing.add(account["Retail Accounts"]);
+      }
+    });
+
+    return [
+      {
+        month: 'May 2025',
+        growing: mayGrowing.size,
+        shortMonth: 'May'
+      },
+      {
+        month: 'June 2025',
+        growing: juneGrowing.size,
+        shortMonth: 'June'
+      },
+      {
+        month: 'July 2025',
+        growing: julyGrowing.size,
+        shortMonth: 'July'
+      }
+    ];
+  };
+
   const getActivePODsData = () => {
     if (!salesData.length) return [];
     
@@ -709,56 +821,115 @@ export const MainAIChat = () => {
                 )}
               </div>
             ) : activeSection === 'churn' ? (
-              // Churn Risk Section
-              <Collapsible open={isChurnRiskOpen} onOpenChange={setIsChurnRiskOpen}>
-                {getChurnRiskStores().length > 0 ? (
-                  <>
-                     {/* Preview: First 3 churn risk stores */}
-                     <div className="space-y-4">
-                        {getChurnRiskStores().slice(0, 3).map((store, index) => (
-                          <div 
-                            key={`${store.name}-${index}`} 
-                            className="flex items-center justify-between p-4 rounded-lg border border-destructive/20 bg-destructive/5 cursor-pointer hover:bg-destructive/10 transition-colors"
-                            onClick={() => navigate(`/accounts/${encodeURIComponent(store.name)}`)}
-                          >
-                            <div className="flex items-center gap-3">
-                              <AlertTriangle className="w-5 h-5 text-destructive" />
-                              <div>
-                                <h4 className="font-medium text-foreground">{store.name}</h4>
-                                <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week (July)</p>
-                                <p className="text-xs text-muted-foreground">June: {store.juneCases.toFixed(1)} cases/week</p>
-                                <div className="mt-1">
-                                  {getStatusBadge(store.status)}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-lg font-bold text-destructive">
-                                -{store.caseReduction.toFixed(1)}
-                              </div>
-                              <p className="text-xs text-muted-foreground">Cases Lost/Week</p>
-                              <p className="text-xs text-muted-foreground">({store.growth.toFixed(1)}%)</p>
-                            </div>
-                          </div>
-                        ))}
-                     </div>
+              // Churn Risk Section - Monthly Breakdown
+              <div className="space-y-6">
+                {/* Monthly breakdown summary */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {getChurnRiskData().map((month) => (
+                    <div key={month.month} className="p-4 rounded-lg border border-destructive/20 bg-destructive/5">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-destructive">{month.churnRisk}</div>
+                        <p className="text-sm text-muted-foreground">Churn Risk Stores</p>
+                        <p className="text-xs text-muted-foreground mt-1">{month.month}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
 
-                    {/* Collapsible trigger */}
-                    {getChurnRiskStores().length > 3 && (
-                      <CollapsibleTrigger className="flex items-center justify-center w-full mt-4 p-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                        <span className="mr-2">
-                          {isChurnRiskOpen ? `Hide ${getChurnRiskStores().length - 3} more stores` : `Show ${getChurnRiskStores().length - 3} more stores`}
+                {/* Bar Chart */}
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={getChurnRiskData()} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                      <XAxis 
+                        dataKey="shortMonth" 
+                        fontSize={12}
+                      />
+                      <YAxis 
+                        fontSize={12}
+                        label={{ value: 'Churn Risk Stores', angle: -90, position: 'insideLeft' }}
+                      />
+                      <Tooltip 
+                        labelFormatter={(value) => `${value} 2025`}
+                        formatter={(value: number, name: string) => [
+                          `${value} stores`,
+                          'Churn Risk'
+                        ]}
+                        contentStyle={{
+                          backgroundColor: 'hsl(var(--card))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px'
+                        }}
+                      />
+                      <Bar 
+                        dataKey="churnRisk" 
+                        fill="hsl(var(--destructive))"
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Insights */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-lg border border-border bg-card/30">
+                    <h4 className="font-medium text-foreground mb-2">Monthly Changes</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">June vs May:</span>
+                        <span className={`text-sm font-medium ${
+                          getChurnRiskData()[1]?.churnRisk <= getChurnRiskData()[0]?.churnRisk ? 'text-success' : 'text-destructive'
+                        }`}>
+                          {getChurnRiskData()[1]?.churnRisk <= getChurnRiskData()[0]?.churnRisk ? '' : '+'}
+                          {getChurnRiskData()[1] && getChurnRiskData()[0] ? 
+                            ((getChurnRiskData()[1].churnRisk - getChurnRiskData()[0].churnRisk)).toString() : '0'} stores
                         </span>
-                        <ChevronDown className={`w-4 h-4 transition-transform ${isChurnRiskOpen ? 'rotate-180' : ''}`} />
-                      </CollapsibleTrigger>
-                    )}
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">July vs June:</span>
+                        <span className={`text-sm font-medium ${
+                          getChurnRiskData()[2]?.churnRisk <= getChurnRiskData()[1]?.churnRisk ? 'text-success' : 'text-destructive'
+                        }`}>
+                          {getChurnRiskData()[2]?.churnRisk <= getChurnRiskData()[1]?.churnRisk ? '' : '+'}
+                          {getChurnRiskData()[2] && getChurnRiskData()[1] ? 
+                            ((getChurnRiskData()[2].churnRisk - getChurnRiskData()[1].churnRisk)).toString() : '0'} stores
+                        </span>
+                      </div>
+                    </div>
+                  </div>
 
-                     {/* Collapsible content: Remaining churn risk stores */}
-                     <CollapsibleContent>
-                       <div className="space-y-4 mt-4">
-                          {getChurnRiskStores().slice(3).map((store, index) => (
+                  <div className="p-4 rounded-lg border border-border bg-card/30">
+                    <h4 className="font-medium text-foreground mb-2">Risk Analysis</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Current (July):</span>
+                        <span className="text-sm font-medium text-destructive">{getChurnRiskData()[2]?.churnRisk || 0}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Peak Risk Month:</span>
+                        <span className="text-sm font-medium text-destructive">
+                          {Math.max(...getChurnRiskData().map(d => d.churnRisk))} stores
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Total At Risk:</span>
+                        <span className="text-sm font-medium">{dashboardData.churnRiskAccounts}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Current Month Details */}
+                <div className="mt-6">
+                  <h4 className="font-medium text-foreground mb-4">Current Month Churn Risk Stores</h4>
+                  <Collapsible open={isChurnRiskOpen} onOpenChange={setIsChurnRiskOpen}>
+                    {getChurnRiskStores().length > 0 ? (
+                      <>
+                        {/* Preview: First 3 churn risk stores */}
+                        <div className="space-y-4">
+                          {getChurnRiskStores().slice(0, 3).map((store, index) => (
                             <div 
-                              key={`${store.name}-${index + 3}`} 
+                              key={`${store.name}-${index}`} 
                               className="flex items-center justify-between p-4 rounded-lg border border-destructive/20 bg-destructive/5 cursor-pointer hover:bg-destructive/10 transition-colors"
                               onClick={() => navigate(`/accounts/${encodeURIComponent(store.name)}`)}
                             >
@@ -782,22 +953,253 @@ export const MainAIChat = () => {
                               </div>
                             </div>
                           ))}
-                       </div>
-                     </CollapsibleContent>
-                  </>
-                ) : (
-                  <div className="text-center py-8">
-                    <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <TrendingUp className="w-8 h-8 text-success" />
-                    </div>
-                    <h3 className="text-lg font-medium text-foreground mb-2">No Churn Risk Detected</h3>
-                    <p className="text-muted-foreground">All stores are performing within acceptable ranges.</p>
-                  </div>
-                )}
-              </Collapsible>
+                        </div>
+
+                        {/* Collapsible trigger and content for remaining stores */}
+                        {getChurnRiskStores().length > 3 && (
+                          <>
+                            <CollapsibleTrigger className="flex items-center justify-center w-full mt-4 p-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                              <span className="mr-2">
+                                {isChurnRiskOpen ? `Hide ${getChurnRiskStores().length - 3} more stores` : `Show ${getChurnRiskStores().length - 3} more stores`}
+                              </span>
+                              <ChevronDown className={`w-4 h-4 transition-transform ${isChurnRiskOpen ? 'rotate-180' : ''}`} />
+                            </CollapsibleTrigger>
+
+                            <CollapsibleContent>
+                              <div className="space-y-4 mt-4">
+                                {getChurnRiskStores().slice(3).map((store, index) => (
+                                  <div 
+                                    key={`${store.name}-${index + 3}`} 
+                                    className="flex items-center justify-between p-4 rounded-lg border border-destructive/20 bg-destructive/5 cursor-pointer hover:bg-destructive/10 transition-colors"
+                                    onClick={() => navigate(`/accounts/${encodeURIComponent(store.name)}`)}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <AlertTriangle className="w-5 h-5 text-destructive" />
+                                      <div>
+                                        <h4 className="font-medium text-foreground">{store.name}</h4>
+                                        <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week (July)</p>
+                                        <p className="text-xs text-muted-foreground">June: {store.juneCases.toFixed(1)} cases/week</p>
+                                        <div className="mt-1">
+                                          {getStatusBadge(store.status)}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <div className="text-lg font-bold text-destructive">
+                                        -{store.caseReduction.toFixed(1)}
+                                      </div>
+                                      <p className="text-xs text-muted-foreground">Cases Lost/Week</p>
+                                      <p className="text-xs text-muted-foreground">({store.growth.toFixed(1)}%)</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </CollapsibleContent>
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      <div className="text-center py-8">
+                        <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <TrendingUp className="w-8 h-8 text-success" />
+                        </div>
+                        <h3 className="text-lg font-medium text-foreground mb-2">No Churn Risk Detected</h3>
+                        <p className="text-muted-foreground">All stores are performing within acceptable ranges.</p>
+                      </div>
+                    )}
+                  </Collapsible>
+                </div>
+              </div>
             ) : activeSection === 'growing' ? (
-              // Growing Accounts Section
-              <Collapsible open={isGrowingAccountsOpen} onOpenChange={setIsGrowingAccountsOpen}>
+              // Growing Accounts Section - Monthly Breakdown
+              <div className="space-y-6">
+                {/* Monthly breakdown summary */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {getGrowingAccountsData().map((month) => (
+                    <div key={month.month} className="p-4 rounded-lg border border-success/20 bg-success/5">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-success">{month.growing}</div>
+                        <p className="text-sm text-muted-foreground">Growing Stores</p>
+                        <p className="text-xs text-muted-foreground mt-1">{month.month}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Bar Chart */}
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={getGrowingAccountsData()} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                      <XAxis 
+                        dataKey="shortMonth" 
+                        fontSize={12}
+                      />
+                      <YAxis 
+                        fontSize={12}
+                        label={{ value: 'Growing Stores', angle: -90, position: 'insideLeft' }}
+                      />
+                      <Tooltip 
+                        labelFormatter={(value) => `${value} 2025`}
+                        formatter={(value: number, name: string) => [
+                          `${value} stores`,
+                          'Growing Accounts'
+                        ]}
+                        contentStyle={{
+                          backgroundColor: 'hsl(var(--card))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px'
+                        }}
+                      />
+                      <Bar 
+                        dataKey="growing" 
+                        fill="hsl(var(--success))"
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Insights */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-lg border border-border bg-card/30">
+                    <h4 className="font-medium text-foreground mb-2">Monthly Changes</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">June vs May:</span>
+                        <span className={`text-sm font-medium ${
+                          getGrowingAccountsData()[1]?.growing >= getGrowingAccountsData()[0]?.growing ? 'text-success' : 'text-destructive'
+                        }`}>
+                          {getGrowingAccountsData()[1]?.growing >= getGrowingAccountsData()[0]?.growing ? '+' : ''}
+                          {getGrowingAccountsData()[1] && getGrowingAccountsData()[0] ? 
+                            ((getGrowingAccountsData()[1].growing - getGrowingAccountsData()[0].growing)).toString() : '0'} stores
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">July vs June:</span>
+                        <span className={`text-sm font-medium ${
+                          getGrowingAccountsData()[2]?.growing >= getGrowingAccountsData()[1]?.growing ? 'text-success' : 'text-destructive'
+                        }`}>
+                          {getGrowingAccountsData()[2]?.growing >= getGrowingAccountsData()[1]?.growing ? '+' : ''}
+                          {getGrowingAccountsData()[2] && getGrowingAccountsData()[1] ? 
+                            ((getGrowingAccountsData()[2].growing - getGrowingAccountsData()[1].growing)).toString() : '0'} stores
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-lg border border-border bg-card/30">
+                    <h4 className="font-medium text-foreground mb-2">Growth Analysis</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Current (July):</span>
+                        <span className="text-sm font-medium text-success">{getGrowingAccountsData()[2]?.growing || 0}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Peak Growth Month:</span>
+                        <span className="text-sm font-medium text-success">
+                          {Math.max(...getGrowingAccountsData().map(d => d.growing))} stores
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Total Growing:</span>
+                        <span className="text-sm font-medium">{dashboardData.growingAccounts}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Current Month Details */}
+                <div className="mt-6">
+                  <h4 className="font-medium text-foreground mb-4">Current Month Growing Stores</h4>
+                  <Collapsible open={isGrowingAccountsOpen} onOpenChange={setIsGrowingAccountsOpen}>
+                    {getGrowingStores().length > 0 ? (
+                      <>
+                        {/* Preview: First 3 growing stores */}
+                        <div className="space-y-4">
+                          {getGrowingStores().slice(0, 3).map((store, index) => (
+                            <div 
+                              key={`${store.name}-${index}`} 
+                              className="flex items-center justify-between p-4 rounded-lg border border-success/20 bg-success/5 cursor-pointer hover:bg-success/10 transition-colors"
+                              onClick={() => navigate(`/accounts/${encodeURIComponent(store.name)}`)}
+                            >
+                              <div className="flex items-center gap-3">
+                                <TrendingUp className="w-5 h-5 text-success" />
+                                <div>
+                                  <h4 className="font-medium text-foreground">{store.name}</h4>
+                                  <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week (July)</p>
+                                  <p className="text-xs text-muted-foreground">June: {store.juneCases.toFixed(1)} cases/week</p>
+                                  <div className="mt-1">
+                                    {getStatusBadge(store.status)}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-lg font-bold text-success">
+                                  +{store.caseIncrease.toFixed(1)}
+                                </div>
+                                <p className="text-xs text-muted-foreground">Cases Gained/Week</p>
+                                <p className="text-xs text-muted-foreground">(+{store.growth.toFixed(1)}%)</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Collapsible trigger and content for remaining stores */}
+                        {getGrowingStores().length > 3 && (
+                          <>
+                            <CollapsibleTrigger className="flex items-center justify-center w-full mt-4 p-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                              <span className="mr-2">
+                                {isGrowingAccountsOpen ? `Hide ${getGrowingStores().length - 3} more stores` : `Show ${getGrowingStores().length - 3} more stores`}
+                              </span>
+                              <ChevronDown className={`w-4 h-4 transition-transform ${isGrowingAccountsOpen ? 'rotate-180' : ''}`} />
+                            </CollapsibleTrigger>
+
+                            <CollapsibleContent>
+                              <div className="space-y-4 mt-4">
+                                {getGrowingStores().slice(3).map((store, index) => (
+                                  <div 
+                                    key={`${store.name}-${index + 3}`} 
+                                    className="flex items-center justify-between p-4 rounded-lg border border-success/20 bg-success/5 cursor-pointer hover:bg-success/10 transition-colors"
+                                    onClick={() => navigate(`/accounts/${encodeURIComponent(store.name)}`)}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <TrendingUp className="w-5 h-5 text-success" />
+                                      <div>
+                                        <h4 className="font-medium text-foreground">{store.name}</h4>
+                                        <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week (July)</p>
+                                        <p className="text-xs text-muted-foreground">June: {store.juneCases.toFixed(1)} cases/week</p>
+                                        <div className="mt-1">
+                                          {getStatusBadge(store.status)}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <div className="text-lg font-bold text-success">
+                                        +{store.caseIncrease.toFixed(1)}
+                                      </div>
+                                      <p className="text-xs text-muted-foreground">Cases Gained/Week</p>
+                                      <p className="text-xs text-muted-foreground">(+{store.growth.toFixed(1)}%)</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </CollapsibleContent>
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      <div className="text-center py-8">
+                        <div className="w-16 h-16 bg-muted/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <TrendingUp className="w-8 h-8 text-muted-foreground" />
+                        </div>
+                        <h3 className="text-lg font-medium text-foreground mb-2">No Growing Accounts</h3>
+                        <p className="text-muted-foreground">No stores are currently showing significant growth.</p>
+                      </div>
+                    )}
+                  </Collapsible>
+                </div>
+              </div>
                 {getGrowingStores().length > 0 ? (
                   <>
                     {/* Preview: First 3 growing stores */}
