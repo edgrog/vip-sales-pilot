@@ -581,13 +581,6 @@ export const MainAIChat = () => {
                 
                 {dashboardData.chainPerformance.length > 5 && (
                   <Collapsible open={isChainPerformanceOpen} onOpenChange={setIsChainPerformanceOpen}>
-                    <CollapsibleTrigger className="flex items-center justify-center w-full p-2 text-sm text-muted-foreground hover:text-foreground transition-colors border rounded-lg bg-muted/30 hover:bg-muted/50">
-                      <span className="mr-2">
-                        {isChainPerformanceOpen ? `Hide ${dashboardData.chainPerformance.length - 5} more chains` : `Show ${dashboardData.chainPerformance.length - 5} more chains`}
-                      </span>
-                      <ChevronDown className={`w-4 h-4 transition-transform ${isChainPerformanceOpen ? 'rotate-180' : ''}`} />
-                    </CollapsibleTrigger>
-                    
                     <CollapsibleContent>
                       <div className="mt-4">
                         <Table>
@@ -635,6 +628,13 @@ export const MainAIChat = () => {
                         </Table>
                       </div>
                     </CollapsibleContent>
+                    
+                    <CollapsibleTrigger className="flex items-center justify-center w-full mt-4 p-2 text-sm text-muted-foreground hover:text-foreground transition-colors border rounded-lg bg-muted/30 hover:bg-muted/50">
+                      <span className="mr-2">
+                        {isChainPerformanceOpen ? `Hide ${dashboardData.chainPerformance.length - 5} more chains` : `Show ${dashboardData.chainPerformance.length - 5} more chains`}
+                      </span>
+                      <ChevronDown className={`w-4 h-4 transition-transform ${isChainPerformanceOpen ? 'rotate-180' : ''}`} />
+                    </CollapsibleTrigger>
                   </Collapsible>
                 )}
               </div>
