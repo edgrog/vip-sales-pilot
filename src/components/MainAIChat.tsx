@@ -1179,20 +1179,6 @@ export const MainAIChat = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {/* Chain summary cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {dashboardData.chainPerformance.slice(0, 3).map((chain) => (
-                  <div key={chain.chain} className="p-4 rounded-lg border border-border bg-card/30">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-foreground">{chain.totalCases.toFixed(1)}</div>
-                      <p className="text-sm text-muted-foreground">Cases/Week</p>
-                      <p className="text-xs text-muted-foreground mt-1">{chain.chain}</p>
-                      <p className="text-xs text-muted-foreground">{chain.accounts} stores</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
               {/* Chain Performance Table */}
               <ScrollArea className="h-[400px]">
                 <Table>
