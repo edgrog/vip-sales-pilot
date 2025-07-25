@@ -418,29 +418,6 @@ export const MainAIChat = () => {
       </header>
 
       <div className="container mx-auto px-6 py-6">
-        {/* AI Chat Interface - Same width as chain performance */}
-        <Card className="card-grog mb-6">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold">VIP Sales AI Assistant</CardTitle>
-            <CardDescription>Get insights and analysis for your sales performance data</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Collapsible open={isAIChatOpen} onOpenChange={setIsAIChatOpen}>
-              <CollapsibleTrigger className="flex items-center justify-center w-full p-2 text-sm text-muted-foreground hover:text-foreground transition-colors border rounded-lg bg-muted/30 hover:bg-muted/50">
-                <span className="mr-2">
-                  {isAIChatOpen ? 'Hide AI Chat' : 'Show AI Chat'}
-                </span>
-                <ChevronDown className={`w-4 h-4 transition-transform ${isAIChatOpen ? 'rotate-180' : ''}`} />
-              </CollapsibleTrigger>
-              
-              <CollapsibleContent>
-                <div className="mt-4">
-                  <SalesAIChat />
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-          </CardContent>
-        </Card>
 
         {/* Key Metrics Dashboard - Now properly spaced below chat */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
