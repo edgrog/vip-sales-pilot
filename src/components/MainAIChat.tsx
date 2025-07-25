@@ -25,8 +25,9 @@ interface VipSalesData {
 }
 
 interface DashboardData {
-  totalAccounts: number;
-  totalStoresWithSales: number; // Add this new field
+  totalActivePODs: number;
+  activePODsChange: number;
+  totalStoresWithSales: number; // Keep for backward compatibility
   churnRiskAccounts: number;
   growingAccounts: number;
   totalRevenueChange: number;
@@ -122,30 +123,42 @@ export const MainAIChat = () => {
     
     if (!validData.length) return;
 
-    // Count ALL unique stores (not filtering by sales) - even those with 0 sales
-    const allUniqueStores = new Set();
-    const uniqueStoresWithSales = new Set();
-    const storesWithZeroSales = [];
+    // Calculate Active PODs (stores with sales in last 2 months: June + July)
+    const activePODsCurrentPeriod = new Set();
+    const activePODsJulyOnly = new Set();
+    const activePODsJuneOnly = new Set();
     
     validData.forEach(account => {
-      // Add every store to the total count, regardless of sales
-      allUniqueStores.add(account["Retail Accounts"]);
-      
-      const may = account["May 2025"] || 0;
       const june = account["June 2025"] || 0;
       const july = account["July 2025"] || 0;
       
-      // Since every store should have sales, count all as having sales
-      // The original logic was incorrect - there are no valid stores with zero sales
-      uniqueStoresWithSales.add(account["Retail Accounts"]);
+      // Active in last 2 months (June + July)
+      if (june > 0 || july > 0) {
+        activePODsCurrentPeriod.add(account["Retail Accounts"]);
+      }
+      
+      // Active in July only (for comparison)
+      if (july > 0) {
+        activePODsJulyOnly.add(account["Retail Accounts"]);
+      }
+      
+      // Active in June only (for comparison)
+      if (june > 0) {
+        activePODsJuneOnly.add(account["Retail Accounts"]);
+      }
     });
     
-    console.log('All unique stores (after filtering NULL records):', allUniqueStores.size);
-    console.log('This should match the total since every store has sales:', uniqueStoresWithSales.size);
-    console.log('Should be 1,578:', allUniqueStores.size === 1578);
+    const totalActivePODs = activePODsCurrentPeriod.size;
+    const julyActivePODs = activePODsJulyOnly.size;
+    const juneActivePODs = activePODsJuneOnly.size;
     
-    const totalAccounts = data.length; // Include ALL records (including NULL entries)
-    const totalStoresWithSales = allUniqueStores.size; // Only stores with valid names
+    // Calculate month-over-month change (July vs June)
+    const activePODsChange = juneActivePODs > 0 ? ((julyActivePODs - juneActivePODs) / juneActivePODs) * 100 : 0;
+    
+    console.log('Active PODs - Last 2 months:', totalActivePODs);
+    console.log('Active PODs - July:', julyActivePODs);
+    console.log('Active PODs - June:', juneActivePODs);
+    console.log('Active PODs - Change:', activePODsChange.toFixed(1) + '%');
     let churnRiskAccounts = 0;
     let growingAccounts = 0;
     let totalJuneCases = 0;
@@ -233,8 +246,8 @@ export const MainAIChat = () => {
     accountPerformance.sort((a, b) => b.julyCases - a.julyCases);
 
     const totalRevenueChange = totalJuneCases > 0 ? ((totalJulyCases - totalJuneCases) / totalJuneCases) * 100 : 0;
-    const averageSalesVelocity = totalAccounts > 0 ? totalJulyCases / totalAccounts : 0;
-    const juneVelocity = totalAccounts > 0 ? totalJuneCases / totalAccounts : 0;
+    const averageSalesVelocity = totalActivePODs > 0 ? totalJulyCases / totalActivePODs : 0;
+    const juneVelocity = totalActivePODs > 0 ? totalJuneCases / totalActivePODs : 0;
     const velocityChange = juneVelocity > 0 ? ((averageSalesVelocity - juneVelocity) / juneVelocity) * 100 : 0;
     
     // Calculate all-time high velocity from all three months
@@ -243,12 +256,13 @@ export const MainAIChat = () => {
       totalMayCases += account["May 2025"] || 0;
     });
     
-    const mayVelocity = totalAccounts > 0 ? totalMayCases / totalAccounts : 0;
+    const mayVelocity = totalActivePODs > 0 ? totalMayCases / totalActivePODs : 0;
     const allTimeHighVelocity = Math.max(mayVelocity, juneVelocity, averageSalesVelocity);
 
     setDashboardData({
-      totalAccounts,
-      totalStoresWithSales, // Add this field
+      totalActivePODs,
+      activePODsChange,
+      totalStoresWithSales: totalActivePODs, // Use active PODs for backward compatibility
       churnRiskAccounts,
       growingAccounts,
       totalRevenueChange,
@@ -426,11 +440,20 @@ export const MainAIChat = () => {
             onClick={() => setActiveSection('accounts')}
           >
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Accounts</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Active PODs</CardTitle>
+              <CardDescription className="text-xs text-muted-foreground">Stores with orders in last 2 months</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
-                <div className="text-3xl font-bold text-foreground">{dashboardData.totalStoresWithSales}</div>
+                <div>
+                  <div className="text-3xl font-bold text-foreground">{dashboardData.totalActivePODs}</div>
+                  <div className={`text-xs font-medium mt-1 flex items-center gap-1 ${
+                    dashboardData.activePODsChange >= 0 ? 'text-success' : 'text-destructive'
+                  }`}>
+                    {dashboardData.activePODsChange >= 0 ? '+' : ''}{dashboardData.activePODsChange.toFixed(1)}%
+                    <span className="text-muted-foreground">vs last month</span>
+                  </div>
+                </div>
                 <Users className="w-8 h-8 text-primary" />
               </div>
               <p className="text-xs text-muted-foreground mt-2">Click to view details</p>
@@ -988,8 +1011,8 @@ export const MainAIChat = () => {
                         <span className="text-sm font-medium text-success">{dashboardData.allTimeHighVelocity.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Total Accounts:</span>
-                        <span className="text-sm font-medium">{dashboardData.totalStoresWithSales.toLocaleString()}</span>
+                        <span className="text-sm text-muted-foreground">Active PODs:</span>
+                        <span className="text-sm font-medium">{dashboardData.totalActivePODs.toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
