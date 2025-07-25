@@ -511,22 +511,6 @@ export const MainAIChat = () => {
 
           <Card 
             className="card-grog cursor-pointer hover:shadow-glow transition-all duration-300" 
-            onClick={() => setActiveSection('churn')}
-          >
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Churn Risk</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="text-3xl font-bold text-destructive">{dashboardData.churnRiskAccounts}</div>
-                <AlertTriangle className="w-8 h-8 text-destructive" />
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">Click to view details</p>
-            </CardContent>
-          </Card>
-
-          <Card 
-            className="card-grog cursor-pointer hover:shadow-glow transition-all duration-300" 
             onClick={() => setActiveSection('growing')}
           >
             <CardHeader className="pb-3">
@@ -536,6 +520,22 @@ export const MainAIChat = () => {
               <div className="flex items-center justify-between">
                 <div className="text-3xl font-bold text-success">{dashboardData.growingAccounts}</div>
                 <TrendingUp className="w-8 h-8 text-success" />
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">Click to view details</p>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="card-grog cursor-pointer hover:shadow-glow transition-all duration-300" 
+            onClick={() => setActiveSection('churn')}
+          >
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Churn Risk</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="text-3xl font-bold text-destructive">{dashboardData.churnRiskAccounts}</div>
+                <AlertTriangle className="w-8 h-8 text-destructive" />
               </div>
               <p className="text-xs text-muted-foreground mt-2">Click to view details</p>
             </CardContent>
