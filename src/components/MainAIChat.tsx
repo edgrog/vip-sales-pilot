@@ -972,29 +972,27 @@ export const MainAIChat = () => {
               <CardDescription>Store-level performance data with status indicators</CardDescription>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[600px]">
-                <div className="space-y-3 pr-4">
-                  {dashboardData.accountPerformance.map((account, index) => (
-                    <div key={`${account.name}-${index}`} className="flex items-center justify-between p-3 rounded-lg border border-border bg-card/30">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-medium text-foreground text-sm">{account.name}</h4>
-                          {getStatusBadge(account.status)}
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">{account.state} • {account.julyCases.toFixed(1)} cases/week</p>
+              <div className="space-y-3">
+                {dashboardData.accountPerformance.map((account, index) => (
+                  <div key={`${account.name}-${index}`} className="flex items-center justify-between p-3 rounded-lg border border-border bg-card/30">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-medium text-foreground text-sm">{account.name}</h4>
+                        {getStatusBadge(account.status)}
                       </div>
-                      <div className="text-right">
-                        <div className={`text-sm font-medium ${
-                          account.growth > 0 ? 'text-success' : 
-                          account.growth < -10 ? 'text-destructive' : 'text-muted-foreground'
-                        }`}>
-                          {account.growth >= 0 ? '+' : ''}{account.growth.toFixed(1)}%
-                        </div>
+                      <p className="text-xs text-muted-foreground mt-1">{account.state} • {account.julyCases.toFixed(1)} cases/week</p>
+                    </div>
+                    <div className="text-right">
+                      <div className={`text-sm font-medium ${
+                        account.growth > 0 ? 'text-success' : 
+                        account.growth < -10 ? 'text-destructive' : 'text-muted-foreground'
+                      }`}>
+                        {account.growth >= 0 ? '+' : ''}{account.growth.toFixed(1)}%
                       </div>
                     </div>
-                  ))}
-                </div>
-              </ScrollArea>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
 
