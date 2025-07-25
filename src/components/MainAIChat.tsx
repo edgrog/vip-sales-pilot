@@ -972,27 +972,29 @@ export const MainAIChat = () => {
               <CardDescription>Store-level performance data with status indicators</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {dashboardData.accountPerformance.map((account, index) => (
-                  <div key={`${account.name}-${index}`} className="flex items-center justify-between p-3 rounded-lg border border-border bg-card/30">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-medium text-foreground text-sm">{account.name}</h4>
-                        {getStatusBadge(account.status)}
+              <ScrollArea className="h-[500px]">
+                <div className="space-y-3 pr-4">
+                  {dashboardData.accountPerformance.map((account, index) => (
+                    <div key={`${account.name}-${index}`} className="flex items-center justify-between p-3 rounded-lg border border-border bg-card/30">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium text-foreground text-sm">{account.name}</h4>
+                          {getStatusBadge(account.status)}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">{account.state} • {account.julyCases.toFixed(1)} cases/week</p>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">{account.state} • {account.julyCases.toFixed(1)} cases/week</p>
-                    </div>
-                    <div className="text-right">
-                      <div className={`text-sm font-medium ${
-                        account.growth > 0 ? 'text-success' : 
-                        account.growth < -10 ? 'text-destructive' : 'text-muted-foreground'
-                      }`}>
-                        {account.growth >= 0 ? '+' : ''}{account.growth.toFixed(1)}%
+                      <div className="text-right">
+                        <div className={`text-sm font-medium ${
+                          account.growth > 0 ? 'text-success' : 
+                          account.growth < -10 ? 'text-destructive' : 'text-muted-foreground'
+                        }`}>
+                          {account.growth >= 0 ? '+' : ''}{account.growth.toFixed(1)}%
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </ScrollArea>
             </CardContent>
           </Card>
 
@@ -1002,58 +1004,60 @@ export const MainAIChat = () => {
               <CardDescription>Performance breakdown by retail chain ({dashboardData.chainPerformance.length} chains)</CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Chain</TableHead>
-                    <TableHead className="text-center">Stores</TableHead>
-                    <TableHead className="text-right">Cases/Week</TableHead>
-                    <TableHead className="text-right">Growth</TableHead>
-                    <TableHead className="text-center">Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {dashboardData.chainPerformance.map((chain) => (
-                    <TableRow 
-                      key={chain.chain}
-                      className="cursor-pointer hover:bg-muted/50 transition-colors"
-                      onClick={() => navigate(`/chains/${encodeURIComponent(chain.chain)}`)}
-                    >
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                            <span className="text-sm font-semibold text-primary">{chain.chain.charAt(0)}</span>
-                          </div>
-                          {chain.chain}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center">{chain.accounts}</TableCell>
-                      <TableCell className="text-right font-medium">{chain.totalCases.toFixed(1)}</TableCell>
-                      <TableCell className={`text-right font-medium ${
-                        chain.avgGrowth >= 0 ? 'text-success' : 'text-destructive'
-                      }`}>
-                        {chain.avgGrowth >= 0 ? '+' : ''}{chain.avgGrowth.toFixed(1)}%
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Badge 
-                          variant={
-                            chain.status === 'growing' ? 'default' : 
-                            chain.status === 'declining' ? 'destructive' : 
-                            'secondary'
-                          }
-                          className={
-                            chain.status === 'growing' ? 'bg-success text-success-foreground' :
-                            chain.status === 'declining' ? 'bg-destructive text-destructive-foreground' :
-                            'bg-secondary text-secondary-foreground'
-                          }
-                        >
-                          {chain.status}
-                        </Badge>
-                      </TableCell>
+              <ScrollArea className="h-[500px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Chain</TableHead>
+                      <TableHead className="text-center">Stores</TableHead>
+                      <TableHead className="text-right">Cases/Week</TableHead>
+                      <TableHead className="text-right">Growth</TableHead>
+                      <TableHead className="text-center">Status</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {dashboardData.chainPerformance.map((chain) => (
+                      <TableRow 
+                        key={chain.chain}
+                        className="cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => navigate(`/chains/${encodeURIComponent(chain.chain)}`)}
+                      >
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                              <span className="text-sm font-semibold text-primary">{chain.chain.charAt(0)}</span>
+                            </div>
+                            {chain.chain}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center">{chain.accounts}</TableCell>
+                        <TableCell className="text-right font-medium">{chain.totalCases.toFixed(1)}</TableCell>
+                        <TableCell className={`text-right font-medium ${
+                          chain.avgGrowth >= 0 ? 'text-success' : 'text-destructive'
+                        }`}>
+                          {chain.avgGrowth >= 0 ? '+' : ''}{chain.avgGrowth.toFixed(1)}%
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge 
+                            variant={
+                              chain.status === 'growing' ? 'default' : 
+                              chain.status === 'declining' ? 'destructive' : 
+                              'secondary'
+                            }
+                            className={
+                              chain.status === 'growing' ? 'bg-success text-success-foreground' :
+                              chain.status === 'declining' ? 'bg-destructive text-destructive-foreground' :
+                              'bg-secondary text-secondary-foreground'
+                            }
+                          >
+                            {chain.status}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
             </CardContent>
           </Card>
         </div>
