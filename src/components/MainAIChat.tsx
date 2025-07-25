@@ -525,79 +525,119 @@ export const MainAIChat = () => {
           <CardContent>
             {activeSection === 'chain' ? (
               // Chain Performance Section
-              <Collapsible open={isChainPerformanceOpen} onOpenChange={setIsChainPerformanceOpen}>
-                {/* Preview: Top 3 chains */}
-                <div className="space-y-4">
-                  {dashboardData.chainPerformance.slice(0, 3).map((chain, index) => (
-                    <div 
-                      key={chain.chain} 
-                      className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50 cursor-pointer hover:bg-card/80 transition-colors"
-                      onClick={() => navigate(`/chains/${encodeURIComponent(chain.chain)}`)}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                          <span className="text-primary font-semibold">{chain.chain.charAt(0)}</span>
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-foreground">{chain.chain}</h4>
-                          <p className="text-sm text-muted-foreground">{chain.accounts} accounts • {chain.totalCases.toFixed(1)} cases/week</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className={`text-sm font-medium ${
-                          chain.status === 'growing' ? 'text-success' : 
-                          chain.status === 'declining' ? 'text-destructive' : 'text-muted-foreground'
-                        }`}>
-                          {chain.avgGrowth >= 0 ? '+' : ''}{chain.avgGrowth.toFixed(1)}%
-                        </div>
-                        <div className="text-xs text-muted-foreground capitalize">{chain.status}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Collapsible trigger */}
-                {dashboardData.chainPerformance.length > 3 && (
-                  <CollapsibleTrigger className="flex items-center justify-center w-full mt-4 p-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    <span className="mr-2">
-                      {isChainPerformanceOpen ? `Hide ${dashboardData.chainPerformance.length - 3} more chains` : `Show ${dashboardData.chainPerformance.length - 3} more chains`}
-                    </span>
-                    <ChevronDown className={`w-4 h-4 transition-transform ${isChainPerformanceOpen ? 'rotate-180' : ''}`} />
-                  </CollapsibleTrigger>
-                )}
-
-                {/* Collapsible content: Remaining chains */}
-                <CollapsibleContent>
-                  <div className="space-y-4 mt-4">
-                    {dashboardData.chainPerformance.slice(3).map((chain, index) => (
-                      <div 
-                        key={chain.chain} 
-                        className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50 cursor-pointer hover:bg-card/80 transition-colors"
+              <div className="space-y-4">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Chain</TableHead>
+                      <TableHead className="text-center">Stores</TableHead>
+                      <TableHead className="text-right">Cases/Week</TableHead>
+                      <TableHead className="text-right">Growth</TableHead>
+                      <TableHead className="text-center">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {dashboardData.chainPerformance.slice(0, 5).map((chain) => (
+                      <TableRow 
+                        key={chain.chain}
+                        className="cursor-pointer hover:bg-muted/50 transition-colors"
                         onClick={() => navigate(`/chains/${encodeURIComponent(chain.chain)}`)}
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                            <span className="text-primary font-semibold">{chain.chain.charAt(0)}</span>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                              <span className="text-sm font-semibold text-primary">{chain.chain.charAt(0)}</span>
+                            </div>
+                            {chain.chain}
                           </div>
-                          <div>
-                            <h4 className="font-medium text-foreground">{chain.chain}</h4>
-                            <p className="text-sm text-muted-foreground">{chain.accounts} accounts • {chain.totalCases.toFixed(1)} cases/week</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className={`text-sm font-medium ${
-                            chain.status === 'growing' ? 'text-success' : 
-                            chain.status === 'declining' ? 'text-destructive' : 'text-muted-foreground'
-                          }`}>
-                            {chain.avgGrowth >= 0 ? '+' : ''}{chain.avgGrowth.toFixed(1)}%
-                          </div>
-                          <div className="text-xs text-muted-foreground capitalize">{chain.status}</div>
-                        </div>
-                      </div>
+                        </TableCell>
+                        <TableCell className="text-center">{chain.accounts}</TableCell>
+                        <TableCell className="text-right font-medium">{chain.totalCases.toFixed(1)}</TableCell>
+                        <TableCell className={`text-right font-medium ${
+                          chain.avgGrowth >= 0 ? 'text-success' : 'text-destructive'
+                        }`}>
+                          {chain.avgGrowth >= 0 ? '+' : ''}{chain.avgGrowth.toFixed(1)}%
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge 
+                            variant={
+                              chain.status === 'growing' ? 'default' : 
+                              chain.status === 'declining' ? 'destructive' : 
+                              'secondary'
+                            }
+                            className={
+                              chain.status === 'growing' ? 'bg-success text-success-foreground' :
+                              chain.status === 'declining' ? 'bg-destructive text-destructive-foreground' :
+                              'bg-secondary text-secondary-foreground'
+                            }
+                          >
+                            {chain.status}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
+                  </TableBody>
+                </Table>
+                
+                {dashboardData.chainPerformance.length > 5 && (
+                  <Collapsible open={isChainPerformanceOpen} onOpenChange={setIsChainPerformanceOpen}>
+                    <CollapsibleTrigger className="flex items-center justify-center w-full p-2 text-sm text-muted-foreground hover:text-foreground transition-colors border rounded-lg bg-muted/30 hover:bg-muted/50">
+                      <span className="mr-2">
+                        {isChainPerformanceOpen ? `Hide ${dashboardData.chainPerformance.length - 5} more chains` : `Show ${dashboardData.chainPerformance.length - 5} more chains`}
+                      </span>
+                      <ChevronDown className={`w-4 h-4 transition-transform ${isChainPerformanceOpen ? 'rotate-180' : ''}`} />
+                    </CollapsibleTrigger>
+                    
+                    <CollapsibleContent>
+                      <div className="mt-4">
+                        <Table>
+                          <TableBody>
+                            {dashboardData.chainPerformance.slice(5).map((chain) => (
+                              <TableRow 
+                                key={chain.chain}
+                                className="cursor-pointer hover:bg-muted/50 transition-colors"
+                                onClick={() => navigate(`/chains/${encodeURIComponent(chain.chain)}`)}
+                              >
+                                <TableCell className="font-medium">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                      <span className="text-sm font-semibold text-primary">{chain.chain.charAt(0)}</span>
+                                    </div>
+                                    {chain.chain}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="text-center">{chain.accounts}</TableCell>
+                                <TableCell className="text-right font-medium">{chain.totalCases.toFixed(1)}</TableCell>
+                                <TableCell className={`text-right font-medium ${
+                                  chain.avgGrowth >= 0 ? 'text-success' : 'text-destructive'
+                                }`}>
+                                  {chain.avgGrowth >= 0 ? '+' : ''}{chain.avgGrowth.toFixed(1)}%
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  <Badge 
+                                    variant={
+                                      chain.status === 'growing' ? 'default' : 
+                                      chain.status === 'declining' ? 'destructive' : 
+                                      'secondary'
+                                    }
+                                    className={
+                                      chain.status === 'growing' ? 'bg-success text-success-foreground' :
+                                      chain.status === 'declining' ? 'bg-destructive text-destructive-foreground' :
+                                      'bg-secondary text-secondary-foreground'
+                                    }
+                                  >
+                                    {chain.status}
+                                  </Badge>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+              </div>
             ) : activeSection === 'churn' ? (
               // Churn Risk Section
               <Collapsible open={isChurnRiskOpen} onOpenChange={setIsChurnRiskOpen}>
