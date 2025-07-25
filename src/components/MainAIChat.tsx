@@ -57,7 +57,7 @@ export const MainAIChat = () => {
   const [loading, setLoading] = useState(true);
   const [isChainPerformanceOpen, setIsChainPerformanceOpen] = useState(false);
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<'chain' | 'churn' | 'growing' | 'velocity' | 'accounts' | 'activepods'>('chain'); // Track which section to show
+  const [activeSection, setActiveSection] = useState<'chain' | 'churn' | 'growing' | 'growing-monthly' | 'velocity' | 'accounts' | 'activepods'>('chain'); // Track which section to show
   const [isChurnRiskOpen, setIsChurnRiskOpen] = useState(false); // For churn risk collapsible
   const [isGrowingAccountsOpen, setIsGrowingAccountsOpen] = useState(false); // For growing accounts collapsible
 
@@ -639,7 +639,7 @@ export const MainAIChat = () => {
 
           <Card 
             className="card-grog cursor-pointer hover:shadow-glow transition-all duration-300" 
-            onClick={() => setActiveSection('growing')}
+            onClick={() => setActiveSection('growing-monthly')}
           >
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Growing Accounts</CardTitle>
@@ -1200,93 +1200,202 @@ export const MainAIChat = () => {
                   </Collapsible>
                 </div>
               </div>
-                {getGrowingStores().length > 0 ? (
-                  <>
-                    {/* Preview: First 3 growing stores */}
-                    <div className="space-y-4">
-                      {getGrowingStores().slice(0, 3).map((store, index) => (
-                        <div 
-                          key={`${store.name}-${index}`} 
-                          className="flex items-center justify-between p-4 rounded-lg border border-success/20 bg-success/5 cursor-pointer hover:bg-success/10 transition-colors"
-                          onClick={() => navigate(`/accounts/${encodeURIComponent(store.name)}`)}
-                        >
-                          <div className="flex items-center gap-3">
-                            <TrendingUp className="w-5 h-5 text-success" />
-                            <div>
-                              <h4 className="font-medium text-foreground">{store.name}</h4>
-                              <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week • June: {store.juneCases.toFixed(1)}</p>
-                              <div className="mt-1">
-                                {getStatusBadge(store.status)}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-lg font-bold text-success">
-                              +{store.caseIncrease.toFixed(1)}
-                            </div>
-                            <p className="text-xs text-muted-foreground">Cases/Week Gained</p>
-                            <div className="text-xs text-success font-medium">
-                              +{store.growth.toFixed(1)}%
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Collapsible trigger */}
-                    {getGrowingStores().length > 3 && (
-                      <CollapsibleTrigger className="flex items-center justify-center w-full mt-4 p-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                        <span className="mr-2">
-                          {isGrowingAccountsOpen ? `Hide ${getGrowingStores().length - 3} more stores` : `Show ${getGrowingStores().length - 3} more stores`}
-                        </span>
-                        <ChevronDown className={`w-4 h-4 transition-transform ${isGrowingAccountsOpen ? 'rotate-180' : ''}`} />
-                      </CollapsibleTrigger>
-                    )}
-
-                    {/* Collapsible content: Remaining growing stores */}
-                    <CollapsibleContent>
-                      <div className="space-y-4 mt-4">
-                        {getGrowingStores().slice(3).map((store, index) => (
-                          <div 
-                            key={`${store.name}-${index + 3}`} 
-                            className="flex items-center justify-between p-4 rounded-lg border border-success/20 bg-success/5 cursor-pointer hover:bg-success/10 transition-colors"
-                            onClick={() => navigate(`/accounts/${encodeURIComponent(store.name)}`)}
-                          >
-                            <div className="flex items-center gap-3">
-                              <TrendingUp className="w-5 h-5 text-success" />
-                              <div>
-                                <h4 className="font-medium text-foreground">{store.name}</h4>
-                                <p className="text-sm text-muted-foreground">{store.state} • {store.julyCases.toFixed(1)} cases/week • June: {store.juneCases.toFixed(1)}</p>
-                                <div className="mt-1">
-                                  {getStatusBadge(store.status)}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-lg font-bold text-success">
-                                +{store.caseIncrease.toFixed(1)}
-                              </div>
-                              <p className="text-xs text-muted-foreground">Cases/Week Gained</p>
-                              <div className="text-xs text-success font-medium">
-                                +{store.growth.toFixed(1)}%
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CollapsibleContent>
-                  </>
-                ) : (
-                  <div className="text-center py-8">
-                    <div className="w-16 h-16 bg-muted/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <TrendingUp className="w-8 h-8 text-muted-foreground" />
-                    </div>
-                    <h3 className="text-lg font-medium text-foreground mb-2">No Growing Accounts</h3>
-                    <p className="text-muted-foreground">No stores are currently showing significant growth.</p>
+            )}
+          </CardContent>
+        </Card>
+        ) : activeSection === 'growing-monthly' ? (
+            // Growing Accounts Monthly Breakdown
+            <Card className="card-grog">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setActiveSection('growing')}
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      <ArrowLeft className="w-4 h-4 mr-2" />
+                      Back to Growing Accounts
+                    </Button>
                   </div>
-                )}
-              </Collapsible>
-            ) : activeSection === 'accounts' ? (
+                </div>
+                <CardTitle className="text-2xl font-bold">Growing Accounts - Monthly Breakdown</CardTitle>
+                <CardDescription>Month-by-month analysis of accounts showing growth</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Monthly Summary Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card className="border-success/20 bg-success/5">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg">May 2025</CardTitle>
+                      <CardDescription>Growing Accounts</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-3xl font-bold text-success">
+                        {dashboardData.accountPerformance.filter(account => 
+                          account.mayCases > 0 && account.juneCases > account.mayCases && 
+                          ((account.juneCases - account.mayCases) / account.mayCases) >= 0.1
+                        ).length}
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-success/20 bg-success/5">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg">June 2025</CardTitle>
+                      <CardDescription>Growing Accounts</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-3xl font-bold text-success">
+                        {dashboardData.accountPerformance.filter(account => 
+                          account.juneCases > 0 && account.julyCases > account.juneCases && 
+                          ((account.julyCases - account.juneCases) / account.juneCases) >= 0.1
+                        ).length}
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-success/20 bg-success/5">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg">July 2025</CardTitle>
+                      <CardDescription>Growing Accounts</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-3xl font-bold text-success">
+                        {getGrowingStores().length}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Monthly Bar Chart */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Monthly Growing Accounts Trend</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ChartContainer
+                      config={{
+                        growingAccounts: {
+                          label: "Growing Accounts",
+                          color: "hsl(var(--success))",
+                        },
+                      }}
+                      className="h-[300px]"
+                    >
+                      <BarChart
+                        data={[
+                          {
+                            month: "May 2025",
+                            growingAccounts: dashboardData.accountPerformance.filter(account => 
+                              account.mayCases > 0 && account.juneCases > account.mayCases && 
+                              ((account.juneCases - account.mayCases) / account.mayCases) >= 0.1
+                            ).length,
+                          },
+                          {
+                            month: "June 2025",
+                            growingAccounts: dashboardData.accountPerformance.filter(account => 
+                              account.juneCases > 0 && account.julyCases > account.juneCases && 
+                              ((account.julyCases - account.juneCases) / account.juneCases) >= 0.1
+                            ).length,
+                          },
+                          {
+                            month: "July 2025",
+                            growingAccounts: getGrowingStores().length,
+                          },
+                        ]}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" />
+                        <YAxis />
+                        <ChartTooltip
+                          content={<ChartTooltipContent />}
+                        />
+                        <Bar dataKey="growingAccounts" fill="var(--color-growingAccounts)" />
+                      </BarChart>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+
+                {/* Growth Analysis */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Monthly Changes</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="flex justify-between items-center p-3 rounded-lg bg-muted/30">
+                        <span className="text-sm text-muted-foreground">June vs May:</span>
+                        <span className="font-medium text-success">
+                          {(() => {
+                            const mayGrowing = dashboardData.accountPerformance.filter(account => 
+                              account.mayCases > 0 && account.juneCases > account.mayCases && 
+                              ((account.juneCases - account.mayCases) / account.mayCases) >= 0.1
+                            ).length;
+                            const juneGrowing = dashboardData.accountPerformance.filter(account => 
+                              account.juneCases > 0 && account.julyCases > account.juneCases && 
+                              ((account.julyCases - account.juneCases) / account.juneCases) >= 0.1
+                            ).length;
+                            const change = mayGrowing > 0 ? ((juneGrowing - mayGrowing) / mayGrowing * 100) : 0;
+                            return `${change >= 0 ? '+' : ''}${change.toFixed(1)}%`;
+                          })()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 rounded-lg bg-muted/30">
+                        <span className="text-sm text-muted-foreground">July vs June:</span>
+                        <span className="font-medium text-success">
+                          {(() => {
+                            const juneGrowing = dashboardData.accountPerformance.filter(account => 
+                              account.juneCases > 0 && account.julyCases > account.juneCases && 
+                              ((account.julyCases - account.juneCases) / account.juneCases) >= 0.1
+                            ).length;
+                            const julyGrowing = getGrowingStores().length;
+                            const change = juneGrowing > 0 ? ((julyGrowing - juneGrowing) / juneGrowing * 100) : 0;
+                            return `${change >= 0 ? '+' : ''}${change.toFixed(1)}%`;
+                          })()}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Key Insights</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="flex justify-between items-center p-3 rounded-lg bg-muted/30">
+                        <span className="text-sm text-muted-foreground">Current Month (July):</span>
+                        <span className="font-medium">{getGrowingStores().length} accounts</span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 rounded-lg bg-muted/30">
+                        <span className="text-sm text-muted-foreground">Peak Month:</span>
+                        <span className="font-medium">
+                          {(() => {
+                            const mayGrowing = dashboardData.accountPerformance.filter(account => 
+                              account.mayCases > 0 && account.juneCases > account.mayCases && 
+                              ((account.juneCases - account.mayCases) / account.mayCases) >= 0.1
+                            ).length;
+                            const juneGrowing = dashboardData.accountPerformance.filter(account => 
+                              account.juneCases > 0 && account.julyCases > account.juneCases && 
+                              ((account.julyCases - account.juneCases) / account.juneCases) >= 0.1
+                            ).length;
+                            const julyGrowing = getGrowingStores().length;
+                            const max = Math.max(mayGrowing, juneGrowing, julyGrowing);
+                            if (max === julyGrowing) return "July";
+                            if (max === juneGrowing) return "June";
+                            return "May";
+                          })()} 2025
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 rounded-lg bg-muted/30">
+                        <span className="text-sm text-muted-foreground">Growth Threshold:</span>
+                        <span className="font-medium">≥10% increase</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </CardContent>
+            </Card>
+          ) : activeSection === 'accounts' ? (
               // All Accounts Section
               <div className="space-y-4">
                 {dashboardData.accountPerformance
@@ -1671,5 +1780,6 @@ export const MainAIChat = () => {
           </Card>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
