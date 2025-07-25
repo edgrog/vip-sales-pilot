@@ -780,7 +780,7 @@ export const MainAIChat = () => {
                 {dashboardData.accountPerformance
                   .filter(account => account.julyCases > 0)
                   .sort((a, b) => b.julyCases - a.julyCases) // Sort by sales per week
-                  .slice(0, 3) // Show only first 3 by default
+                  .slice(0, 10) // Show first 10 accounts to match chain performance visibility
                   .map((account, index) => (
                     <div 
                       key={`${account.name}-${account.state}`} 
@@ -817,7 +817,7 @@ export const MainAIChat = () => {
                 <Collapsible>
                   <CollapsibleTrigger className="flex items-center justify-center w-full mt-4 p-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
                     <span className="mr-2">
-                      Show {dashboardData.accountPerformance.filter(account => account.julyCases > 0).length - 3} more accounts
+                      Show {dashboardData.accountPerformance.filter(account => account.julyCases > 0).length - 10} more accounts
                     </span>
                     <ChevronDown className="w-4 h-4 transition-transform ui-state-open:rotate-180" />
                   </CollapsibleTrigger>
@@ -827,7 +827,7 @@ export const MainAIChat = () => {
                       {dashboardData.accountPerformance
                         .filter(account => account.julyCases > 0)
                         .sort((a, b) => b.julyCases - a.julyCases)
-                        .slice(3) // Skip first 3
+                        .slice(10) // Skip first 10
                         .map((account, index) => (
                           <div 
                             key={`${account.name}-${account.state}-${index}`} 
