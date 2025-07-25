@@ -11,7 +11,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
-import { SalesAIChat } from "./SalesAIChat";
+
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface VipSalesData {
@@ -56,7 +56,6 @@ export const MainAIChat = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isChainPerformanceOpen, setIsChainPerformanceOpen] = useState(false);
-  const [isAIChatOpen, setIsAIChatOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<'chain' | 'churn' | 'growing' | 'velocity' | 'accounts' | 'activepods'>('activepods'); // Track which section to show
   const [isChurnRiskOpen, setIsChurnRiskOpen] = useState(false); // For churn risk collapsible
   const [isGrowingAccountsOpen, setIsGrowingAccountsOpen] = useState(false); // For growing accounts collapsible
@@ -1278,76 +1277,38 @@ export const MainAIChat = () => {
           </CardContent>
         </Card>
 
-        {/* Account Performance and Action Items */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-          <Card className="card-grog">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">Account Performance ({dashboardData.accountPerformance.length} accounts)</CardTitle>
-              <CardDescription>Store-level performance data with status indicators</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[500px]">
-                <div className="space-y-3 pr-4">
-                  {dashboardData.accountPerformance.map((account, index) => (
-                    <div key={`${account.name}-${index}`} className="flex items-center justify-between p-3 rounded-lg border border-border bg-card/30">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-medium text-foreground text-sm">{account.name}</h4>
-                          {getStatusBadge(account.status)}
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">{account.state} • {account.julyCases.toFixed(1)} cases/week</p>
+        {/* Account Performance */}
+        <Card className="card-grog mt-8">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold">Account Performance ({dashboardData.accountPerformance.length} accounts)</CardTitle>
+            <CardDescription>Store-level performance data with status indicators</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[500px]">
+              <div className="space-y-3 pr-4">
+                {dashboardData.accountPerformance.map((account, index) => (
+                  <div key={`${account.name}-${index}`} className="flex items-center justify-between p-3 rounded-lg border border-border bg-card/30">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-medium text-foreground text-sm">{account.name}</h4>
+                        {getStatusBadge(account.status)}
                       </div>
-                      <div className="text-right">
-                        <div className={`text-sm font-medium ${
-                          account.growth > 0 ? 'text-success' : 
-                          account.growth < -10 ? 'text-destructive' : 'text-muted-foreground'
-                        }`}>
-                          {account.growth >= 0 ? '+' : ''}{account.growth.toFixed(1)}%
-                        </div>
+                      <p className="text-xs text-muted-foreground mt-1">{account.state} • {account.julyCases.toFixed(1)} cases/week</p>
+                    </div>
+                    <div className="text-right">
+                      <div className={`text-sm font-medium ${
+                        account.growth > 0 ? 'text-success' : 
+                        account.growth < -10 ? 'text-destructive' : 'text-muted-foreground'
+                      }`}>
+                        {account.growth >= 0 ? '+' : ''}{account.growth.toFixed(1)}%
                       </div>
                     </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-
-          <Card className="card-grog">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">AI Sales Assistant</CardTitle>
-              <CardDescription>Chat with our AI to analyze your sales data and get actionable insights</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col h-[500px]">
-                <div className="flex-1 mb-4">
-                  <Button 
-                    onClick={() => setIsAIChatOpen(true)} 
-                    className="w-full h-full flex flex-col items-center justify-center gap-4 border-2 border-dashed border-border hover:border-primary/50 transition-colors bg-card/50 hover:bg-card/80"
-                    variant="outline"
-                  >
-                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Bot className="w-8 h-8 text-primary" />
-                    </div>
-                    <div className="text-center">
-                      <h3 className="font-medium text-foreground mb-2">Start AI Analysis</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Ask questions about your sales data, get insights on performance trends, or request action plans for improving results.
-                      </p>
-                    </div>
-                  </Button>
-                </div>
+                  </div>
+                ))}
               </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Sales AI Chat Dialog */}
-        <SalesAIChat 
-          isOpen={isAIChatOpen} 
-          onClose={() => setIsAIChatOpen(false)}
-          salesData={salesData}
-          dashboardData={dashboardData}
-        />
+            </ScrollArea>
+          </CardContent>
+        </Card>
       </div>
     </div>;
 };
