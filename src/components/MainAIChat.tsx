@@ -57,7 +57,7 @@ export const MainAIChat = () => {
   const [loading, setLoading] = useState(true);
   const [isChainPerformanceOpen, setIsChainPerformanceOpen] = useState(false);
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<'chain' | 'churn' | 'growing' | 'velocity' | 'accounts'>('chain'); // Track which section to show
+  const [activeSection, setActiveSection] = useState<'chain' | 'churn' | 'growing' | 'velocity' | 'accounts' | 'activepods'>('chain'); // Track which section to show
   const [isChurnRiskOpen, setIsChurnRiskOpen] = useState(false); // For churn risk collapsible
   const [isGrowingAccountsOpen, setIsGrowingAccountsOpen] = useState(false); // For growing accounts collapsible
 
@@ -386,6 +386,55 @@ export const MainAIChat = () => {
     ];
   };
 
+  const getActivePODsData = () => {
+    if (!salesData.length) return [];
+    
+    // Calculate active PODs for each month
+    const validData = salesData.filter(account => 
+      account["Retail Accounts"] && 
+      account["Retail Accounts"].trim() !== '' && 
+      account["Retail Accounts"] !== 'Total'
+    );
+
+    const mayActivePODs = new Set();
+    const juneActivePODs = new Set();
+    const julyActivePODs = new Set();
+    
+    validData.forEach(account => {
+      const may = account["May 2025"] || 0;
+      const june = account["June 2025"] || 0;
+      const july = account["July 2025"] || 0;
+      
+      if (may > 0) {
+        mayActivePODs.add(account["Retail Accounts"]);
+      }
+      if (june > 0) {
+        juneActivePODs.add(account["Retail Accounts"]);
+      }
+      if (july > 0) {
+        julyActivePODs.add(account["Retail Accounts"]);
+      }
+    });
+
+    return [
+      {
+        month: 'May 2025',
+        activePODs: mayActivePODs.size,
+        shortMonth: 'May'
+      },
+      {
+        month: 'June 2025',
+        activePODs: juneActivePODs.size,
+        shortMonth: 'June'
+      },
+      {
+        month: 'July 2025',
+        activePODs: julyActivePODs.size,
+        shortMonth: 'July'
+      }
+    ];
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -437,7 +486,7 @@ export const MainAIChat = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <Card 
             className="card-grog cursor-pointer hover:shadow-glow transition-all duration-300" 
-            onClick={() => setActiveSection('accounts')}
+            onClick={() => setActiveSection('activepods')}
           >
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Active PODs</CardTitle>
@@ -528,7 +577,8 @@ export const MainAIChat = () => {
                   {activeSection === 'chain' ? 'Chain Performance Breakdown' : 
                    activeSection === 'churn' ? 'Churn Risk Analysis' : 
                    activeSection === 'growing' ? 'Growing Accounts Performance' : 
-                   activeSection === 'accounts' ? 'All Accounts Performance' : 'Sales Velocity Breakdown'}
+                   activeSection === 'accounts' ? 'All Accounts Performance' : 
+                   activeSection === 'activepods' ? 'Active PODs Monthly Breakdown' : 'Sales Velocity Breakdown'}
                 </CardTitle>
                 <CardDescription>
                   {activeSection === 'chain' 
@@ -539,6 +589,8 @@ export const MainAIChat = () => {
                     ? 'Top performing stores with strong growth'
                     : activeSection === 'accounts'
                     ? 'All stores ranked by sales per week (July 2025)'
+                    : activeSection === 'activepods'
+                    ? 'Monthly count of stores with active orders (May - July 2025)'
                     : 'Monthly sales velocity trend (May - July 2025)'
                   }
                 </CardDescription>
@@ -920,6 +972,103 @@ export const MainAIChat = () => {
                     </div>
                   </CollapsibleContent>
                 </Collapsible>
+              </div>
+            ) : activeSection === 'activepods' ? (
+              // Active PODs Section
+              <div className="space-y-6">
+                {/* Monthly breakdown summary */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {getActivePODsData().map((month) => (
+                    <div key={month.month} className="p-4 rounded-lg border border-border bg-card/30">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-foreground">{month.activePODs}</div>
+                        <p className="text-sm text-muted-foreground">Active PODs</p>
+                        <p className="text-xs text-muted-foreground mt-1">{month.month}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Bar Chart */}
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={getActivePODsData()} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                      <XAxis 
+                        dataKey="shortMonth" 
+                        fontSize={12}
+                      />
+                      <YAxis 
+                        fontSize={12}
+                        label={{ value: 'Active PODs', angle: -90, position: 'insideLeft' }}
+                      />
+                      <Tooltip 
+                        labelFormatter={(value) => `${value} 2025`}
+                        formatter={(value: number, name: string) => [
+                          `${value} stores`,
+                          'Active PODs'
+                        ]}
+                        contentStyle={{
+                          backgroundColor: 'hsl(var(--card))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px'
+                        }}
+                      />
+                      <Bar 
+                        dataKey="activePODs" 
+                        fill="hsl(var(--primary))"
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Insights */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-lg border border-border bg-card/30">
+                    <h4 className="font-medium text-foreground mb-2">Monthly Changes</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">June vs May:</span>
+                        <span className={`text-sm font-medium ${
+                          getActivePODsData()[1]?.activePODs >= getActivePODsData()[0]?.activePODs ? 'text-success' : 'text-destructive'
+                        }`}>
+                          {getActivePODsData()[1]?.activePODs >= getActivePODsData()[0]?.activePODs ? '+' : ''}
+                          {getActivePODsData()[1] && getActivePODsData()[0] ? 
+                            ((getActivePODsData()[1].activePODs - getActivePODsData()[0].activePODs) / getActivePODsData()[0].activePODs * 100).toFixed(1) : 0}%
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">July vs June:</span>
+                        <span className={`text-sm font-medium ${
+                          dashboardData.activePODsChange >= 0 ? 'text-success' : 'text-destructive'
+                        }`}>
+                          {dashboardData.activePODsChange >= 0 ? '+' : ''}{dashboardData.activePODsChange.toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-lg border border-border bg-card/30">
+                    <h4 className="font-medium text-foreground mb-2">Key Metrics</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Current (July):</span>
+                        <span className="text-sm font-medium">{getActivePODsData()[2]?.activePODs || 0}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Peak Month:</span>
+                        <span className="text-sm font-medium text-success">
+                          {Math.max(...getActivePODsData().map(d => d.activePODs))} PODs
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Total Unique PODs:</span>
+                        <span className="text-sm font-medium">{dashboardData.totalActivePODs}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             ) : (
               // Sales Velocity Section
