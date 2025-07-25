@@ -57,7 +57,7 @@ export const MainAIChat = () => {
   const [loading, setLoading] = useState(true);
   const [isChainPerformanceOpen, setIsChainPerformanceOpen] = useState(false);
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<'chain' | 'churn' | 'growing' | 'velocity' | 'accounts' | 'activepods'>('chain'); // Track which section to show
+  const [activeSection, setActiveSection] = useState<'chain' | 'churn' | 'growing' | 'velocity' | 'accounts' | 'activepods'>('activepods'); // Track which section to show
   const [isChurnRiskOpen, setIsChurnRiskOpen] = useState(false); // For churn risk collapsible
   const [isGrowingAccountsOpen, setIsGrowingAccountsOpen] = useState(false); // For growing accounts collapsible
 
