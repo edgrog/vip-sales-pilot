@@ -529,11 +529,11 @@ export const MainAIChat = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Chain</TableHead>
-                      <TableHead className="text-center">Stores</TableHead>
-                      <TableHead className="text-right">Cases/Week</TableHead>
-                      <TableHead className="text-right">Growth</TableHead>
-                      <TableHead className="text-center">Status</TableHead>
+                      <TableHead className="w-[300px]">Chain</TableHead>
+                      <TableHead className="text-center w-[80px]">Stores</TableHead>
+                      <TableHead className="text-right w-[120px] pr-6">Cases/Week</TableHead>
+                      <TableHead className="text-right w-[100px] pr-6">Growth</TableHead>
+                      <TableHead className="text-center w-[100px]">Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -553,8 +553,8 @@ export const MainAIChat = () => {
                           </div>
                         </TableCell>
                         <TableCell className="text-center">{chain.accounts}</TableCell>
-                        <TableCell className="text-right font-medium">{chain.totalCases.toFixed(1)}</TableCell>
-                        <TableCell className={`text-right font-medium ${
+                        <TableCell className="text-right font-medium pr-6">{chain.totalCases.toFixed(1)}</TableCell>
+                        <TableCell className={`text-right font-medium pr-6 ${
                           chain.avgGrowth >= 0 ? 'text-success' : 'text-destructive'
                         }`}>
                           {chain.avgGrowth >= 0 ? '+' : ''}{chain.avgGrowth.toFixed(1)}%
@@ -597,8 +597,8 @@ export const MainAIChat = () => {
                                 </div>
                               </TableCell>
                               <TableCell className="text-center">{chain.accounts}</TableCell>
-                              <TableCell className="text-right font-medium">{chain.totalCases.toFixed(1)}</TableCell>
-                              <TableCell className={`text-right font-medium ${
+                              <TableCell className="text-right font-medium pr-6">{chain.totalCases.toFixed(1)}</TableCell>
+                              <TableCell className={`text-right font-medium pr-6 ${
                                 chain.avgGrowth >= 0 ? 'text-success' : 'text-destructive'
                               }`}>
                                 {chain.avgGrowth >= 0 ? '+' : ''}{chain.avgGrowth.toFixed(1)}%
