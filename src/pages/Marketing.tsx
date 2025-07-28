@@ -7,7 +7,6 @@ import { useMetaAdsData } from "@/hooks/useMetaAdsData";
 import { MetaAdsTable } from "@/components/MetaAdsTable";
 import { ChainSpendAnalysis } from "@/components/ChainSpendAnalysis";
 import { StateSpendAnalysis } from "@/components/StateSpendAnalysis";
-import { USHeatMap } from "@/components/USHeatMap";
 
 const Marketing = () => {
   const navigate = useNavigate();
@@ -35,7 +34,7 @@ const Marketing = () => {
         </div>
 
         <Tabs defaultValue="campaigns" className="space-y-6">
-          <TabsList className="grid w-full lg:w-auto lg:grid-cols-4">
+          <TabsList className="grid w-full lg:w-auto lg:grid-cols-3">
             <TabsTrigger value="campaigns" className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4" />
               Campaigns
@@ -47,10 +46,6 @@ const Marketing = () => {
             <TabsTrigger value="states" className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />
               State Analysis
-            </TabsTrigger>
-            <TabsTrigger value="heatmap" className="flex items-center gap-2">
-              <MapPin className="w-4 h-4" />
-              US Heat Map
             </TabsTrigger>
           </TabsList>
 
@@ -100,10 +95,6 @@ const Marketing = () => {
 
           <TabsContent value="states" className="space-y-6">
             <StateSpendAnalysis data={data} />
-          </TabsContent>
-
-          <TabsContent value="heatmap" className="space-y-6">
-            <USHeatMap data={data} />
           </TabsContent>
         </Tabs>
       </div>
