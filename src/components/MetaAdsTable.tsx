@@ -24,7 +24,7 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTag, setFilterTag] = useState<string>('all');
   const [filterChain, setFilterChain] = useState<string>('all');
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingCell, setEditingCell] = useState<string | null>(null); // format: "adId-field"
   const [editingData, setEditingData] = useState<Partial<MetaAd>>({});
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
@@ -45,8 +45,9 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
 
   const totalSpend = filteredData.reduce((sum, ad) => sum + ad.spend, 0);
 
-  const handleEdit = (ad: MetaAd) => {
-    setEditingId(ad.id);
+  const handleEdit = (ad: MetaAd, field: string) => {
+    const cellId = `${ad.id}-${field}`;
+    setEditingCell(cellId);
     setEditingData({
       tag: ad.tag,
       chain: ad.chain,
@@ -56,7 +57,7 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
   };
 
   const handleCancel = () => {
-    setEditingId(null);
+    setEditingCell(null);
     setEditingData({});
   };
 
@@ -76,7 +77,7 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
       if (error) throw error;
 
       onAdUpdate(adId, editingData);
-      setEditingId(null);
+      setEditingCell(null);
       setEditingData({});
       
       toast({
@@ -209,13 +210,12 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                 <TableHead>Chain</TableHead>
                 <TableHead>State</TableHead>
                 <TableHead>Notes</TableHead>
-                <TableHead className="w-24">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8">
+                  <TableCell colSpan={7} className="text-center py-8">
                     <div className="flex items-center justify-center gap-2">
                       <RefreshCw className="w-4 h-4 animate-spin" />
                       Loading Meta Ads data...
@@ -224,7 +224,7 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                 </TableRow>
               ) : filteredData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     No ads found matching your filters
                   </TableCell>
                 </TableRow>
@@ -241,107 +241,187 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                       ${ad.spend.toLocaleString()}
                     </TableCell>
                     <TableCell>
-                      {editingId === ad.id ? (
-                        <MultiSelect
-                          options={uniqueTags}
-                          value={editingData.tag || []}
-                          onChange={(value) => setEditingData(prev => ({ ...prev, tag: value }))}
-                          placeholder="Select tags"
-                          className="w-48"
-                        />
-                      ) : ad.tag.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
-                          {ad.tag.map((tag, index) => (
-                            <Badge key={index} variant="secondary">{tag}</Badge>
-                          ))}
+                      {editingCell === `${ad.id}-tag` ? (
+                        <div className="flex items-center gap-2">
+                          <MultiSelect
+                            options={uniqueTags}
+                            value={editingData.tag || []}
+                            onChange={(value) => setEditingData(prev => ({ ...prev, tag: value }))}
+                            placeholder="Select tags"
+                            className="w-48"
+                          />
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              onClick={() => handleSave(ad.id)}
+                              disabled={saving}
+                              className="h-6 w-6 p-0"
+                            >
+                              <Save className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={handleCancel}
+                              disabled={saving}
+                              className="h-6 w-6 p-0"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </div>
                       ) : (
-                        <span className="text-muted-foreground text-sm">-</span>
+                        <div 
+                          className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1"
+                          onClick={() => handleEdit(ad, 'tag')}
+                        >
+                          {ad.tag.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {ad.tag.map((tag, index) => (
+                                <Badge key={index} variant="secondary">{tag}</Badge>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">Click to add tags</span>
+                          )}
+                        </div>
                       )}
                     </TableCell>
                     <TableCell>
-                      {editingId === ad.id ? (
-                        <MultiSelect
-                          options={uniqueChains}
-                          value={editingData.chain || []}
-                          onChange={(value) => setEditingData(prev => ({ ...prev, chain: value }))}
-                          placeholder="Select chains"
-                          className="w-48"
-                        />
-                      ) : ad.chain.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
-                          {ad.chain.map((chain, index) => (
-                            <Badge key={index} variant="outline">{chain}</Badge>
-                          ))}
+                      {editingCell === `${ad.id}-chain` ? (
+                        <div className="flex items-center gap-2">
+                          <MultiSelect
+                            options={uniqueChains}
+                            value={editingData.chain || []}
+                            onChange={(value) => setEditingData(prev => ({ ...prev, chain: value }))}
+                            placeholder="Select chains"
+                            className="w-48"
+                          />
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              onClick={() => handleSave(ad.id)}
+                              disabled={saving}
+                              className="h-6 w-6 p-0"
+                            >
+                              <Save className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={handleCancel}
+                              disabled={saving}
+                              className="h-6 w-6 p-0"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </div>
                       ) : (
-                        <span className="text-muted-foreground text-sm">-</span>
+                        <div 
+                          className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1"
+                          onClick={() => handleEdit(ad, 'chain')}
+                        >
+                          {ad.chain.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {ad.chain.map((chain, index) => (
+                                <Badge key={index} variant="outline">{chain}</Badge>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">Click to add chains</span>
+                          )}
+                        </div>
                       )}
                     </TableCell>
                     <TableCell>
-                      {editingId === ad.id ? (
-                        <MultiSelect
-                          options={[...new Set(data.flatMap(ad => ad.state))]}
-                          value={editingData.state || []}
-                          onChange={(value) => setEditingData(prev => ({ ...prev, state: value }))}
-                          placeholder="Select states"
-                          className="w-32"
-                        />
-                      ) : ad.state.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
-                          {ad.state.map((state, index) => (
-                            <Badge key={index} variant="outline">{state}</Badge>
-                          ))}
+                      {editingCell === `${ad.id}-state` ? (
+                        <div className="flex items-center gap-2">
+                          <MultiSelect
+                            options={[...new Set(data.flatMap(ad => ad.state))]}
+                            value={editingData.state || []}
+                            onChange={(value) => setEditingData(prev => ({ ...prev, state: value }))}
+                            placeholder="Select states"
+                            className="w-32"
+                          />
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              onClick={() => handleSave(ad.id)}
+                              disabled={saving}
+                              className="h-6 w-6 p-0"
+                            >
+                              <Save className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={handleCancel}
+                              disabled={saving}
+                              className="h-6 w-6 p-0"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </div>
                       ) : (
-                        <span className="text-muted-foreground text-sm">-</span>
+                        <div 
+                          className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1"
+                          onClick={() => handleEdit(ad, 'state')}
+                        >
+                          {ad.state.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {ad.state.map((state, index) => (
+                                <Badge key={index} variant="outline">{state}</Badge>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">Click to add states</span>
+                          )}
+                        </div>
                       )}
                     </TableCell>
                     <TableCell className="max-w-xs">
-                      {editingId === ad.id ? (
-                        <Textarea
-                          value={editingData.notes || ''}
-                          onChange={(e) => setEditingData(prev => ({ ...prev, notes: e.target.value }))}
-                          placeholder="Enter notes"
-                          className="w-48 min-h-[60px]"
-                          rows={2}
-                        />
-                      ) : ad.notes ? (
-                        <span className="text-sm">{ad.notes}</span>
-                      ) : (
-                        <span className="text-muted-foreground text-sm">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {editingId === ad.id ? (
-                        <div className="flex gap-1">
-                          <Button
-                            size="sm"
-                            onClick={() => handleSave(ad.id)}
-                            disabled={saving}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Save className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={handleCancel}
-                            disabled={saving}
-                            className="h-8 w-8 p-0"
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
+                      {editingCell === `${ad.id}-notes` ? (
+                        <div className="flex items-center gap-2">
+                          <Textarea
+                            value={editingData.notes || ''}
+                            onChange={(e) => setEditingData(prev => ({ ...prev, notes: e.target.value }))}
+                            placeholder="Enter notes"
+                            className="w-48 min-h-[60px]"
+                            rows={2}
+                          />
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              onClick={() => handleSave(ad.id)}
+                              disabled={saving}
+                              className="h-6 w-6 p-0"
+                            >
+                              <Save className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={handleCancel}
+                              disabled={saving}
+                              className="h-6 w-6 p-0"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </div>
                       ) : (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleEdit(ad)}
-                          className="h-8 w-8 p-0"
+                        <div 
+                          className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1"
+                          onClick={() => handleEdit(ad, 'notes')}
                         >
-                          <Edit2 className="h-3 w-3" />
-                        </Button>
+                          {ad.notes ? (
+                            <span className="text-sm">{ad.notes}</span>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">Click to add notes</span>
+                          )}
+                        </div>
                       )}
                     </TableCell>
                   </TableRow>
