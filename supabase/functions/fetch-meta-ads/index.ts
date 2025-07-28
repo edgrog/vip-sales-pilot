@@ -28,8 +28,11 @@ serve(async (req) => {
     console.log('Fetching Meta Ads data...');
 
     const adAccountId = 'act_602278455259953';    
-    const fields = 'id,name,delivery,insights{spend,impressions,results,cost_per_result}';
+    // Try different field combinations - some might not be available
+    const fields = 'id,name,effective_status,insights{spend,impressions,actions,cost_per_action_type}';
     const apiUrl = `https://graph.facebook.com/v18.0/${adAccountId}/ads?fields=${fields}&access_token=${metaAccessToken}`;
+    
+    console.log('API URL:', apiUrl);
     
     const response = await fetch(apiUrl);
     
@@ -39,7 +42,9 @@ serve(async (req) => {
     
     const data = await response.json();
     
-    console.log('Successfully fetched Meta Ads data:', data);
+    console.log('Successfully fetched Meta Ads data:');
+    console.log('Sample ad structure:', JSON.stringify(data.data?.[0], null, 2));
+    console.log('Total ads returned:', data.data?.length);
 
     return new Response(
       JSON.stringify(data),

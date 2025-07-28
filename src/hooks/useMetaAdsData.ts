@@ -19,13 +19,19 @@ interface MetaAdsResponse {
   data: Array<{
     id: string;
     name: string;
-    delivery?: string;
+    effective_status?: string;
     insights?: {
       data: Array<{
         spend: string;
         impressions?: string;
-        results?: string;
-        cost_per_result?: string;
+        actions?: Array<{
+          action_type: string;
+          value: string;
+        }>;
+        cost_per_action_type?: Array<{
+          action_type: string;
+          value: string;
+        }>;
       }>;
     };
   }>;
@@ -94,14 +100,30 @@ export const useMetaAdsData = () => {
         const tagData = tagsMap.get(ad.id);
         const insights = ad.insights?.data?.[0];
         
+        // Extract results from actions array (looking for common conversion actions)
+        const actions = insights?.actions || [];
+        const results = actions.find(action => 
+          action.action_type === 'link_click' || 
+          action.action_type === 'post_engagement' ||
+          action.action_type === 'landing_page_view'
+        );
+        
+        // Extract cost per result from cost_per_action_type array
+        const costPerActions = insights?.cost_per_action_type || [];
+        const costPerResult = costPerActions.find(cost => 
+          cost.action_type === 'link_click' || 
+          cost.action_type === 'post_engagement' ||
+          cost.action_type === 'landing_page_view'
+        );
+        
         return {
           id: ad.id,
           name: ad.name,
           spend: parseFloat(insights?.spend || '0'),
-          delivery: ad.delivery || 'UNKNOWN',
-          results: parseInt(insights?.results || '0'),
+          delivery: ad.effective_status || 'UNKNOWN',
+          results: parseInt(results?.value || '0'),
           impressions: parseInt(insights?.impressions || '0'),
-          cost_per_result: parseFloat(insights?.cost_per_result || '0'),
+          cost_per_result: parseFloat(costPerResult?.value || '0'),
           tag: parseCommaSeparated(tagData?.tag),
           state: parseCommaSeparated(tagData?.state),
           chain: parseCommaSeparated(tagData?.chain),
