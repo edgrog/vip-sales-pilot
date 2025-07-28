@@ -10,6 +10,7 @@ import { RefreshCw, Search, DollarSign, Tag, MapPin, Edit2, Save, X } from 'luci
 import { MetaAd } from '@/hooks/useMetaAdsData';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { MultiSelect } from '@/components/ui/multi-select';
 
 interface MetaAdsTableProps {
   data: MetaAd[];
@@ -29,15 +30,15 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
   const { toast } = useToast();
 
   // Get unique values for filters
-  const uniqueTags = [...new Set(data.map(ad => ad.tag).filter(Boolean))];
-  const uniqueChains = [...new Set(data.map(ad => ad.chain).filter(Boolean))];
+  const uniqueTags = [...new Set(data.flatMap(ad => ad.tag).filter(Boolean))];
+  const uniqueChains = [...new Set(data.flatMap(ad => ad.chain).filter(Boolean))];
 
   // Filter data based on search and filters
   const filteredData = data.filter(ad => {
     const matchesSearch = ad.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          ad.id.includes(searchTerm);
-    const matchesTag = filterTag === 'all' || ad.tag === filterTag;
-    const matchesChain = filterChain === 'all' || ad.chain === filterChain;
+    const matchesTag = filterTag === 'all' || ad.tag.includes(filterTag);
+    const matchesChain = filterChain === 'all' || ad.chain.includes(filterChain);
     
     return matchesSearch && matchesTag && matchesChain;
   });
@@ -66,9 +67,9 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
         .from('ad_tags')
         .upsert({
           ad_id: adId,
-          tag: editingData.tag || null,
-          chain: editingData.chain || null,
-          state: editingData.state || null,
+          tag: editingData.tag?.length ? editingData.tag.join(', ') : null,
+          chain: editingData.chain?.length ? editingData.chain.join(', ') : null,
+          state: editingData.state?.length ? editingData.state.join(', ') : null,
           notes: editingData.notes || null
         });
 
@@ -149,7 +150,7 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
             <Tag className="w-8 h-8 text-success" />
             <div>
               <p className="text-sm text-muted-foreground">Tagged Ads</p>
-              <p className="text-2xl font-bold">{data.filter(ad => ad.tag).length}</p>
+              <p className="text-2xl font-bold">{data.filter(ad => ad.tag.length > 0).length}</p>
             </div>
           </div>
           <div className="flex items-center gap-3 p-4 bg-info/5 rounded-lg">
@@ -241,42 +242,59 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                     </TableCell>
                     <TableCell>
                       {editingId === ad.id ? (
-                        <Input
-                          value={editingData.tag || ''}
-                          onChange={(e) => setEditingData(prev => ({ ...prev, tag: e.target.value }))}
-                          placeholder="Enter tag"
-                          className="w-32"
+                        <MultiSelect
+                          options={uniqueTags}
+                          value={editingData.tag || []}
+                          onChange={(value) => setEditingData(prev => ({ ...prev, tag: value }))}
+                          placeholder="Select tags"
+                          className="w-48"
                         />
-                      ) : ad.tag ? (
-                        <Badge variant="secondary">{ad.tag}</Badge>
+                      ) : ad.tag.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {ad.tag.map((tag, index) => (
+                            <Badge key={index} variant="secondary">{tag}</Badge>
+                          ))}
+                        </div>
                       ) : (
                         <span className="text-muted-foreground text-sm">-</span>
                       )}
                     </TableCell>
                     <TableCell>
                       {editingId === ad.id ? (
-                        <Input
-                          value={editingData.chain || ''}
-                          onChange={(e) => setEditingData(prev => ({ ...prev, chain: e.target.value }))}
-                          placeholder="Enter chain"
-                          className="w-32"
+                        <MultiSelect
+                          options={uniqueChains}
+                          value={editingData.chain || []}
+                          onChange={(value) => setEditingData(prev => ({ ...prev, chain: value }))}
+                          placeholder="Select chains"
+                          className="w-48"
                         />
-                      ) : ad.chain ? (
-                        <Badge variant="outline">{ad.chain}</Badge>
+                      ) : ad.chain.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {ad.chain.map((chain, index) => (
+                            <Badge key={index} variant="outline">{chain}</Badge>
+                          ))}
+                        </div>
                       ) : (
                         <span className="text-muted-foreground text-sm">-</span>
                       )}
                     </TableCell>
                     <TableCell>
                       {editingId === ad.id ? (
-                        <Input
-                          value={editingData.state || ''}
-                          onChange={(e) => setEditingData(prev => ({ ...prev, state: e.target.value }))}
-                          placeholder="Enter state"
-                          className="w-24"
+                        <MultiSelect
+                          options={[...new Set(data.flatMap(ad => ad.state))]}
+                          value={editingData.state || []}
+                          onChange={(value) => setEditingData(prev => ({ ...prev, state: value }))}
+                          placeholder="Select states"
+                          className="w-32"
                         />
+                      ) : ad.state.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {ad.state.map((state, index) => (
+                            <Badge key={index} variant="outline">{state}</Badge>
+                          ))}
+                        </div>
                       ) : (
-                        ad.state || <span className="text-muted-foreground text-sm">-</span>
+                        <span className="text-muted-foreground text-sm">-</span>
                       )}
                     </TableCell>
                     <TableCell className="max-w-xs">

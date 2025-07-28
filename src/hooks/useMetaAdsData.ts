@@ -5,9 +5,9 @@ export interface MetaAd {
   id: string;
   name: string;
   spend: number;
-  tag: string;
-  state: string;
-  chain: string;
+  tag: string[];
+  state: string[];
+  chain: string[];
   notes: string;
 }
 
@@ -30,6 +30,11 @@ interface AdTag {
   chain: string | null;
   notes: string | null;
 }
+
+const parseCommaSeparated = (value: string | null): string[] => {
+  if (!value) return [];
+  return value.split(',').map(item => item.trim()).filter(Boolean);
+};
 
 export const useMetaAdsData = () => {
   const [data, setData] = useState<MetaAd[]>([]);
@@ -84,9 +89,9 @@ export const useMetaAdsData = () => {
           id: ad.id,
           name: ad.name,
           spend: parseFloat(ad.insights?.data?.[0]?.spend || '0'),
-          tag: tagData?.tag || '',
-          state: tagData?.state || '',
-          chain: tagData?.chain || '',
+          tag: parseCommaSeparated(tagData?.tag),
+          state: parseCommaSeparated(tagData?.state),
+          chain: parseCommaSeparated(tagData?.chain),
           notes: tagData?.notes || ''
         };
       });
