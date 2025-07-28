@@ -43,14 +43,24 @@ const Marketing = () => {
               <p className="text-muted-foreground">Manage your Meta Ads campaigns and performance</p>
             </div>
           </div>
-          <Button 
-            onClick={() => navigate('/wholesale')}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <BarChart className="w-4 h-4" />
-            Wholesale
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => navigate('/marketing/ads-dashboard')}
+              variant="default"
+              className="flex items-center gap-2"
+            >
+              <BarChart className="w-4 h-4" />
+              Ads Dashboard
+            </Button>
+            <Button 
+              onClick={() => navigate('/wholesale')}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <BarChart className="w-4 h-4" />
+              Wholesale
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="campaigns" className="space-y-6">
