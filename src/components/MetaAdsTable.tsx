@@ -34,8 +34,11 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
   const uniqueTags = [...new Set(data.flatMap(ad => ad.tag).filter(Boolean))];
   const uniqueChains = [...new Set(data.flatMap(ad => ad.chain).filter(Boolean))];
 
-  // Filter data based on search and filters
-  const filteredData = data.filter(ad => {
+  // Filter out campaigns with 'AU/NZ' tag from frontend display
+  const visibleData = data.filter(ad => !ad.tag.includes('AU/NZ'));
+
+  // Filter visible data based on search and filters
+  const filteredData = visibleData.filter(ad => {
     const matchesSearch = ad.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          ad.id.includes(searchTerm);
     const matchesTag = filterTag === 'all' || ad.tag.includes(filterTag);
@@ -234,7 +237,7 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
             <Tag className="w-8 h-8 text-success" />
             <div>
               <p className="text-sm text-muted-foreground">Tagged Ads</p>
-              <p className="text-2xl font-bold">{data.filter(ad => ad.tag.length > 0).length}</p>
+              <p className="text-2xl font-bold">{visibleData.filter(ad => ad.tag.length > 0).length}</p>
             </div>
           </div>
           <div className="flex items-center gap-3 p-4 bg-info/5 rounded-lg">
@@ -326,7 +329,7 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                     <TableCell>
                       {editingCell === `${ad.id}-tag` ? (
                         <MultiSelect
-                          options={uniqueTags}
+                          options={[...uniqueTags, 'AU/NZ'].filter((tag, index, arr) => arr.indexOf(tag) === index)}
                           value={editingData.tag || []}
                           onChange={(value) => {
                             const newData = { ...editingData, tag: value };
