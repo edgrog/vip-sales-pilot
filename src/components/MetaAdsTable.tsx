@@ -78,7 +78,10 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
       
       // Independent & Other Chains  
       'Independent': 'bg-violet-100 text-violet-800 border-violet-300 dark:bg-violet-950 dark:text-violet-300 dark:border-violet-700',
-      'ABC': 'bg-cyan-100 text-cyan-800 border-cyan-300 dark:bg-cyan-950 dark:text-cyan-300 dark:border-cyan-700'
+      'ABC': 'bg-cyan-100 text-cyan-800 border-cyan-300 dark:bg-cyan-950 dark:text-cyan-300 dark:border-cyan-700',
+      'Ralph\'s': 'bg-lime-100 text-lime-800 border-lime-300 dark:bg-lime-950 dark:text-lime-300 dark:border-lime-700',
+      'Binny\'s': 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-700',
+      'BevMo': 'bg-pink-100 text-pink-800 border-pink-300 dark:bg-pink-950 dark:text-pink-300 dark:border-pink-700'
     };
     return chainColors[chain] || 'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-950 dark:text-gray-300 dark:border-gray-700';
   };
