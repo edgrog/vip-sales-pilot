@@ -27,57 +27,9 @@ serve(async (req) => {
 
     console.log('Fetching Meta Ads data...');
 
-    // For now, we'll return mock data since we need the actual ad account ID
-    // Replace this with actual Meta API call once you provide the ad account ID
-    const mockData = {
-      data: [
-        {
-          id: "23892841234567890",
-          name: "Summer Sale Campaign - Target Stores",
-          insights: {
-            data: [
-              { spend: "1234.56" }
-            ]
-          }
-        },
-        {
-          id: "23892841234567891", 
-          name: "Back to School Promo - Walmart",
-          insights: {
-            data: [
-              { spend: "2345.67" }
-            ]
-          }
-        },
-        {
-          id: "23892841234567892",
-          name: "Holiday Campaign - Kroger",
-          insights: {
-            data: [
-              { spend: "3456.78" }
-            ]
-          }
-        },
-        {
-          id: "23892841234567893",
-          name: "Brand Awareness - Multi-Chain",
-          insights: {
-            data: [
-              { spend: "987.65" }
-            ]
-          }
-        },
-        {
-          id: "23892841234567894",
-          name: "Product Launch - Target & Walmart",
-          insights: {
-            data: [
-              { spend: "4567.89" }
-            ]
-          }
-        }
-      ]
-    };
+      const res = await fetch("https://uqdsgeqvosbfrdvebtbf.functions.supabase.co/fetch-meta-ads");
+      const json = await res.json();
+      const metaData = json.data || [];
 
     console.log('Successfully fetched Meta Ads data');
 
