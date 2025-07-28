@@ -53,7 +53,7 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
       setSaveTimeoutId(null);
     }
     
-    // Save current editing cell if there is one
+    // Save current editing cell if there is one and it's different
     if (editingCell && editingCell !== `${ad.id}-${field}`) {
       const currentAdId = editingCell.split('-')[0];
       handleAutoSave(currentAdId, false); // Save without timeout
@@ -61,11 +61,14 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
 
     const cellId = `${ad.id}-${field}`;
     setEditingCell(cellId);
+    
+    // Always load the current ad data to ensure we have the latest values
+    const currentAd = data.find(a => a.id === ad.id) || ad;
     setEditingData({
-      tag: ad.tag,
-      chain: ad.chain,
-      state: ad.state,
-      notes: ad.notes
+      tag: currentAd.tag,
+      chain: currentAd.chain,
+      state: currentAd.state,
+      notes: currentAd.notes
     });
   };
 
@@ -151,7 +154,10 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
 
       onAdUpdate(adId, dataToSave);
       
-      if (exitEditMode) {
+      // Update editingData to stay in sync with saved data
+      if (!exitEditMode) {
+        setEditingData(dataToSave);
+      } else {
         setEditingCell(null);
         setEditingData({});
       }
@@ -323,9 +329,10 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                           options={uniqueTags}
                           value={editingData.tag || []}
                           onChange={(value) => {
-                            setEditingData(prev => ({ ...prev, tag: value }));
+                            const newData = { ...editingData, tag: value };
+                            setEditingData(newData);
                             setTimeout(() => {
-                              handleAutoSaveWithData(ad.id, { ...editingData, tag: value }, false);
+                              handleAutoSaveWithData(ad.id, newData, false);
                             }, 100);
                           }}
                           onBlur={() => handleAutoSaveWithData(ad.id, editingData, true)}
@@ -355,9 +362,10 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                           options={uniqueChains}
                           value={editingData.chain || []}
                           onChange={(value) => {
-                            setEditingData(prev => ({ ...prev, chain: value }));
+                            const newData = { ...editingData, chain: value };
+                            setEditingData(newData);
                             setTimeout(() => {
-                              handleAutoSaveWithData(ad.id, { ...editingData, chain: value }, false);
+                              handleAutoSaveWithData(ad.id, newData, false);
                             }, 100);
                           }}
                           onBlur={() => handleAutoSaveWithData(ad.id, editingData, true)}
@@ -388,10 +396,10 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                           value={editingData.state || []}
                           onChange={(value) => {
                             console.log('State onChange:', value);
-                            setEditingData(prev => ({ ...prev, state: value }));
-                            // Save immediately with the new value but don't exit edit mode
+                            const newData = { ...editingData, state: value };
+                            setEditingData(newData);
                             setTimeout(() => {
-                              handleAutoSaveWithData(ad.id, { ...editingData, state: value }, false);
+                              handleAutoSaveWithData(ad.id, newData, false);
                             }, 100);
                           }}
                           onBlur={() => handleAutoSaveWithData(ad.id, editingData, true)}
