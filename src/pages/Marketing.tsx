@@ -1,9 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, BarChart, MapPin, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useMetaAdsData } from "@/hooks/useMetaAdsData";
 import { MetaAdsTable } from "@/components/MetaAdsTable";
+import { ChainSpendAnalysis } from "@/components/ChainSpendAnalysis";
+import { StateSpendAnalysis } from "@/components/StateSpendAnalysis";
+import { USHeatMap } from "@/components/USHeatMap";
 
 const Marketing = () => {
   const navigate = useNavigate();
@@ -30,45 +34,78 @@ const Marketing = () => {
           </div>
         </div>
 
-        <div className="grid gap-6">
-          {/* Meta Ads Table */}
-          <MetaAdsTable 
-            data={data}
-            loading={loading}
-            error={error}
-            onRefresh={refetch}
-            onAdUpdate={updateAd}
-          />
+        <Tabs defaultValue="campaigns" className="space-y-6">
+          <TabsList className="grid w-full lg:w-auto lg:grid-cols-4">
+            <TabsTrigger value="campaigns" className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4" />
+              Campaigns
+            </TabsTrigger>
+            <TabsTrigger value="chains" className="flex items-center gap-2">
+              <BarChart className="w-4 h-4" />
+              Chain Analysis
+            </TabsTrigger>
+            <TabsTrigger value="states" className="flex items-center gap-2">
+              <MapPin className="w-4 h-4" />
+              State Analysis
+            </TabsTrigger>
+            <TabsTrigger value="heatmap" className="flex items-center gap-2">
+              <MapPin className="w-4 h-4" />
+              US Heat Map
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Additional Marketing Features */}
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Campaign Management</CardTitle>
-                <CardDescription>
-                  Create, monitor, and optimize your marketing campaigns
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Additional campaign management features coming soon! This will include campaign creation, 
-                  automated bidding strategies, and cross-platform campaign coordination.
-                </p>
-              </CardContent>
-            </Card>
+          <TabsContent value="campaigns" className="space-y-6">
+            {/* Meta Ads Table */}
+            <MetaAdsTable 
+              data={data}
+              loading={loading}
+              error={error}
+              onRefresh={refetch}
+              onAdUpdate={updateAd}
+            />
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Audience Insights</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Understand your target audience with detailed demographic and behavioral data from Meta Ads.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+            {/* Additional Marketing Features */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Campaign Management</CardTitle>
+                  <CardDescription>
+                    Create, monitor, and optimize your marketing campaigns
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Additional campaign management features coming soon! This will include campaign creation, 
+                    automated bidding strategies, and cross-platform campaign coordination.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Audience Insights</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Understand your target audience with detailed demographic and behavioral data from Meta Ads.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="chains" className="space-y-6">
+            <ChainSpendAnalysis data={data} />
+          </TabsContent>
+
+          <TabsContent value="states" className="space-y-6">
+            <StateSpendAnalysis data={data} />
+          </TabsContent>
+
+          <TabsContent value="heatmap" className="space-y-6">
+            <USHeatMap data={data} />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
