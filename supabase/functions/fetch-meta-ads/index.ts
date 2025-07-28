@@ -27,21 +27,6 @@ serve(async (req) => {
 
     console.log('Fetching Meta Ads data...');
 
-      const res = await fetch("https://uqdsgeqvosbfrdvebtbf.functions.supabase.co/fetch-meta-ads");
-      const json = await res.json();
-      const metaData = json.data || [];
-
-    console.log('Successfully fetched Meta Ads data');
-
-    return new Response(
-      JSON.stringify(mockData),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    );
-
-    // Uncomment this section when you want to use real Meta API data:
-    /*
     const adAccountId = 'act_YOUR_AD_ACCOUNT_ID'; // Replace with your actual ad account ID
     const fields = 'id,name,insights{spend}';
     const apiUrl = `https://graph.facebook.com/v18.0/${adAccountId}/ads?fields=${fields}&access_token=${metaAccessToken}`;
@@ -62,7 +47,6 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     );
-    */
 
   } catch (error) {
     console.error('Error fetching Meta Ads data:', error);
