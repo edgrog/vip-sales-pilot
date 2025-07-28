@@ -116,8 +116,8 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
   const uniqueTags = [...new Set(data.flatMap(ad => ad.tag).filter(Boolean))];
   const uniqueChains = [...new Set(data.flatMap(ad => ad.chain).filter(Boolean))];
 
-  // Filter out campaigns with 'AU/NZ' tag from frontend display
-  const visibleData = data.filter(ad => !ad.tag.includes('AU/NZ'));
+  // Filter out campaigns with 'AU/NZ' tag OR state from frontend display
+  const visibleData = data.filter(ad => !ad.tag.includes('AU/NZ') && !ad.state.includes('AU/NZ'));
 
   // Filter visible data based on search and filters
   const filteredData = visibleData.filter(ad => {
@@ -430,9 +430,7 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
             <TableHeader>
               <TableRow>
                 <TableHead>Ad Name</TableHead>
-                <TableHead>Ad ID</TableHead>
                 <TableHead className="text-right">Spend</TableHead>
-                <TableHead>Tag</TableHead>
                 <TableHead>Chain</TableHead>
                 <TableHead>State</TableHead>
                 <TableHead>Notes</TableHead>
@@ -440,8 +438,8 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
+                 <TableRow>
+                   <TableCell colSpan={5} className="text-center py-8">
                     <div className="flex items-center justify-center gap-2">
                       <RefreshCw className="w-4 h-4 animate-spin" />
                       Loading Meta Ads data...
@@ -450,167 +448,129 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                 </TableRow>
               ) : filteredData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                     No ads found matching your filters
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredData.map((ad) => (
-                  <TableRow key={ad.id}>
-                    <TableCell className="font-medium max-w-xs truncate">
-                      {ad.name}
-                    </TableCell>
-                    <TableCell className="font-mono text-sm">
-                      {ad.id}
-                    </TableCell>
-                    <TableCell className="text-right font-bold">
-                      ${ad.spend.toLocaleString()}
-                    </TableCell>
-                    <TableCell>
-                      {editingCell === `${ad.id}-tag` ? (
-                        <MultiSelect
-                          options={[...uniqueTags, 'AU/NZ'].filter((tag, index, arr) => arr.indexOf(tag) === index)}
-                          value={editingData.tag || []}
-                          onChange={(value) => {
-                            const newData = { ...editingData, tag: value };
-                            setEditingData(newData);
-                            // Save immediately with the new data
-                            handleAutoSaveWithData(ad.id, newData, false);
-                          }}
-                          onBlur={() => {
-                            setEditingCell(null);
-                            setEditingData({});
-                          }}
-                          placeholder="Select tags"
-                          className="w-48"
-                        />
-                      ) : (
-                        <div 
-                          className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1"
-                          onClick={() => handleEdit(ad, 'tag')}
-                        >
-                          {ad.tag.length > 0 ? (
-                            <div className="flex flex-wrap gap-1">
-                              {ad.tag.map((tag, index) => (
-                                <Badge key={index} variant="outline" className={getTagColor(tag)}>{tag}</Badge>
-                              ))}
-                            </div>
-                          ) : (
-                            <span className="text-muted-foreground text-sm">Click to add tags</span>
-                          )}
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {editingCell === `${ad.id}-chain` ? (
-                        <MultiSelect
-                          options={uniqueChains}
-                          value={editingData.chain || []}
-                          onChange={(value) => {
-                            const newData = { ...editingData, chain: value };
-                            setEditingData(newData);
-                            // Save immediately with the new data
-                            handleAutoSaveWithData(ad.id, newData, false);
-                          }}
-                          onBlur={() => {
-                            setEditingCell(null);
-                            setEditingData({});
-                          }}
-                          placeholder="Select chains"
-                          className="w-48"
-                        />
-                      ) : (
-                        <div 
-                          className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1"
-                          onClick={() => handleEdit(ad, 'chain')}
-                        >
-                          {ad.chain.length > 0 ? (
-                            <div className="flex flex-wrap gap-1">
-                              {ad.chain.map((chain, index) => (
-                                <Badge key={index} variant="outline" className={getChainColor(chain)}>{chain}</Badge>
-                              ))}
-                            </div>
-                          ) : (
-                            <span className="text-muted-foreground text-sm">Click to add chains</span>
-                          )}
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {editingCell === `${ad.id}-state` ? (
-                        <MultiSelect
-                          options={['ALL', 'CA', 'TX', 'IL', 'MI', 'WI', 'FL', 'OH', 'MA']}
-                          value={editingData.state || []}
-                          onChange={(value) => {
-                            console.log('State onChange:', value);
-                            let newStateValue = value;
-                            
-                            // Handle 'ALL' selection
-                            if (value.includes('ALL')) {
-                              if (value.length === 1) {
-                                // If only 'ALL' is selected, select all states
-                                newStateValue = ['CA', 'TX', 'IL', 'MI', 'WI', 'FL', 'OH', 'MA'];
-                              } else {
-                                // If 'ALL' plus other states, remove 'ALL' and keep individual states
-                                newStateValue = value.filter(state => state !== 'ALL');
-                              }
-                            }
-                            
-                            const newData = { ...editingData, state: newStateValue };
-                            setEditingData(newData);
-                            // Save immediately with the new data
-                            handleAutoSaveWithData(ad.id, newData, false);
-                          }}
-                          onBlur={() => {
-                            setEditingCell(null);
-                            setEditingData({});
-                          }}
-                          placeholder="Select states"
-                          className="w-32"
-                        />
-                      ) : (
-                        <div 
-                          className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1"
-                          onClick={() => handleEdit(ad, 'state')}
-                        >
-                          {ad.state.length > 0 ? (
-                            <div className="flex flex-wrap gap-1">
-                              {ad.state.map((state, index) => (
-                                <Badge key={index} variant="outline" className={getStateColor(state)}>{state}</Badge>
-                              ))}
-                            </div>
-                          ) : (
-                            <span className="text-muted-foreground text-sm">Click to add states</span>
-                          )}
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell className="max-w-xs">
-                      {editingCell === `${ad.id}-notes` ? (
-                        <Textarea
-                          value={editingData.notes || ''}
-                          onChange={(e) => setEditingData(prev => ({ ...prev, notes: e.target.value }))}
-                          onBlur={() => handleAutoSave(ad.id)}
-                          placeholder="Enter notes"
-                          className="w-48 min-h-[60px]"
-                          rows={2}
-                          autoFocus
-                        />
-                      ) : (
-                        <div 
-                          className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1"
-                          onClick={() => handleEdit(ad, 'notes')}
-                        >
-                          {ad.notes ? (
-                            <span className="text-sm">{ad.notes}</span>
-                          ) : (
-                            <span className="text-muted-foreground text-sm">Click to add notes</span>
-                          )}
-                        </div>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))
+                 filteredData.map((ad) => (
+                   <TableRow key={ad.id}>
+                     <TableCell className="font-medium max-w-xs truncate">
+                       {ad.name}
+                     </TableCell>
+                     <TableCell className="text-right font-bold">
+                       ${ad.spend.toLocaleString()}
+                     </TableCell>
+                     <TableCell>
+                       {editingCell === `${ad.id}-chain` ? (
+                         <MultiSelect
+                           options={uniqueChains}
+                           value={editingData.chain || []}
+                           onChange={(value) => {
+                             const newData = { ...editingData, chain: value };
+                             setEditingData(newData);
+                             // Save immediately with the new data
+                             handleAutoSaveWithData(ad.id, newData, false);
+                           }}
+                           onBlur={() => {
+                             setEditingCell(null);
+                             setEditingData({});
+                           }}
+                           placeholder="Select chains"
+                           className="w-48"
+                         />
+                       ) : (
+                         <div 
+                           className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1"
+                           onClick={() => handleEdit(ad, 'chain')}
+                         >
+                           {ad.chain.length > 0 ? (
+                             <div className="flex flex-wrap gap-1">
+                               {ad.chain.map((chain, index) => (
+                                 <Badge key={index} variant="outline" className={getChainColor(chain)}>{chain}</Badge>
+                               ))}
+                             </div>
+                           ) : (
+                             <span className="text-muted-foreground text-sm">Click to add chains</span>
+                           )}
+                         </div>
+                       )}
+                     </TableCell>
+                     <TableCell>
+                       {editingCell === `${ad.id}-state` ? (
+                         <MultiSelect
+                           options={["ALL", "CA", "TX", "IL", "MI", "WI", "FL", "OH", "MA"]}
+                           value={editingData.state || []}
+                           onChange={(value) => {
+                             console.log("State onChange:", value);
+                             let newStateValue = value;
+                             
+                             // Handle 'ALL' selection
+                             if (value.includes("ALL")) {
+                               if (value.length === 1) {
+                                 // If only 'ALL' is selected, select all states
+                                 newStateValue = ["CA", "TX", "IL", "MI", "WI", "FL", "OH", "MA"];
+                               } else {
+                                 // If 'ALL' plus other states, remove 'ALL' and keep individual states
+                                 newStateValue = value.filter(state => state !== "ALL");
+                               }
+                             }
+                             
+                             const newData = { ...editingData, state: newStateValue };
+                             setEditingData(newData);
+                             // Save immediately with the new data
+                             handleAutoSaveWithData(ad.id, newData, false);
+                           }}
+                           onBlur={() => {
+                             setEditingCell(null);
+                             setEditingData({});
+                           }}
+                           placeholder="Select states"
+                           className="w-32"
+                         />
+                       ) : (
+                         <div 
+                           className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1"
+                           onClick={() => handleEdit(ad, 'state')}
+                         >
+                           {ad.state.length > 0 ? (
+                             <div className="flex flex-wrap gap-1">
+                               {ad.state.map((state, index) => (
+                                 <Badge key={index} variant="outline" className={getStateColor(state)}>{state}</Badge>
+                               ))}
+                             </div>
+                           ) : (
+                             <span className="text-muted-foreground text-sm">Click to add states</span>
+                           )}
+                         </div>
+                       )}
+                     </TableCell>
+                     <TableCell className="max-w-xs">
+                       {editingCell === `${ad.id}-notes` ? (
+                         <Textarea
+                           value={editingData.notes || ""}
+                           onChange={(e) => setEditingData(prev => ({ ...prev, notes: e.target.value }))}
+                           onBlur={() => handleAutoSave(ad.id)}
+                           placeholder="Enter notes"
+                           className="w-48 min-h-[60px]"
+                           rows={2}
+                           autoFocus
+                         />
+                       ) : (
+                         <div 
+                           className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1"
+                           onClick={() => handleEdit(ad, 'notes')}
+                         >
+                           {ad.notes ? (
+                             <span className="text-sm">{ad.notes}</span>
+                           ) : (
+                             <span className="text-muted-foreground text-sm">Click to add notes</span>
+                           )}
+                         </div>
+                       )}
+                     </TableCell>
+                   </TableRow>
+                 ))
               )}
             </TableBody>
           </Table>
