@@ -464,18 +464,28 @@ export const MainAIChat = () => {
       {/* Header */}
       <header className="border-b bg-card/95 backdrop-blur-sm sticky top-0 z-40">
         <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-16 h-16 rounded-lg overflow-hidden">
-              <img 
-                src="/lovable-uploads/072fbba7-85ff-4594-94d0-c4f01498cf16.png" 
-                alt="Grog Logo" 
-                className="w-full h-full object-cover"
-              />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-16 h-16 rounded-lg overflow-hidden">
+                <img 
+                  src="/lovable-uploads/072fbba7-85ff-4594-94d0-c4f01498cf16.png" 
+                  alt="Grog Logo" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div>
+                <h1 className="text-xl font-semibold text-foreground">Grog Sales Analyser 3000</h1>
+                <p className="text-sm text-foreground/80">AI-Powered CPG Performance Analytics</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-semibold text-foreground">Grog Sales Analyser 3000</h1>
-              <p className="text-sm text-foreground/80">AI-Powered CPG Performance Analytics</p>
-            </div>
+            <Button 
+              onClick={() => navigate('/marketing')}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Target className="w-4 h-4" />
+              Marketing
+            </Button>
           </div>
         </div>
       </header>
