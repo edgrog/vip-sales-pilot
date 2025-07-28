@@ -1,12 +1,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { MetaAd } from '@/hooks/useMetaAdsData';
-
 interface ChainSpendAnalysisProps {
   data: MetaAd[];
 }
-
-export const ChainSpendAnalysis = ({ data }: ChainSpendAnalysisProps) => {
+export const ChainSpendAnalysis = ({
+  data
+}: ChainSpendAnalysisProps) => {
   // Aggregate spend by chain
   const chainSpendData = data.reduce((acc, ad) => {
     ad.chain.forEach(chainName => {
@@ -18,26 +18,23 @@ export const ChainSpendAnalysis = ({ data }: ChainSpendAnalysisProps) => {
   }, {} as Record<string, number>);
 
   // Convert to array and sort by spend
-  const chartData = Object.entries(chainSpendData)
-    .map(([chain, spend]) => ({ chain, spend }))
-    .sort((a, b) => b.spend - a.spend)
-    .slice(0, 15); // Top 15 chains
+  const chartData = Object.entries(chainSpendData).map(([chain, spend]) => ({
+    chain,
+    spend
+  })).sort((a, b) => b.spend - a.spend).slice(0, 15); // Top 15 chains
 
   // Pie chart data for top chains
   const pieData = chartData.slice(0, 8).map((item, index) => ({
     ...item,
-    fill: `hsl(${(index * 45) % 360}, 70%, 50%)`
+    fill: `hsl(${index * 45 % 360}, 70%, 50%)`
   }));
-
   const totalSpend = chartData.reduce((sum, item) => sum + item.spend, 0);
-
-  return (
-    <div className="grid gap-6">
+  return <div className="grid gap-6">
       {/* Summary Cards */}
       <div className="grid md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Chains</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Chains Advertised</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{Object.keys(chainSpendData).length}</div>
@@ -73,20 +70,20 @@ export const ChainSpendAnalysis = ({ data }: ChainSpendAnalysisProps) => {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
+              <BarChart data={chartData} margin={{
+              top: 20,
+              right: 30,
+              left: 20,
+              bottom: 80
+            }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="chain" 
-                  angle={-45}
-                  textAnchor="end"
-                  height={100}
-                  tick={{ fontSize: 12 }}
-                />
-                <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
-                <Tooltip 
-                  formatter={(value: number) => [`$${value.toLocaleString()}`, 'Spend']}
-                  labelStyle={{ color: 'hsl(var(--foreground))' }}
-                />
+                <XAxis dataKey="chain" angle={-45} textAnchor="end" height={100} tick={{
+                fontSize: 12
+              }} />
+                <YAxis tickFormatter={value => `$${(value / 1000).toFixed(0)}k`} />
+                <Tooltip formatter={(value: number) => [`$${value.toLocaleString()}`, 'Spend']} labelStyle={{
+                color: 'hsl(var(--foreground))'
+              }} />
                 <Bar dataKey="spend" fill="hsl(var(--primary))" />
               </BarChart>
             </ResponsiveContainer>
@@ -101,25 +98,13 @@ export const ChainSpendAnalysis = ({ data }: ChainSpendAnalysisProps) => {
           <CardContent>
             <ResponsiveContainer width="100%" height={400}>
               <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ chain, percent }) => 
-                    percent > 0.05 ? `${chain} ${(percent * 100).toFixed(0)}%` : ''
-                  }
-                  outerRadius={120}
-                  fill="#8884d8"
-                  dataKey="spend"
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill} />
-                  ))}
+                <Pie data={pieData} cx="50%" cy="50%" labelLine={false} label={({
+                chain,
+                percent
+              }) => percent > 0.05 ? `${chain} ${(percent * 100).toFixed(0)}%` : ''} outerRadius={120} fill="#8884d8" dataKey="spend">
+                  {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.fill} />)}
                 </Pie>
-                <Tooltip 
-                  formatter={(value: number) => [`$${value.toLocaleString()}`, 'Spend']}
-                />
+                <Tooltip formatter={(value: number) => [`$${value.toLocaleString()}`, 'Spend']} />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -136,12 +121,10 @@ export const ChainSpendAnalysis = ({ data }: ChainSpendAnalysisProps) => {
             <div>
               <h4 className="font-semibold mb-2">High Performing Chains</h4>
               <div className="space-y-2">
-                {chartData.slice(0, 5).map((chain, index) => (
-                  <div key={chain.chain} className="flex justify-between items-center">
+                {chartData.slice(0, 5).map((chain, index) => <div key={chain.chain} className="flex justify-between items-center">
                     <span className="text-sm">{index + 1}. {chain.chain}</span>
                     <span className="text-sm font-medium">${chain.spend.toLocaleString()}</span>
-                  </div>
-                ))}
+                  </div>)}
               </div>
             </div>
             <div>
@@ -156,6 +139,5 @@ export const ChainSpendAnalysis = ({ data }: ChainSpendAnalysisProps) => {
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
