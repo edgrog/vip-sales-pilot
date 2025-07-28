@@ -5,6 +5,10 @@ export interface MetaAd {
   id: string;
   name: string;
   spend: number;
+  delivery: string;
+  results: number;
+  impressions: number;
+  cost_per_result: number;
   tag: string[];
   state: string[];
   chain: string[];
@@ -15,9 +19,13 @@ interface MetaAdsResponse {
   data: Array<{
     id: string;
     name: string;
-    insights: {
+    delivery?: string;
+    insights?: {
       data: Array<{
         spend: string;
+        impressions?: string;
+        results?: string;
+        cost_per_result?: string;
       }>;
     };
   }>;
@@ -84,11 +92,16 @@ export const useMetaAdsData = () => {
       // Merge the datasets
       const combinedData: MetaAd[] = metaData.data.map((ad) => {
         const tagData = tagsMap.get(ad.id);
+        const insights = ad.insights?.data?.[0];
         
         return {
           id: ad.id,
           name: ad.name,
-          spend: parseFloat(ad.insights?.data?.[0]?.spend || '0'),
+          spend: parseFloat(insights?.spend || '0'),
+          delivery: ad.delivery || 'UNKNOWN',
+          results: parseInt(insights?.results || '0'),
+          impressions: parseInt(insights?.impressions || '0'),
+          cost_per_result: parseFloat(insights?.cost_per_result || '0'),
           tag: parseCommaSeparated(tagData?.tag),
           state: parseCommaSeparated(tagData?.state),
           chain: parseCommaSeparated(tagData?.chain),
