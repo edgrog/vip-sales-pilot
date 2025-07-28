@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, BarChart, MapPin, TrendingUp } from "lucide-react";
+import { ArrowLeft, BarChart, MapPin, TrendingUp, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useMetaAdsData } from "@/hooks/useMetaAdsData";
 import { MetaAdsTable } from "@/components/MetaAdsTable";
@@ -11,6 +12,17 @@ import { StateSpendAnalysis } from "@/components/StateSpendAnalysis";
 const Marketing = () => {
   const navigate = useNavigate();
   const { data, loading, error, refetch, updateAd } = useMetaAdsData();
+
+  // Calculate average CPM for comparison
+  const totalSpend = data.reduce((sum, ad) => sum + ad.spend, 0);
+  const totalImpressions = data.reduce((sum, ad) => sum + ad.impressions, 0);
+  const averageCPM = totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0;
+
+  // Identify fatigued ads (30+ days running with above-average CPM)
+  const fatiguedAds = data.filter(ad => {
+    const adCPM = ad.impressions > 0 ? (ad.spend / ad.impressions) * 1000 : 0;
+    return ad.days_running >= 30 && adCPM > averageCPM;
+  });
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -71,16 +83,50 @@ const Marketing = () => {
             <div className="grid md:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Campaign Management</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <AlertTriangle className="w-5 h-5 text-destructive" />
+                    Fatigued Ads
+                  </CardTitle>
                   <CardDescription>
-                    Create, monitor, and optimize your marketing campaigns
+                    Ads running 30+ days with above-average CPM (${averageCPM.toFixed(2)})
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">
-                    Additional campaign management features coming soon! This will include campaign creation, 
-                    automated bidding strategies, and cross-platform campaign coordination.
-                  </p>
+                  {fatiguedAds.length === 0 ? (
+                    <p className="text-muted-foreground">
+                      No fatigued ads detected. All ads are performing within expected CPM ranges.
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {fatiguedAds.slice(0, 3).map(ad => {
+                        const adCPM = ad.impressions > 0 ? (ad.spend / ad.impressions) * 1000 : 0;
+                        return (
+                          <div key={ad.id} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex-1">
+                              <p className="font-medium text-sm truncate max-w-xs">{ad.name}</p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge variant="destructive" className="text-xs">
+                                  {ad.days_running} days
+                                </Badge>
+                                <Badge variant="outline" className="text-xs">
+                                  ${adCPM.toFixed(2)} CPM
+                                </Badge>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-bold text-sm">${ad.spend.toLocaleString()}</p>
+                              <p className="text-xs text-muted-foreground">spent</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {fatiguedAds.length > 3 && (
+                        <p className="text-xs text-muted-foreground text-center">
+                          +{fatiguedAds.length - 3} more fatigued ads
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
