@@ -9,12 +9,13 @@ interface MultiSelectProps {
   options: string[]
   value: string[]
   onChange: (value: string[]) => void
+  onBlur?: () => void
   placeholder?: string
   className?: string
 }
 
 export const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
-  ({ options, value, onChange, placeholder, className }, ref) => {
+  ({ options, value, onChange, onBlur, placeholder, className }, ref) => {
     const [inputValue, setInputValue] = React.useState("")
     const [isOpen, setIsOpen] = React.useState(false)
 
@@ -44,8 +45,24 @@ export const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
       }
     }
 
+    const handleContainerBlur = (e: React.FocusEvent) => {
+      // Check if the focus is moving to a child element
+      const currentTarget = e.currentTarget;
+      const relatedTarget = e.relatedTarget;
+      
+      if (!currentTarget.contains(relatedTarget as Node)) {
+        setIsOpen(false);
+        onBlur?.();
+      }
+    };
+
     return (
-      <div ref={ref} className={cn("relative", className)}>
+      <div 
+        ref={ref} 
+        className={cn("relative", className)}
+        onBlur={handleContainerBlur}
+        tabIndex={-1}
+      >
         <div className="flex flex-wrap gap-1 p-2 border rounded-md min-h-[40px] bg-background">
           {value.map((item) => (
             <Badge key={item} variant="secondary" className="flex items-center gap-1">

@@ -61,7 +61,9 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
     setEditingData({});
   };
 
-  const handleSave = async (adId: string) => {
+  const handleAutoSave = async (adId: string) => {
+    if (saving) return; // Prevent multiple saves
+    
     setSaving(true);
     try {
       const { error } = await (supabase as any)
@@ -81,14 +83,14 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
       setEditingData({});
       
       toast({
-        title: "Tags saved",
-        description: "Ad tags have been updated successfully.",
+        title: "Saved",
+        description: "Changes saved successfully.",
       });
     } catch (error) {
       console.error('Error saving tags:', error);
       toast({
-        title: "Error saving tags",
-        description: "Failed to save ad tags. Please try again.",
+        title: "Error saving",
+        description: "Failed to save changes. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -242,34 +244,14 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                     </TableCell>
                     <TableCell>
                       {editingCell === `${ad.id}-tag` ? (
-                        <div className="flex items-center gap-2">
-                          <MultiSelect
-                            options={uniqueTags}
-                            value={editingData.tag || []}
-                            onChange={(value) => setEditingData(prev => ({ ...prev, tag: value }))}
-                            placeholder="Select tags"
-                            className="w-48"
-                          />
-                          <div className="flex gap-1">
-                            <Button
-                              size="sm"
-                              onClick={() => handleSave(ad.id)}
-                              disabled={saving}
-                              className="h-6 w-6 p-0"
-                            >
-                              <Save className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={handleCancel}
-                              disabled={saving}
-                              className="h-6 w-6 p-0"
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
+                        <MultiSelect
+                          options={uniqueTags}
+                          value={editingData.tag || []}
+                          onChange={(value) => setEditingData(prev => ({ ...prev, tag: value }))}
+                          onBlur={() => handleAutoSave(ad.id)}
+                          placeholder="Select tags"
+                          className="w-48"
+                        />
                       ) : (
                         <div 
                           className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1"
@@ -289,34 +271,14 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                     </TableCell>
                     <TableCell>
                       {editingCell === `${ad.id}-chain` ? (
-                        <div className="flex items-center gap-2">
-                          <MultiSelect
-                            options={uniqueChains}
-                            value={editingData.chain || []}
-                            onChange={(value) => setEditingData(prev => ({ ...prev, chain: value }))}
-                            placeholder="Select chains"
-                            className="w-48"
-                          />
-                          <div className="flex gap-1">
-                            <Button
-                              size="sm"
-                              onClick={() => handleSave(ad.id)}
-                              disabled={saving}
-                              className="h-6 w-6 p-0"
-                            >
-                              <Save className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={handleCancel}
-                              disabled={saving}
-                              className="h-6 w-6 p-0"
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
+                        <MultiSelect
+                          options={uniqueChains}
+                          value={editingData.chain || []}
+                          onChange={(value) => setEditingData(prev => ({ ...prev, chain: value }))}
+                          onBlur={() => handleAutoSave(ad.id)}
+                          placeholder="Select chains"
+                          className="w-48"
+                        />
                       ) : (
                         <div 
                           className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1"
@@ -336,34 +298,14 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                     </TableCell>
                     <TableCell>
                       {editingCell === `${ad.id}-state` ? (
-                        <div className="flex items-center gap-2">
-                          <MultiSelect
-                            options={[...new Set(data.flatMap(ad => ad.state))]}
-                            value={editingData.state || []}
-                            onChange={(value) => setEditingData(prev => ({ ...prev, state: value }))}
-                            placeholder="Select states"
-                            className="w-32"
-                          />
-                          <div className="flex gap-1">
-                            <Button
-                              size="sm"
-                              onClick={() => handleSave(ad.id)}
-                              disabled={saving}
-                              className="h-6 w-6 p-0"
-                            >
-                              <Save className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={handleCancel}
-                              disabled={saving}
-                              className="h-6 w-6 p-0"
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
+                        <MultiSelect
+                          options={[...new Set(data.flatMap(ad => ad.state))]}
+                          value={editingData.state || []}
+                          onChange={(value) => setEditingData(prev => ({ ...prev, state: value }))}
+                          onBlur={() => handleAutoSave(ad.id)}
+                          placeholder="Select states"
+                          className="w-32"
+                        />
                       ) : (
                         <div 
                           className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1"
@@ -383,34 +325,15 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                     </TableCell>
                     <TableCell className="max-w-xs">
                       {editingCell === `${ad.id}-notes` ? (
-                        <div className="flex items-center gap-2">
-                          <Textarea
-                            value={editingData.notes || ''}
-                            onChange={(e) => setEditingData(prev => ({ ...prev, notes: e.target.value }))}
-                            placeholder="Enter notes"
-                            className="w-48 min-h-[60px]"
-                            rows={2}
-                          />
-                          <div className="flex gap-1">
-                            <Button
-                              size="sm"
-                              onClick={() => handleSave(ad.id)}
-                              disabled={saving}
-                              className="h-6 w-6 p-0"
-                            >
-                              <Save className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={handleCancel}
-                              disabled={saving}
-                              className="h-6 w-6 p-0"
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
+                        <Textarea
+                          value={editingData.notes || ''}
+                          onChange={(e) => setEditingData(prev => ({ ...prev, notes: e.target.value }))}
+                          onBlur={() => handleAutoSave(ad.id)}
+                          placeholder="Enter notes"
+                          className="w-48 min-h-[60px]"
+                          rows={2}
+                          autoFocus
+                        />
                       ) : (
                         <div 
                           className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1"
