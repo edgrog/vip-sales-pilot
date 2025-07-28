@@ -400,17 +400,6 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
               className="pl-10"
             />
           </div>
-          <Select value={filterTag} onValueChange={setFilterTag}>
-            <SelectTrigger className="w-full sm:w-48">
-              <SelectValue placeholder="Filter by tag" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Tags</SelectItem>
-              {uniqueTags.map(tag => (
-                <SelectItem key={tag} value={tag}>{tag}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
           <Select value={filterChain} onValueChange={setFilterChain}>
             <SelectTrigger className="w-full sm:w-48">
               <SelectValue placeholder="Filter by chain" />
