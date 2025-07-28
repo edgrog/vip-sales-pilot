@@ -31,6 +31,47 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
   const [lastChange, setLastChange] = useState<{adId: string, previousData: Partial<MetaAd>} | null>(null);
   const { toast } = useToast();
 
+  // Color mappings for consistent data visualization
+  const getChainColor = (chain: string) => {
+    const chainColors: Record<string, string> = {
+      'HEB': 'bg-red-100 text-red-800 border-red-300 dark:bg-red-950 dark:text-red-300 dark:border-red-700',
+      'Kroger': 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-700',
+      'Target': 'bg-red-100 text-red-800 border-red-300 dark:bg-red-950 dark:text-red-300 dark:border-red-700',
+      'Walmart': 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-950 dark:text-yellow-300 dark:border-yellow-700',
+      'Safeway': 'bg-green-100 text-green-800 border-green-300 dark:bg-green-950 dark:text-green-300 dark:border-green-700',
+      'Publix': 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-700',
+      'Costco': 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-700',
+      'Whole Foods': 'bg-teal-100 text-teal-800 border-teal-300 dark:bg-teal-950 dark:text-teal-300 dark:border-teal-700'
+    };
+    return chainColors[chain] || 'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-950 dark:text-gray-300 dark:border-gray-700';
+  };
+
+  const getTagColor = (tag: string) => {
+    const tagColors: Record<string, string> = {
+      'AU/NZ': 'bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-950 dark:text-orange-300 dark:border-orange-700',
+      'Video': 'bg-pink-100 text-pink-800 border-pink-300 dark:bg-pink-950 dark:text-pink-300 dark:border-pink-700',
+      'Static': 'bg-indigo-100 text-indigo-800 border-indigo-300 dark:bg-indigo-950 dark:text-indigo-300 dark:border-indigo-700',
+      'Carousel': 'bg-violet-100 text-violet-800 border-violet-300 dark:bg-violet-950 dark:text-violet-300 dark:border-violet-700',
+      'Collection': 'bg-cyan-100 text-cyan-800 border-cyan-300 dark:bg-cyan-950 dark:text-cyan-300 dark:border-cyan-700',
+      'Retargeting': 'bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-700'
+    };
+    return tagColors[tag] || 'bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-950 dark:text-slate-300 dark:border-slate-700';
+  };
+
+  const getStateColor = (state: string) => {
+    const stateColors: Record<string, string> = {
+      'CA': 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-700',
+      'TX': 'bg-red-100 text-red-800 border-red-300 dark:bg-red-950 dark:text-red-300 dark:border-red-700',
+      'IL': 'bg-green-100 text-green-800 border-green-300 dark:bg-green-950 dark:text-green-300 dark:border-green-700',
+      'MI': 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-700',
+      'WI': 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-950 dark:text-yellow-300 dark:border-yellow-700',
+      'FL': 'bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-950 dark:text-orange-300 dark:border-orange-700',
+      'OH': 'bg-teal-100 text-teal-800 border-teal-300 dark:bg-teal-950 dark:text-teal-300 dark:border-teal-700',
+      'MA': 'bg-indigo-100 text-indigo-800 border-indigo-300 dark:bg-indigo-950 dark:text-indigo-300 dark:border-indigo-700'
+    };
+    return stateColors[state] || 'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-950 dark:text-gray-300 dark:border-gray-700';
+  };
+
   // Get unique values for filters
   const uniqueTags = [...new Set(data.flatMap(ad => ad.tag).filter(Boolean))];
   const uniqueChains = [...new Set(data.flatMap(ad => ad.chain).filter(Boolean))];
@@ -411,7 +452,7 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                           {ad.tag.length > 0 ? (
                             <div className="flex flex-wrap gap-1">
                               {ad.tag.map((tag, index) => (
-                                <Badge key={index} variant="default" className="bg-primary text-primary-foreground">{tag}</Badge>
+                                <Badge key={index} variant="outline" className={getTagColor(tag)}>{tag}</Badge>
                               ))}
                             </div>
                           ) : (
@@ -446,7 +487,7 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                           {ad.chain.length > 0 ? (
                             <div className="flex flex-wrap gap-1">
                               {ad.chain.map((chain, index) => (
-                                <Badge key={index} variant="outline" className="border-green-400 text-green-700 bg-green-50 dark:border-green-600 dark:text-green-300 dark:bg-green-950/30">{chain}</Badge>
+                                <Badge key={index} variant="outline" className={getChainColor(chain)}>{chain}</Badge>
                               ))}
                             </div>
                           ) : (
@@ -495,7 +536,7 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                           {ad.state.length > 0 ? (
                             <div className="flex flex-wrap gap-1">
                               {ad.state.map((state, index) => (
-                                <Badge key={index} variant="outline" className="border-blue-400 text-blue-700 bg-blue-50 dark:border-blue-600 dark:text-blue-300 dark:bg-blue-950/30">{state}</Badge>
+                                <Badge key={index} variant="outline" className={getStateColor(state)}>{state}</Badge>
                               ))}
                             </div>
                           ) : (
