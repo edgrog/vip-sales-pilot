@@ -14,6 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_tags: {
+        Row: {
+          ad_id: string
+          chain: string | null
+          notes: string | null
+          state: string | null
+          tag: string | null
+        }
+        Insert: {
+          ad_id: string
+          chain?: string | null
+          notes?: string | null
+          state?: string | null
+          tag?: string | null
+        }
+        Update: {
+          ad_id?: string
+          chain?: string | null
+          notes?: string | null
+          state?: string | null
+          tag?: string | null
+        }
+        Relationships: []
+      }
+      VIP_RAW_12MO: {
+        Row: {
+          "1 Month 1/1/2025 thru 1/31/2025  Case Equivs": string | null
+          "1 Month 10/1/2024 thru 10/31/2024  Case Equivs": string | null
+          "1 Month 11/1/2024 thru 11/30/2024  Case Equivs": string | null
+          "1 Month 12/1/2024 thru 12/31/2024  Case Equivs": string | null
+          "1 Month 2/1/2025 thru 2/28/2025  Case Equivs": string | null
+          "1 Month 3/1/2025 thru 3/31/2025  Case Equivs": string | null
+          "1 Month 4/1/2025 thru 4/30/2025  Case Equivs": number | null
+          "1 Month 5/1/2025 thru 5/31/2025  Case Equivs": number | null
+          "1 Month 6/1/2025 thru 6/30/2025  Case Equivs": string | null
+          "1 Month 7/1/2025 thru 7/23/2025  Case Equivs": string | null
+          "1 Month 8/1/2024 thru 8/31/2024  Case Equivs": string | null
+          "1 Month 9/1/2024 thru 9/30/2024  Case Equivs": string | null
+          "12 Months 8/1/2023 thru 7/23/2024  Case Equivs": string | null
+          "12 Months 8/1/2024 thru 7/23/2025  Case Equivs": number | null
+          "Diff  Case Equivs": number | null
+          "Pct  Case Equivs": string | null
+          "Retail Accounts": string
+          State: string | null
+        }
+        Insert: {
+          "1 Month 1/1/2025 thru 1/31/2025  Case Equivs"?: string | null
+          "1 Month 10/1/2024 thru 10/31/2024  Case Equivs"?: string | null
+          "1 Month 11/1/2024 thru 11/30/2024  Case Equivs"?: string | null
+          "1 Month 12/1/2024 thru 12/31/2024  Case Equivs"?: string | null
+          "1 Month 2/1/2025 thru 2/28/2025  Case Equivs"?: string | null
+          "1 Month 3/1/2025 thru 3/31/2025  Case Equivs"?: string | null
+          "1 Month 4/1/2025 thru 4/30/2025  Case Equivs"?: number | null
+          "1 Month 5/1/2025 thru 5/31/2025  Case Equivs"?: number | null
+          "1 Month 6/1/2025 thru 6/30/2025  Case Equivs"?: string | null
+          "1 Month 7/1/2025 thru 7/23/2025  Case Equivs"?: string | null
+          "1 Month 8/1/2024 thru 8/31/2024  Case Equivs"?: string | null
+          "1 Month 9/1/2024 thru 9/30/2024  Case Equivs"?: string | null
+          "12 Months 8/1/2023 thru 7/23/2024  Case Equivs"?: string | null
+          "12 Months 8/1/2024 thru 7/23/2025  Case Equivs"?: number | null
+          "Diff  Case Equivs"?: number | null
+          "Pct  Case Equivs"?: string | null
+          "Retail Accounts": string
+          State?: string | null
+        }
+        Update: {
+          "1 Month 1/1/2025 thru 1/31/2025  Case Equivs"?: string | null
+          "1 Month 10/1/2024 thru 10/31/2024  Case Equivs"?: string | null
+          "1 Month 11/1/2024 thru 11/30/2024  Case Equivs"?: string | null
+          "1 Month 12/1/2024 thru 12/31/2024  Case Equivs"?: string | null
+          "1 Month 2/1/2025 thru 2/28/2025  Case Equivs"?: string | null
+          "1 Month 3/1/2025 thru 3/31/2025  Case Equivs"?: string | null
+          "1 Month 4/1/2025 thru 4/30/2025  Case Equivs"?: number | null
+          "1 Month 5/1/2025 thru 5/31/2025  Case Equivs"?: number | null
+          "1 Month 6/1/2025 thru 6/30/2025  Case Equivs"?: string | null
+          "1 Month 7/1/2025 thru 7/23/2025  Case Equivs"?: string | null
+          "1 Month 8/1/2024 thru 8/31/2024  Case Equivs"?: string | null
+          "1 Month 9/1/2024 thru 9/30/2024  Case Equivs"?: string | null
+          "12 Months 8/1/2023 thru 7/23/2024  Case Equivs"?: string | null
+          "12 Months 8/1/2024 thru 7/23/2025  Case Equivs"?: number | null
+          "Diff  Case Equivs"?: number | null
+          "Pct  Case Equivs"?: string | null
+          "Retail Accounts"?: string
+          State?: string | null
+        }
+        Relationships: []
+      }
       vip_sales: {
         Row: {
           Address: string | null
