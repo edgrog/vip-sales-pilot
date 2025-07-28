@@ -11,7 +11,6 @@ import { MetaAd } from '@/hooks/useMetaAdsData';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { MultiSelect } from '@/components/ui/multi-select';
-
 interface MetaAdsTableProps {
   data: MetaAd[];
   loading: boolean;
@@ -19,8 +18,13 @@ interface MetaAdsTableProps {
   onRefresh: () => void;
   onAdUpdate: (adId: string, updates: Partial<MetaAd>) => void;
 }
-
-export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: MetaAdsTableProps) => {
+export const MetaAdsTable = ({
+  data,
+  loading,
+  error,
+  onRefresh,
+  onAdUpdate
+}: MetaAdsTableProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTag, setFilterTag] = useState<string>('all');
   const [filterChain, setFilterChain] = useState<string>('all');
@@ -28,8 +32,13 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
   const [editingData, setEditingData] = useState<Partial<MetaAd>>({});
   const [saving, setSaving] = useState(false);
   const [saveTimeoutId, setSaveTimeoutId] = useState<NodeJS.Timeout | null>(null);
-  const [lastChange, setLastChange] = useState<{adId: string, previousData: Partial<MetaAd>} | null>(null);
-  const { toast } = useToast();
+  const [lastChange, setLastChange] = useState<{
+    adId: string;
+    previousData: Partial<MetaAd>;
+  } | null>(null);
+  const {
+    toast
+  } = useToast();
 
   // Color mappings for consistent data visualization
   const getChainColor = (chain: string) => {
@@ -45,23 +54,19 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
       'Whole Foods': 'bg-teal-100 text-teal-800 border-teal-300 dark:bg-teal-950 dark:text-teal-300 dark:border-teal-700',
       'Sam\'s Club': 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-700',
       'Wegmans': 'bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-950 dark:text-orange-300 dark:border-orange-700',
-      
       // Pharmacies
       'CVS': 'bg-red-100 text-red-800 border-red-300 dark:bg-red-950 dark:text-red-300 dark:border-red-700',
       'Walgreens': 'bg-red-100 text-red-800 border-red-300 dark:bg-red-950 dark:text-red-300 dark:border-red-700',
       'Rite Aid': 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-700',
-      
       // Convenience Stores
       '7-Eleven': 'bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-950 dark:text-orange-300 dark:border-orange-700',
       'Circle K': 'bg-red-100 text-red-800 border-red-300 dark:bg-red-950 dark:text-red-300 dark:border-red-700',
       'Wawa': 'bg-red-100 text-red-800 border-red-300 dark:bg-red-950 dark:text-red-300 dark:border-red-700',
-      
       // Delivery Services
       'GoPuff': 'bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-950 dark:text-orange-300 dark:border-orange-700',
       'DoorDash': 'bg-red-100 text-red-800 border-red-300 dark:bg-red-950 dark:text-red-300 dark:border-red-700',
       'Uber Eats': 'bg-green-100 text-green-800 border-green-300 dark:bg-green-950 dark:text-green-300 dark:border-green-700',
       'Instacart': 'bg-green-100 text-green-800 border-green-300 dark:bg-green-950 dark:text-green-300 dark:border-green-700',
-      
       // Gas Stations
       'Shell': 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-950 dark:text-yellow-300 dark:border-yellow-700',
       'ExxonMobil': 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-700',
@@ -69,13 +74,11 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
       'Chevron': 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-700',
       'Speedway': 'bg-red-100 text-red-800 border-red-300 dark:bg-red-950 dark:text-red-300 dark:border-red-700',
       'Mobil': 'bg-red-100 text-red-800 border-red-300 dark:bg-red-950 dark:text-red-300 dark:border-red-700',
-      
       // Regional Chains
       'Trader Joe\'s': 'bg-red-100 text-red-800 border-red-300 dark:bg-red-950 dark:text-red-300 dark:border-red-700',
       'STAR': 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-700',
       'RAPID': 'bg-teal-100 text-teal-800 border-teal-300 dark:bg-teal-950 dark:text-teal-300 dark:border-teal-700',
       'YANKEE SPIRITS': 'bg-indigo-100 text-indigo-800 border-indigo-300 dark:bg-indigo-950 dark:text-indigo-300 dark:border-indigo-700',
-      
       // Independent & Other Chains  
       'Independent': 'bg-violet-100 text-violet-800 border-violet-300 dark:bg-violet-950 dark:text-violet-300 dark:border-violet-700',
       'ABC': 'bg-cyan-100 text-cyan-800 border-cyan-300 dark:bg-cyan-950 dark:text-cyan-300 dark:border-cyan-700',
@@ -85,7 +88,6 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
     };
     return chainColors[chain] || 'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-950 dark:text-gray-300 dark:border-gray-700';
   };
-
   const getTagColor = (tag: string) => {
     const tagColors: Record<string, string> = {
       'AU/NZ': 'bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-950 dark:text-orange-300 dark:border-orange-700',
@@ -97,7 +99,6 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
     };
     return tagColors[tag] || 'bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-950 dark:text-slate-300 dark:border-slate-700';
   };
-
   const getStateColor = (state: string) => {
     const stateColors: Record<string, string> = {
       'CA': 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-700',
@@ -121,32 +122,27 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
 
   // Filter visible data based on search and filters
   const filteredData = visibleData.filter(ad => {
-    const matchesSearch = ad.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         ad.id.includes(searchTerm);
+    const matchesSearch = ad.name.toLowerCase().includes(searchTerm.toLowerCase()) || ad.id.includes(searchTerm);
     const matchesTag = filterTag === 'all' || ad.tag.includes(filterTag);
     const matchesChain = filterChain === 'all' || ad.chain.includes(filterChain);
-    
     return matchesSearch && matchesTag && matchesChain;
   });
-
   const totalSpend = filteredData.reduce((sum, ad) => sum + ad.spend, 0);
-
   const handleEdit = (ad: MetaAd, field: string) => {
     // Clear any pending save timeout when starting to edit a new cell
     if (saveTimeoutId) {
       clearTimeout(saveTimeoutId);
       setSaveTimeoutId(null);
     }
-    
+
     // Save current editing cell if there is one and it's different
     if (editingCell && editingCell !== `${ad.id}-${field}`) {
       const currentAdId = editingCell.split('-')[0];
       handleAutoSave(currentAdId, false); // Save without timeout
     }
-
     const cellId = `${ad.id}-${field}`;
     setEditingCell(cellId);
-    
+
     // Always load the current ad data to ensure we have the latest values
     const currentAd = data.find(a => a.id === ad.id) || ad;
     setEditingData({
@@ -156,7 +152,6 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
       notes: currentAd.notes
     });
   };
-
   const handleCancel = () => {
     if (saveTimeoutId) {
       clearTimeout(saveTimeoutId);
@@ -165,52 +160,46 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
     setEditingCell(null);
     setEditingData({});
   };
-
   const handleAutoSave = async (adId: string, useTimeout: boolean = true) => {
     if (saving) return;
-    
     const performSave = async () => {
       setSaving(true);
       try {
-        const { error } = await (supabase as any)
-          .from('ad_tags')
-          .upsert({
-            ad_id: adId,
-            tag: editingData.tag?.length ? editingData.tag.join(', ') : null,
-            chain: editingData.chain?.length ? editingData.chain.join(', ') : null,
-            state: editingData.state?.length ? editingData.state.join(', ') : null,
-            notes: editingData.notes || null
-          });
-
+        const {
+          error
+        } = await (supabase as any).from('ad_tags').upsert({
+          ad_id: adId,
+          tag: editingData.tag?.length ? editingData.tag.join(', ') : null,
+          chain: editingData.chain?.length ? editingData.chain.join(', ') : null,
+          state: editingData.state?.length ? editingData.state.join(', ') : null,
+          notes: editingData.notes || null
+        });
         if (error) throw error;
-
         onAdUpdate(adId, editingData);
         setEditingCell(null);
         setEditingData({});
-        
         toast({
           title: "Saved",
-          description: "Changes saved successfully.",
+          description: "Changes saved successfully."
         });
       } catch (error) {
         console.error('Error saving tags:', error);
         toast({
           title: "Error saving",
           description: "Failed to save changes. Please try again.",
-          variant: "destructive",
+          variant: "destructive"
         });
       } finally {
         setSaving(false);
         setSaveTimeoutId(null);
       }
     };
-
     if (useTimeout) {
       // Clear any existing timeout
       if (saveTimeoutId) {
         clearTimeout(saveTimeoutId);
       }
-      
+
       // Set a longer timeout to ensure multi-select values are captured
       const timeoutId = setTimeout(performSave, 400);
       setSaveTimeoutId(timeoutId);
@@ -219,10 +208,9 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
       await performSave();
     }
   };
-
   const handleAutoSaveWithData = async (adId: string, dataToSave: Partial<MetaAd>, exitEditMode: boolean = false) => {
     if (saving) return;
-    
+
     // Store the previous data for undo functionality
     const currentAd = data.find(ad => ad.id === adId);
     if (currentAd) {
@@ -236,23 +224,20 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
         }
       });
     }
-    
     setSaving(true);
     try {
-      const { error } = await (supabase as any)
-        .from('ad_tags')
-        .upsert({
-          ad_id: adId,
-          tag: dataToSave.tag?.length ? dataToSave.tag.join(', ') : null,
-          chain: dataToSave.chain?.length ? dataToSave.chain.join(', ') : null,
-          state: dataToSave.state?.length ? dataToSave.state.join(', ') : null,
-          notes: dataToSave.notes || null
-        });
-
+      const {
+        error
+      } = await (supabase as any).from('ad_tags').upsert({
+        ad_id: adId,
+        tag: dataToSave.tag?.length ? dataToSave.tag.join(', ') : null,
+        chain: dataToSave.chain?.length ? dataToSave.chain.join(', ') : null,
+        state: dataToSave.state?.length ? dataToSave.state.join(', ') : null,
+        notes: dataToSave.notes || null
+      });
       if (error) throw error;
-
       onAdUpdate(adId, dataToSave);
-      
+
       // Update editingData to stay in sync with saved data
       if (!exitEditMode) {
         setEditingData(dataToSave);
@@ -260,71 +245,58 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
         setEditingCell(null);
         setEditingData({});
       }
-      
       toast({
         title: "Saved",
         description: "Changes saved successfully.",
-        action: (
-          <button
-            onClick={() => handleUndo()}
-            className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-          >
+        action: <button onClick={() => handleUndo()} className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
             Undo
           </button>
-        ),
       });
     } catch (error) {
       console.error('Error saving tags:', error);
       toast({
         title: "Error saving",
         description: "Failed to save changes. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setSaving(false);
       setSaveTimeoutId(null);
     }
   };
-
   const handleUndo = async () => {
     if (!lastChange || saving) return;
-    
     setSaving(true);
     try {
-      const { error } = await (supabase as any)
-        .from('ad_tags')
-        .upsert({
-          ad_id: lastChange.adId,
-          tag: lastChange.previousData.tag?.length ? lastChange.previousData.tag.join(', ') : null,
-          chain: lastChange.previousData.chain?.length ? lastChange.previousData.chain.join(', ') : null,
-          state: lastChange.previousData.state?.length ? lastChange.previousData.state.join(', ') : null,
-          notes: lastChange.previousData.notes || null
-        });
-
+      const {
+        error
+      } = await (supabase as any).from('ad_tags').upsert({
+        ad_id: lastChange.adId,
+        tag: lastChange.previousData.tag?.length ? lastChange.previousData.tag.join(', ') : null,
+        chain: lastChange.previousData.chain?.length ? lastChange.previousData.chain.join(', ') : null,
+        state: lastChange.previousData.state?.length ? lastChange.previousData.state.join(', ') : null,
+        notes: lastChange.previousData.notes || null
+      });
       if (error) throw error;
-
       onAdUpdate(lastChange.adId, lastChange.previousData);
       setLastChange(null);
-      
       toast({
         title: "Undone",
-        description: "Changes have been reverted.",
+        description: "Changes have been reverted."
       });
     } catch (error) {
       console.error('Error undoing changes:', error);
       toast({
         title: "Error undoing",
         description: "Failed to undo changes. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setSaving(false);
     }
   };
-
   if (error) {
-    return (
-      <Card>
+    return <Card>
         <CardHeader>
           <CardTitle className="text-destructive">Error Loading Meta Ads Data</CardTitle>
         </CardHeader>
@@ -335,12 +307,9 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
             Try Again
           </Button>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
-
-  return (
-    <Card>
+  return <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -352,12 +321,7 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
               Live Meta Ads data combined with manual tags and chain assignments
             </CardDescription>
           </div>
-          <Button 
-            onClick={onRefresh} 
-            variant="outline" 
-            disabled={loading}
-            className="flex items-center gap-2"
-          >
+          <Button onClick={onRefresh} variant="outline" disabled={loading} className="flex items-center gap-2">
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
@@ -369,7 +333,7 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
           <div className="flex items-center gap-3 p-4 bg-primary/5 rounded-lg">
             <DollarSign className="w-8 h-8 text-primary" />
             <div>
-              <p className="text-sm text-muted-foreground">Total Spend</p>
+              <p className="text-sm text-muted-foreground">Total Spend ($AUD)</p>
               <p className="text-2xl font-bold">${totalSpend.toLocaleString()}</p>
             </div>
           </div>
@@ -393,12 +357,7 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              placeholder="Search ads by name or ID..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+            <Input placeholder="Search ads by name or ID..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
           </div>
           <Select value={filterChain} onValueChange={setFilterChain}>
             <SelectTrigger className="w-full sm:w-48">
@@ -406,9 +365,7 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Chains</SelectItem>
-              {uniqueChains.map(chain => (
-                <SelectItem key={chain} value={chain}>{chain}</SelectItem>
-              ))}
+              {uniqueChains.map(chain => <SelectItem key={chain} value={chain}>{chain}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -426,24 +383,18 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
               </TableRow>
             </TableHeader>
             <TableBody>
-              {loading ? (
-                 <TableRow>
+              {loading ? <TableRow>
                    <TableCell colSpan={5} className="text-center py-8">
                     <div className="flex items-center justify-center gap-2">
                       <RefreshCw className="w-4 h-4 animate-spin" />
                       Loading Meta Ads data...
                     </div>
                   </TableCell>
-                </TableRow>
-              ) : filteredData.length === 0 ? (
-                <TableRow>
+                </TableRow> : filteredData.length === 0 ? <TableRow>
                   <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                     No ads found matching your filters
                   </TableCell>
-                </TableRow>
-              ) : (
-                 filteredData.map((ad) => (
-                   <TableRow key={ad.id}>
+                </TableRow> : filteredData.map(ad => <TableRow key={ad.id}>
                      <TableCell className="font-medium max-w-xs truncate">
                        {ad.name}
                      </TableCell>
@@ -451,120 +402,66 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                        ${ad.spend.toLocaleString()}
                      </TableCell>
                      <TableCell>
-                       {editingCell === `${ad.id}-chain` ? (
-                         <MultiSelect
-                           options={uniqueChains}
-                           value={editingData.chain || []}
-                           onChange={(value) => {
-                             const newData = { ...editingData, chain: value };
-                             setEditingData(newData);
-                             // Save immediately with the new data
-                             handleAutoSaveWithData(ad.id, newData, false);
-                           }}
-                           onBlur={() => {
-                             setEditingCell(null);
-                             setEditingData({});
-                           }}
-                           placeholder="Select chains"
-                           className="w-48"
-                         />
-                       ) : (
-                         <div 
-                           className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1"
-                           onClick={() => handleEdit(ad, 'chain')}
-                         >
-                           {ad.chain.length > 0 ? (
-                             <div className="flex flex-wrap gap-1">
-                               {ad.chain.map((chain, index) => (
-                                 <Badge key={index} variant="outline" className={getChainColor(chain)}>{chain}</Badge>
-                               ))}
-                             </div>
-                           ) : (
-                             <span className="text-muted-foreground text-sm">Click to add chains</span>
-                           )}
-                         </div>
-                       )}
+                       {editingCell === `${ad.id}-chain` ? <MultiSelect options={uniqueChains} value={editingData.chain || []} onChange={value => {
+                  const newData = {
+                    ...editingData,
+                    chain: value
+                  };
+                  setEditingData(newData);
+                  // Save immediately with the new data
+                  handleAutoSaveWithData(ad.id, newData, false);
+                }} onBlur={() => {
+                  setEditingCell(null);
+                  setEditingData({});
+                }} placeholder="Select chains" className="w-48" /> : <div className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1" onClick={() => handleEdit(ad, 'chain')}>
+                           {ad.chain.length > 0 ? <div className="flex flex-wrap gap-1">
+                               {ad.chain.map((chain, index) => <Badge key={index} variant="outline" className={getChainColor(chain)}>{chain}</Badge>)}
+                             </div> : <span className="text-muted-foreground text-sm">Click to add chains</span>}
+                         </div>}
                      </TableCell>
                      <TableCell>
-                       {editingCell === `${ad.id}-state` ? (
-                         <MultiSelect
-                           options={["ALL", "CA", "TX", "IL", "MI", "WI", "FL", "OH", "MA"]}
-                           value={editingData.state || []}
-                           onChange={(value) => {
-                             console.log("State onChange:", value);
-                             let newStateValue = value;
-                             
-                             // Handle 'ALL' selection
-                             if (value.includes("ALL")) {
-                               if (value.length === 1) {
-                                 // If only 'ALL' is selected, select all states
-                                 newStateValue = ["CA", "TX", "IL", "MI", "WI", "FL", "OH", "MA"];
-                               } else {
-                                 // If 'ALL' plus other states, remove 'ALL' and keep individual states
-                                 newStateValue = value.filter(state => state !== "ALL");
-                               }
-                             }
-                             
-                             const newData = { ...editingData, state: newStateValue };
-                             setEditingData(newData);
-                             // Save immediately with the new data
-                             handleAutoSaveWithData(ad.id, newData, false);
-                           }}
-                           onBlur={() => {
-                             setEditingCell(null);
-                             setEditingData({});
-                           }}
-                           placeholder="Select states"
-                           className="w-32"
-                         />
-                       ) : (
-                         <div 
-                           className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1"
-                           onClick={() => handleEdit(ad, 'state')}
-                         >
-                           {ad.state.length > 0 ? (
-                             <div className="flex flex-wrap gap-1">
-                               {ad.state.map((state, index) => (
-                                 <Badge key={index} variant="outline" className={getStateColor(state)}>{state}</Badge>
-                               ))}
-                             </div>
-                           ) : (
-                             <span className="text-muted-foreground text-sm">Click to add states</span>
-                           )}
-                         </div>
-                       )}
+                       {editingCell === `${ad.id}-state` ? <MultiSelect options={["ALL", "CA", "TX", "IL", "MI", "WI", "FL", "OH", "MA"]} value={editingData.state || []} onChange={value => {
+                  console.log("State onChange:", value);
+                  let newStateValue = value;
+
+                  // Handle 'ALL' selection
+                  if (value.includes("ALL")) {
+                    if (value.length === 1) {
+                      // If only 'ALL' is selected, select all states
+                      newStateValue = ["CA", "TX", "IL", "MI", "WI", "FL", "OH", "MA"];
+                    } else {
+                      // If 'ALL' plus other states, remove 'ALL' and keep individual states
+                      newStateValue = value.filter(state => state !== "ALL");
+                    }
+                  }
+                  const newData = {
+                    ...editingData,
+                    state: newStateValue
+                  };
+                  setEditingData(newData);
+                  // Save immediately with the new data
+                  handleAutoSaveWithData(ad.id, newData, false);
+                }} onBlur={() => {
+                  setEditingCell(null);
+                  setEditingData({});
+                }} placeholder="Select states" className="w-32" /> : <div className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1" onClick={() => handleEdit(ad, 'state')}>
+                           {ad.state.length > 0 ? <div className="flex flex-wrap gap-1">
+                               {ad.state.map((state, index) => <Badge key={index} variant="outline" className={getStateColor(state)}>{state}</Badge>)}
+                             </div> : <span className="text-muted-foreground text-sm">Click to add states</span>}
+                         </div>}
                      </TableCell>
                      <TableCell className="max-w-xs">
-                       {editingCell === `${ad.id}-notes` ? (
-                         <Textarea
-                           value={editingData.notes || ""}
-                           onChange={(e) => setEditingData(prev => ({ ...prev, notes: e.target.value }))}
-                           onBlur={() => handleAutoSave(ad.id)}
-                           placeholder="Enter notes"
-                           className="w-48 min-h-[60px]"
-                           rows={2}
-                           autoFocus
-                         />
-                       ) : (
-                         <div 
-                           className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1"
-                           onClick={() => handleEdit(ad, 'notes')}
-                         >
-                           {ad.notes ? (
-                             <span className="text-sm">{ad.notes}</span>
-                           ) : (
-                             <span className="text-muted-foreground text-sm">Click to add notes</span>
-                           )}
-                         </div>
-                       )}
+                       {editingCell === `${ad.id}-notes` ? <Textarea value={editingData.notes || ""} onChange={e => setEditingData(prev => ({
+                  ...prev,
+                  notes: e.target.value
+                }))} onBlur={() => handleAutoSave(ad.id)} placeholder="Enter notes" className="w-48 min-h-[60px]" rows={2} autoFocus /> : <div className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1" onClick={() => handleEdit(ad, 'notes')}>
+                           {ad.notes ? <span className="text-sm">{ad.notes}</span> : <span className="text-muted-foreground text-sm">Click to add notes</span>}
+                         </div>}
                      </TableCell>
-                   </TableRow>
-                 ))
-              )}
+                   </TableRow>)}
             </TableBody>
           </Table>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
