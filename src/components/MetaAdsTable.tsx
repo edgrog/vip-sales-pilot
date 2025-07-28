@@ -28,6 +28,7 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
   const [editingData, setEditingData] = useState<Partial<MetaAd>>({});
   const [saving, setSaving] = useState(false);
   const [saveTimeoutId, setSaveTimeoutId] = useState<NodeJS.Timeout | null>(null);
+  const [lastChange, setLastChange] = useState<{adId: string, previousData: Partial<MetaAd>} | null>(null);
   const { toast } = useToast();
 
   // Get unique values for filters
@@ -141,6 +142,20 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
   const handleAutoSaveWithData = async (adId: string, dataToSave: Partial<MetaAd>, exitEditMode: boolean = false) => {
     if (saving) return;
     
+    // Store the previous data for undo functionality
+    const currentAd = data.find(ad => ad.id === adId);
+    if (currentAd) {
+      setLastChange({
+        adId,
+        previousData: {
+          tag: currentAd.tag,
+          chain: currentAd.chain,
+          state: currentAd.state,
+          notes: currentAd.notes
+        }
+      });
+    }
+    
     setSaving(true);
     try {
       const { error } = await (supabase as any)
@@ -168,6 +183,14 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
       toast({
         title: "Saved",
         description: "Changes saved successfully.",
+        action: (
+          <button
+            onClick={() => handleUndo()}
+            className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+          >
+            Undo
+          </button>
+        ),
       });
     } catch (error) {
       console.error('Error saving tags:', error);
@@ -179,6 +202,42 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
     } finally {
       setSaving(false);
       setSaveTimeoutId(null);
+    }
+  };
+
+  const handleUndo = async () => {
+    if (!lastChange || saving) return;
+    
+    setSaving(true);
+    try {
+      const { error } = await (supabase as any)
+        .from('ad_tags')
+        .upsert({
+          ad_id: lastChange.adId,
+          tag: lastChange.previousData.tag?.length ? lastChange.previousData.tag.join(', ') : null,
+          chain: lastChange.previousData.chain?.length ? lastChange.previousData.chain.join(', ') : null,
+          state: lastChange.previousData.state?.length ? lastChange.previousData.state.join(', ') : null,
+          notes: lastChange.previousData.notes || null
+        });
+
+      if (error) throw error;
+
+      onAdUpdate(lastChange.adId, lastChange.previousData);
+      setLastChange(null);
+      
+      toast({
+        title: "Undone",
+        description: "Changes have been reverted.",
+      });
+    } catch (error) {
+      console.error('Error undoing changes:', error);
+      toast({
+        title: "Error undoing",
+        description: "Failed to undo changes. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
     }
   };
 
