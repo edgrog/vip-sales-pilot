@@ -132,6 +132,44 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
     }
   };
 
+  const handleAutoSaveWithData = async (adId: string, dataToSave: Partial<MetaAd>) => {
+    if (saving) return;
+    
+    setSaving(true);
+    try {
+      const { error } = await (supabase as any)
+        .from('ad_tags')
+        .upsert({
+          ad_id: adId,
+          tag: dataToSave.tag?.length ? dataToSave.tag.join(', ') : null,
+          chain: dataToSave.chain?.length ? dataToSave.chain.join(', ') : null,
+          state: dataToSave.state?.length ? dataToSave.state.join(', ') : null,
+          notes: dataToSave.notes || null
+        });
+
+      if (error) throw error;
+
+      onAdUpdate(adId, dataToSave);
+      setEditingCell(null);
+      setEditingData({});
+      
+      toast({
+        title: "Saved",
+        description: "Changes saved successfully.",
+      });
+    } catch (error) {
+      console.error('Error saving tags:', error);
+      toast({
+        title: "Error saving",
+        description: "Failed to save changes. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+      setSaveTimeoutId(null);
+    }
+  };
+
   if (error) {
     return (
       <Card>
@@ -281,8 +319,12 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                         <MultiSelect
                           options={uniqueTags}
                           value={editingData.tag || []}
-                          onChange={(value) => setEditingData(prev => ({ ...prev, tag: value }))}
-                          onBlur={() => handleAutoSave(ad.id)}
+                          onChange={(value) => {
+                            setEditingData(prev => ({ ...prev, tag: value }));
+                            setTimeout(() => {
+                              handleAutoSaveWithData(ad.id, { ...editingData, tag: value });
+                            }, 100);
+                          }}
                           placeholder="Select tags"
                           className="w-48"
                         />
@@ -308,8 +350,12 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                         <MultiSelect
                           options={uniqueChains}
                           value={editingData.chain || []}
-                          onChange={(value) => setEditingData(prev => ({ ...prev, chain: value }))}
-                          onBlur={() => handleAutoSave(ad.id)}
+                          onChange={(value) => {
+                            setEditingData(prev => ({ ...prev, chain: value }));
+                            setTimeout(() => {
+                              handleAutoSaveWithData(ad.id, { ...editingData, chain: value });
+                            }, 100);
+                          }}
                           placeholder="Select chains"
                           className="w-48"
                         />
@@ -338,10 +384,10 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                           onChange={(value) => {
                             console.log('State onChange:', value);
                             setEditingData(prev => ({ ...prev, state: value }));
-                          }}
-                          onBlur={() => {
-                            console.log('State onBlur, current editingData.state:', editingData.state);
-                            handleAutoSave(ad.id);
+                            // Save immediately with the new value
+                            setTimeout(() => {
+                              handleAutoSaveWithData(ad.id, { ...editingData, state: value });
+                            }, 100);
                           }}
                           placeholder="Select states"
                           className="w-32"
