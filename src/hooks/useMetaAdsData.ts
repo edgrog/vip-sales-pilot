@@ -65,7 +65,14 @@ export const useMetaAdsData = () => {
 
       // Fetch Meta Ads data from edge function
       const metaResponse = await fetch(
-        'https://uqdsgeqvosbfrdvebtbf.functions.supabase.co/fetch-meta-ads'
+        'https://uqdsgeqvosbfrdvebtbf.functions.supabase.co/fetch-meta-ads',
+        {
+          headers: {
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZHNnZXF2b3NiZnJkdmVidGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzMjg3OTksImV4cCI6MjA2ODkwNDc5OX0.m5k0J7T93-gaxfKfj5GKuT37t2VidAApyYxNfksFh3w',
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZHNnZXF2b3NiZnJkdmVidGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzMjg3OTksImV4cCI6MjA2ODkwNDc5OX0.m5k0J7T93-gaxfKfj5GKuT37t2VidAApyYxNfksFh3w',
+            'Content-Type': 'application/json'
+          }
+        }
       );
       
       if (!metaResponse.ok) {
