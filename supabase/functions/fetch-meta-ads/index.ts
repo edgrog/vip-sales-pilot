@@ -37,15 +37,17 @@ serve(async (req) => {
     const response = await fetch(apiUrl);
     
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Meta API error: ${response.status} ${response.statusText}`, errorText);
       throw new Error(`Meta API error: ${response.status} ${response.statusText}`);
     }
     
     const data = await response.json();
     
     console.log('Successfully fetched Meta Ads data:');
-    console.log('Sample ad structure:', JSON.stringify(data.data?.[0], null, 2));
     console.log('Total ads returned:', data.data?.length);
 
+    // Return data immediately without storing to database to improve response time
     return new Response(
       JSON.stringify(data),
       { 
