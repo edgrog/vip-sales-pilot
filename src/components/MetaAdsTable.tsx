@@ -123,8 +123,8 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
         clearTimeout(saveTimeoutId);
       }
       
-      // Set a new timeout to save after a brief delay
-      const timeoutId = setTimeout(performSave, 100);
+      // Set a longer timeout to ensure multi-select values are captured
+      const timeoutId = setTimeout(performSave, 400);
       setSaveTimeoutId(timeoutId);
     } else {
       // Save immediately
@@ -333,10 +333,16 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                     <TableCell>
                       {editingCell === `${ad.id}-state` ? (
                         <MultiSelect
-                          options={[...new Set(data.flatMap(ad => ad.state))]}
+                          options={[...new Set(data.flatMap(ad => ad.state).concat(['CA', 'NY', 'TX', 'FL', 'MA', 'WA', 'OR', 'NV']))]}
                           value={editingData.state || []}
-                          onChange={(value) => setEditingData(prev => ({ ...prev, state: value }))}
-                          onBlur={() => handleAutoSave(ad.id)}
+                          onChange={(value) => {
+                            console.log('State onChange:', value);
+                            setEditingData(prev => ({ ...prev, state: value }));
+                          }}
+                          onBlur={() => {
+                            console.log('State onBlur, current editingData.state:', editingData.state);
+                            handleAutoSave(ad.id);
+                          }}
                           placeholder="Select states"
                           className="w-32"
                         />

@@ -26,7 +26,8 @@ export const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
 
     const handleAddValue = (option: string) => {
       if (!value.includes(option)) {
-        onChange([...value, option])
+        const newValue = [...value, option];
+        onChange(newValue);
       }
       setInputValue("")
       setIsOpen(false)
@@ -46,11 +47,11 @@ export const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
     }
 
     const handleInputBlur = (e: React.FocusEvent) => {
-      // Use a timeout to allow other click events to complete first
+      // Use a longer timeout to ensure state updates complete first
       setTimeout(() => {
         setIsOpen(false);
         onBlur?.();
-      }, 150);
+      }, 300);
     };
 
     return (
