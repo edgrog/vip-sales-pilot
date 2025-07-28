@@ -392,10 +392,10 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                 <TableHead>Ad Name</TableHead>
                 <TableHead>Ad ID</TableHead>
                 <TableHead className="text-right">Spend</TableHead>
-                <TableHead className="text-primary font-semibold">🏷️ Tags</TableHead>
-                <TableHead className="text-green-700 font-semibold dark:text-green-300">🏪 Chains</TableHead>
-                <TableHead className="text-blue-700 font-semibold dark:text-blue-300">📍 States</TableHead>
-                <TableHead className="text-amber-700 font-semibold dark:text-amber-300">📝 Notes</TableHead>
+                <TableHead>Tag</TableHead>
+                <TableHead>Chain</TableHead>
+                <TableHead>State</TableHead>
+                <TableHead>Notes</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -446,7 +446,7 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                         />
                       ) : (
                         <div 
-                          className="cursor-pointer hover:bg-primary/10 rounded p-2 -m-1 border-l-4 border-primary/30 bg-primary/5"
+                          className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1"
                           onClick={() => handleEdit(ad, 'tag')}
                         >
                           {ad.tag.length > 0 ? (
@@ -481,7 +481,7 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                         />
                       ) : (
                         <div 
-                          className="cursor-pointer hover:bg-green-50 rounded p-2 -m-1 border-l-4 border-green-200 bg-green-50/50 dark:hover:bg-green-950/20 dark:border-green-800 dark:bg-green-950/10"
+                          className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1"
                           onClick={() => handleEdit(ad, 'chain')}
                         >
                           {ad.chain.length > 0 ? (
@@ -530,7 +530,7 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                         />
                       ) : (
                         <div 
-                          className="cursor-pointer hover:bg-blue-50 rounded p-2 -m-1 border-l-4 border-blue-200 bg-blue-50/50 dark:hover:bg-blue-950/20 dark:border-blue-800 dark:bg-blue-950/10"
+                          className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1"
                           onClick={() => handleEdit(ad, 'state')}
                         >
                           {ad.state.length > 0 ? (
@@ -558,11 +558,11 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                         />
                       ) : (
                         <div 
-                          className="cursor-pointer hover:bg-amber-50 rounded p-2 -m-1 border-l-4 border-amber-200 bg-amber-50/50 dark:hover:bg-amber-950/20 dark:border-amber-800 dark:bg-amber-950/10"
+                          className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1"
                           onClick={() => handleEdit(ad, 'notes')}
                         >
                           {ad.notes ? (
-                            <span className="text-sm text-amber-800 dark:text-amber-200">{ad.notes}</span>
+                            <span className="text-sm">{ad.notes}</span>
                           ) : (
                             <span className="text-muted-foreground text-sm">Click to add notes</span>
                           )}
