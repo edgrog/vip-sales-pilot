@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { RefreshCw, Search, DollarSign, Tag, MapPin, Edit2, Save, X } from 'lucide-react';
+import { RefreshCw, Search, DollarSign, Eye, MapPin, Edit2, Save, X } from 'lucide-react';
 import { MetaAd } from '@/hooks/useMetaAdsData';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -128,6 +128,7 @@ export const MetaAdsTable = ({
     return matchesSearch && matchesTag && matchesChain;
   });
   const totalSpend = filteredData.reduce((sum, ad) => sum + ad.spend, 0);
+  const totalImpressions = filteredData.reduce((sum, ad) => sum + ad.impressions, 0);
   const handleEdit = (ad: MetaAd, field: string) => {
     // Clear any pending save timeout when starting to edit a new cell
     if (saveTimeoutId) {
@@ -338,10 +339,10 @@ export const MetaAdsTable = ({
             </div>
           </div>
           <div className="flex items-center gap-3 p-4 bg-success/5 rounded-lg">
-            <Tag className="w-8 h-8 text-success" />
+            <Eye className="w-8 h-8 text-success" />
             <div>
-              <p className="text-sm text-muted-foreground">Tagged Ads</p>
-              <p className="text-2xl font-bold">{visibleData.filter(ad => ad.tag.length > 0).length}</p>
+              <p className="text-sm text-muted-foreground">Total Impressions</p>
+              <p className="text-2xl font-bold">{totalImpressions.toLocaleString()}</p>
             </div>
           </div>
           <div className="flex items-center gap-3 p-4 bg-info/5 rounded-lg">
