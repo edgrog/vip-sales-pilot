@@ -45,24 +45,16 @@ export const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
       }
     }
 
-    const handleContainerBlur = (e: React.FocusEvent) => {
-      // Check if the focus is moving to a child element
-      const currentTarget = e.currentTarget;
-      const relatedTarget = e.relatedTarget;
-      
-      if (!currentTarget.contains(relatedTarget as Node)) {
+    const handleInputBlur = (e: React.FocusEvent) => {
+      // Use a timeout to allow other click events to complete first
+      setTimeout(() => {
         setIsOpen(false);
         onBlur?.();
-      }
+      }, 150);
     };
 
     return (
-      <div 
-        ref={ref} 
-        className={cn("relative", className)}
-        onBlur={handleContainerBlur}
-        tabIndex={-1}
-      >
+      <div ref={ref} className={cn("relative", className)}>
         <div className="flex flex-wrap gap-1 p-2 border rounded-md min-h-[40px] bg-background">
           {value.map((item) => (
             <Badge key={item} variant="secondary" className="flex items-center gap-1">
@@ -82,7 +74,7 @@ export const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             onFocus={() => setIsOpen(true)}
-            onBlur={() => setTimeout(() => setIsOpen(false), 200)}
+            onBlur={handleInputBlur}
             placeholder={value.length === 0 ? placeholder : ""}
             className="border-0 p-0 h-auto bg-transparent focus-visible:ring-0 flex-1 min-w-[100px]"
           />

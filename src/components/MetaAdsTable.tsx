@@ -24,9 +24,10 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTag, setFilterTag] = useState<string>('all');
   const [filterChain, setFilterChain] = useState<string>('all');
-  const [editingCell, setEditingCell] = useState<string | null>(null); // format: "adId-field"
+  const [editingCell, setEditingCell] = useState<string | null>(null);
   const [editingData, setEditingData] = useState<Partial<MetaAd>>({});
   const [saving, setSaving] = useState(false);
+  const [saveTimeoutId, setSaveTimeoutId] = useState<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
   // Get unique values for filters
@@ -46,6 +47,18 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
   const totalSpend = filteredData.reduce((sum, ad) => sum + ad.spend, 0);
 
   const handleEdit = (ad: MetaAd, field: string) => {
+    // Clear any pending save timeout when starting to edit a new cell
+    if (saveTimeoutId) {
+      clearTimeout(saveTimeoutId);
+      setSaveTimeoutId(null);
+    }
+    
+    // Save current editing cell if there is one
+    if (editingCell && editingCell !== `${ad.id}-${field}`) {
+      const currentAdId = editingCell.split('-')[0];
+      handleAutoSave(currentAdId, false); // Save without timeout
+    }
+
     const cellId = `${ad.id}-${field}`;
     setEditingCell(cellId);
     setEditingData({
@@ -57,44 +70,65 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
   };
 
   const handleCancel = () => {
+    if (saveTimeoutId) {
+      clearTimeout(saveTimeoutId);
+      setSaveTimeoutId(null);
+    }
     setEditingCell(null);
     setEditingData({});
   };
 
-  const handleAutoSave = async (adId: string) => {
-    if (saving) return; // Prevent multiple saves
+  const handleAutoSave = async (adId: string, useTimeout: boolean = true) => {
+    if (saving) return;
     
-    setSaving(true);
-    try {
-      const { error } = await (supabase as any)
-        .from('ad_tags')
-        .upsert({
-          ad_id: adId,
-          tag: editingData.tag?.length ? editingData.tag.join(', ') : null,
-          chain: editingData.chain?.length ? editingData.chain.join(', ') : null,
-          state: editingData.state?.length ? editingData.state.join(', ') : null,
-          notes: editingData.notes || null
+    const performSave = async () => {
+      setSaving(true);
+      try {
+        const { error } = await (supabase as any)
+          .from('ad_tags')
+          .upsert({
+            ad_id: adId,
+            tag: editingData.tag?.length ? editingData.tag.join(', ') : null,
+            chain: editingData.chain?.length ? editingData.chain.join(', ') : null,
+            state: editingData.state?.length ? editingData.state.join(', ') : null,
+            notes: editingData.notes || null
+          });
+
+        if (error) throw error;
+
+        onAdUpdate(adId, editingData);
+        setEditingCell(null);
+        setEditingData({});
+        
+        toast({
+          title: "Saved",
+          description: "Changes saved successfully.",
         });
+      } catch (error) {
+        console.error('Error saving tags:', error);
+        toast({
+          title: "Error saving",
+          description: "Failed to save changes. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setSaving(false);
+        setSaveTimeoutId(null);
+      }
+    };
 
-      if (error) throw error;
-
-      onAdUpdate(adId, editingData);
-      setEditingCell(null);
-      setEditingData({});
+    if (useTimeout) {
+      // Clear any existing timeout
+      if (saveTimeoutId) {
+        clearTimeout(saveTimeoutId);
+      }
       
-      toast({
-        title: "Saved",
-        description: "Changes saved successfully.",
-      });
-    } catch (error) {
-      console.error('Error saving tags:', error);
-      toast({
-        title: "Error saving",
-        description: "Failed to save changes. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setSaving(false);
+      // Set a new timeout to save after a brief delay
+      const timeoutId = setTimeout(performSave, 100);
+      setSaveTimeoutId(timeoutId);
+    } else {
+      // Save immediately
+      await performSave();
     }
   };
 
