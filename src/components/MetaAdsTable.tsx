@@ -132,7 +132,7 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
     }
   };
 
-  const handleAutoSaveWithData = async (adId: string, dataToSave: Partial<MetaAd>) => {
+  const handleAutoSaveWithData = async (adId: string, dataToSave: Partial<MetaAd>, exitEditMode: boolean = false) => {
     if (saving) return;
     
     setSaving(true);
@@ -150,8 +150,11 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
       if (error) throw error;
 
       onAdUpdate(adId, dataToSave);
-      setEditingCell(null);
-      setEditingData({});
+      
+      if (exitEditMode) {
+        setEditingCell(null);
+        setEditingData({});
+      }
       
       toast({
         title: "Saved",
@@ -322,9 +325,10 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                           onChange={(value) => {
                             setEditingData(prev => ({ ...prev, tag: value }));
                             setTimeout(() => {
-                              handleAutoSaveWithData(ad.id, { ...editingData, tag: value });
+                              handleAutoSaveWithData(ad.id, { ...editingData, tag: value }, false);
                             }, 100);
                           }}
+                          onBlur={() => handleAutoSaveWithData(ad.id, editingData, true)}
                           placeholder="Select tags"
                           className="w-48"
                         />
@@ -353,9 +357,10 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                           onChange={(value) => {
                             setEditingData(prev => ({ ...prev, chain: value }));
                             setTimeout(() => {
-                              handleAutoSaveWithData(ad.id, { ...editingData, chain: value });
+                              handleAutoSaveWithData(ad.id, { ...editingData, chain: value }, false);
                             }, 100);
                           }}
+                          onBlur={() => handleAutoSaveWithData(ad.id, editingData, true)}
                           placeholder="Select chains"
                           className="w-48"
                         />
@@ -384,11 +389,12 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                           onChange={(value) => {
                             console.log('State onChange:', value);
                             setEditingData(prev => ({ ...prev, state: value }));
-                            // Save immediately with the new value
+                            // Save immediately with the new value but don't exit edit mode
                             setTimeout(() => {
-                              handleAutoSaveWithData(ad.id, { ...editingData, state: value });
+                              handleAutoSaveWithData(ad.id, { ...editingData, state: value }, false);
                             }, 100);
                           }}
+                          onBlur={() => handleAutoSaveWithData(ad.id, editingData, true)}
                           placeholder="Select states"
                           className="w-32"
                         />
