@@ -379,7 +379,6 @@ export const MetaAdsTable = ({
                 <TableHead className="text-right">Spend</TableHead>
                 <TableHead>Delivery</TableHead>
                 <TableHead className="text-right">Impressions</TableHead>
-                <TableHead>Tag</TableHead>
                 <TableHead>State</TableHead>
                 <TableHead>Chain</TableHead>
                 <TableHead>Notes</TableHead>
@@ -388,7 +387,7 @@ export const MetaAdsTable = ({
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8">
+                  <TableCell colSpan={7} className="text-center py-8">
                     <div className="flex items-center justify-center gap-2">
                       <RefreshCw className="w-4 h-4 animate-spin" />
                       Loading Meta Ads data...
@@ -397,7 +396,7 @@ export const MetaAdsTable = ({
                 </TableRow>
               ) : filteredData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     No ads found matching your filters
                   </TableCell>
                 </TableRow>
@@ -424,41 +423,6 @@ export const MetaAdsTable = ({
                     {/* Impressions */}
                     <TableCell className="text-right">
                       {ad.impressions.toLocaleString()}
-                    </TableCell>
-                    
-                    {/* Tag (editable) */}
-                    <TableCell>
-                      {editingCell === `${ad.id}-tag` ? (
-                        <MultiSelect 
-                          options={uniqueTags.concat(['Video', 'Static', 'Carousel', 'Collection', 'Retargeting'])} 
-                          value={editingData.tag || []} 
-                          onChange={value => {
-                            const newData = { ...editingData, tag: value };
-                            setEditingData(newData);
-                            handleAutoSaveWithData(ad.id, newData, false);
-                          }} 
-                          onBlur={() => {
-                            setEditingCell(null);
-                            setEditingData({});
-                          }} 
-                          placeholder="Select tags" 
-                          className="w-48" 
-                        />
-                      ) : (
-                        <div className="cursor-pointer hover:bg-muted/50 rounded p-1 -m-1" onClick={() => handleEdit(ad, 'tag')}>
-                          {ad.tag.length > 0 ? (
-                            <div className="flex flex-wrap gap-1">
-                              {ad.tag.map((tag, index) => (
-                                <Badge key={index} variant="outline" className={getTagColor(tag)}>
-                                  {tag}
-                                </Badge>
-                              ))}
-                            </div>
-                          ) : (
-                            <span className="text-muted-foreground text-sm">Click to add tags</span>
-                          )}
-                        </div>
-                      )}
                     </TableCell>
                     
                     {/* State (editable) */}
