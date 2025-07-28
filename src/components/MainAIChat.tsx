@@ -1171,7 +1171,7 @@ export const MainAIChat = () => {
         </Card>
 
         {/* Chain Performance */}
-        <Card className="card-grog">
+        <Card className="card-grog mt-8">
           <CardHeader>
             <CardTitle className="text-lg font-semibold">Chain Performance</CardTitle>
             <CardDescription>Performance breakdown by retail chain ({dashboardData.chainPerformance.length} chains)</CardDescription>
