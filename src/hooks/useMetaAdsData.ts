@@ -103,10 +103,19 @@ export const useMetaAdsData = () => {
     fetchData();
   }, []);
 
+  const updateAd = (adId: string, updates: Partial<MetaAd>) => {
+    setData(prevData => 
+      prevData.map(ad => 
+        ad.id === adId ? { ...ad, ...updates } : ad
+      )
+    );
+  };
+
   return {
     data,
     loading,
     error,
-    refetch: fetchData
+    refetch: fetchData,
+    updateAd
   };
 };

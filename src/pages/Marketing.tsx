@@ -7,7 +7,7 @@ import { MetaAdsTable } from "@/components/MetaAdsTable";
 
 const Marketing = () => {
   const navigate = useNavigate();
-  const { data, loading, error, refetch } = useMetaAdsData();
+  const { data, loading, error, refetch, updateAd } = useMetaAdsData();
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -37,6 +37,7 @@ const Marketing = () => {
             loading={loading}
             error={error}
             onRefresh={refetch}
+            onAdUpdate={updateAd}
           />
 
           {/* Additional Marketing Features */}
