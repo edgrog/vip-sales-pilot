@@ -27,7 +27,7 @@ serve(async (req) => {
 
     console.log('Fetching Meta Ads data...');
 
-    const adAccountId = 'act_YOUR_AD_ACCOUNT_ID'; // Replace with your actual ad account ID
+    const adAccountId = 'act_602278455259953';    
     const fields = 'id,name,insights{spend}';
     const apiUrl = `https://graph.facebook.com/v18.0/${adAccountId}/ads?fields=${fields}&access_token=${metaAccessToken}`;
     
