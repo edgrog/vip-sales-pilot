@@ -378,7 +378,6 @@ export const MetaAdsTable = ({
                 <TableHead>Ad Name</TableHead>
                 <TableHead className="text-right">Spend</TableHead>
                 <TableHead>Delivery</TableHead>
-                <TableHead className="text-right">Results</TableHead>
                 <TableHead className="text-right">Impressions</TableHead>
                 <TableHead className="text-right">Cost/Result</TableHead>
                 <TableHead>Tag</TableHead>
@@ -390,7 +389,7 @@ export const MetaAdsTable = ({
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center py-8">
+                  <TableCell colSpan={9} className="text-center py-8">
                     <div className="flex items-center justify-center gap-2">
                       <RefreshCw className="w-4 h-4 animate-spin" />
                       Loading Meta Ads data...
@@ -399,7 +398,7 @@ export const MetaAdsTable = ({
                 </TableRow>
               ) : filteredData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                     No ads found matching your filters
                   </TableCell>
                 </TableRow>
@@ -421,11 +420,6 @@ export const MetaAdsTable = ({
                       <Badge variant={ad.delivery === 'ACTIVE' ? 'default' : 'secondary'}>
                         {ad.delivery}
                       </Badge>
-                    </TableCell>
-                    
-                    {/* Results */}
-                    <TableCell className="text-right">
-                      {ad.results.toLocaleString()}
                     </TableCell>
                     
                     {/* Impressions */}
