@@ -331,11 +331,13 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                           onChange={(value) => {
                             const newData = { ...editingData, tag: value };
                             setEditingData(newData);
-                            setTimeout(() => {
-                              handleAutoSaveWithData(ad.id, newData, false);
-                            }, 100);
+                            // Save immediately with the new data
+                            handleAutoSaveWithData(ad.id, newData, false);
                           }}
-                          onBlur={() => handleAutoSaveWithData(ad.id, editingData, true)}
+                          onBlur={() => {
+                            setEditingCell(null);
+                            setEditingData({});
+                          }}
                           placeholder="Select tags"
                           className="w-48"
                         />
@@ -364,11 +366,13 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                           onChange={(value) => {
                             const newData = { ...editingData, chain: value };
                             setEditingData(newData);
-                            setTimeout(() => {
-                              handleAutoSaveWithData(ad.id, newData, false);
-                            }, 100);
+                            // Save immediately with the new data
+                            handleAutoSaveWithData(ad.id, newData, false);
                           }}
-                          onBlur={() => handleAutoSaveWithData(ad.id, editingData, true)}
+                          onBlur={() => {
+                            setEditingCell(null);
+                            setEditingData({});
+                          }}
                           placeholder="Select chains"
                           className="w-48"
                         />
@@ -398,11 +402,13 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                             console.log('State onChange:', value);
                             const newData = { ...editingData, state: value };
                             setEditingData(newData);
-                            setTimeout(() => {
-                              handleAutoSaveWithData(ad.id, newData, false);
-                            }, 100);
+                            // Save immediately with the new data
+                            handleAutoSaveWithData(ad.id, newData, false);
                           }}
-                          onBlur={() => handleAutoSaveWithData(ad.id, editingData, true)}
+                          onBlur={() => {
+                            setEditingCell(null);
+                            setEditingData({});
+                          }}
                           placeholder="Select states"
                           className="w-32"
                         />

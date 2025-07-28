@@ -47,11 +47,11 @@ export const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
     }
 
     const handleInputBlur = (e: React.FocusEvent) => {
-      // Use a longer timeout to ensure state updates complete first
+      // Use a longer timeout to allow click events to complete
       setTimeout(() => {
         setIsOpen(false);
         onBlur?.();
-      }, 300);
+      }, 200);
     };
 
     return (
