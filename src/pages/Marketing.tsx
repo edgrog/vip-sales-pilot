@@ -2,9 +2,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useMetaAdsData } from "@/hooks/useMetaAdsData";
+import { MetaAdsTable } from "@/components/MetaAdsTable";
 
 const Marketing = () => {
   const navigate = useNavigate();
+  const { data, loading, error, refetch } = useMetaAdsData();
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -22,35 +25,33 @@ const Marketing = () => {
             </Button>
             <div>
               <h1 className="text-3xl font-bold text-foreground">Marketing Platform</h1>
-              <p className="text-muted-foreground">Manage your marketing campaigns and strategies</p>
+              <p className="text-muted-foreground">Manage your Meta Ads campaigns and performance</p>
             </div>
           </div>
         </div>
 
         <div className="grid gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Campaign Management</CardTitle>
-              <CardDescription>
-                Create, monitor, and optimize your marketing campaigns
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Marketing features coming soon! This section will include campaign creation, 
-                performance tracking, audience management, and ROI analytics.
-              </p>
-            </CardContent>
-          </Card>
+          {/* Meta Ads Table */}
+          <MetaAdsTable 
+            data={data}
+            loading={loading}
+            error={error}
+            onRefresh={refetch}
+          />
 
+          {/* Additional Marketing Features */}
           <div className="grid md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Performance Analytics</CardTitle>
+                <CardTitle>Campaign Management</CardTitle>
+                <CardDescription>
+                  Create, monitor, and optimize your marketing campaigns
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Track campaign performance, conversion rates, and customer engagement metrics.
+                  Additional campaign management features coming soon! This will include campaign creation, 
+                  automated bidding strategies, and cross-platform campaign coordination.
                 </p>
               </CardContent>
             </Card>
@@ -61,7 +62,7 @@ const Marketing = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Understand your target audience with detailed demographic and behavioral data.
+                  Understand your target audience with detailed demographic and behavioral data from Meta Ads.
                 </p>
               </CardContent>
             </Card>
