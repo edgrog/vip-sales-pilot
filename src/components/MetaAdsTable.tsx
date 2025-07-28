@@ -380,6 +380,7 @@ export const MetaAdsTable = ({
                 <TableHead className="text-right">Spend</TableHead>
                 <TableHead>Delivery</TableHead>
                 <TableHead className="text-right">Impressions</TableHead>
+                <TableHead className="text-right">Days Running</TableHead>
                 <TableHead>State</TableHead>
                 <TableHead>Chain</TableHead>
                 <TableHead>Notes</TableHead>
@@ -388,7 +389,7 @@ export const MetaAdsTable = ({
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
+                  <TableCell colSpan={8} className="text-center py-8">
                     <div className="flex items-center justify-center gap-2">
                       <RefreshCw className="w-4 h-4 animate-spin" />
                       Loading Meta Ads data...
@@ -397,7 +398,7 @@ export const MetaAdsTable = ({
                 </TableRow>
               ) : filteredData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                     No ads found matching your filters
                   </TableCell>
                 </TableRow>
@@ -424,6 +425,13 @@ export const MetaAdsTable = ({
                     {/* Impressions */}
                     <TableCell className="text-right">
                       {ad.impressions.toLocaleString()}
+                    </TableCell>
+                    
+                    {/* Days Running */}
+                    <TableCell className="text-right">
+                      <Badge variant={ad.days_running > 30 ? 'destructive' : ad.days_running > 14 ? 'secondary' : 'default'}>
+                        {ad.days_running} days
+                      </Badge>
                     </TableCell>
                     
                     {/* State (editable) */}

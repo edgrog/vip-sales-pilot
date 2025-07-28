@@ -13,6 +13,8 @@ export interface MetaAd {
   state: string[];
   chain: string[];
   notes: string;
+  created_time: string;
+  days_running: number;
 }
 
 interface MetaAdsResponse {
@@ -20,6 +22,7 @@ interface MetaAdsResponse {
     id: string;
     name: string;
     effective_status?: string;
+    created_time?: string;
     insights?: {
       data: Array<{
         spend: string;
@@ -116,6 +119,12 @@ export const useMetaAdsData = () => {
           cost.action_type === 'landing_page_view'
         );
         
+        // Calculate days running
+        const createdTime = ad.created_time || new Date().toISOString();
+        const createdDate = new Date(createdTime);
+        const currentDate = new Date();
+        const daysRunning = Math.floor((currentDate.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
+        
         return {
           id: ad.id,
           name: ad.name,
@@ -127,7 +136,9 @@ export const useMetaAdsData = () => {
           tag: parseCommaSeparated(tagData?.tag),
           state: parseCommaSeparated(tagData?.state),
           chain: parseCommaSeparated(tagData?.chain),
-          notes: tagData?.notes || ''
+          notes: tagData?.notes || '',
+          created_time: createdTime,
+          days_running: daysRunning
         };
       });
 

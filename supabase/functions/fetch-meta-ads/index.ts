@@ -29,7 +29,7 @@ serve(async (req) => {
 
     const adAccountId = 'act_602278455259953';    
     // Try different field combinations - some might not be available
-    const fields = 'id,name,effective_status,insights{spend,impressions,actions,cost_per_action_type}';
+    const fields = 'id,name,effective_status,created_time,insights{spend,impressions,actions,cost_per_action_type}';
     const apiUrl = `https://graph.facebook.com/v18.0/${adAccountId}/ads?fields=${fields}&access_token=${metaAccessToken}`;
     
     console.log('API URL:', apiUrl);
