@@ -38,6 +38,30 @@ export type Database = {
         }
         Relationships: []
       }
+      meta_ads_raw: {
+        Row: {
+          delivery: string | null
+          fetched_at: string | null
+          id: string
+          insights: Json | null
+          name: string | null
+        }
+        Insert: {
+          delivery?: string | null
+          fetched_at?: string | null
+          id: string
+          insights?: Json | null
+          name?: string | null
+        }
+        Update: {
+          delivery?: string | null
+          fetched_at?: string | null
+          id?: string
+          insights?: Json | null
+          name?: string | null
+        }
+        Relationships: []
+      }
       VIP_RAW_12MO: {
         Row: {
           "1 Month 1/1/2025 thru 1/31/2025  Case Equivs": string | null
@@ -139,7 +163,34 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      ad_sales_insights: {
+        Row: {
+          chain: string | null
+          cost_per_case: number | null
+          month: string | null
+          state: string | null
+          total_cases: number | null
+          total_spend: number | null
+        }
+        Relationships: []
+      }
+      ad_tags_flattened: {
+        Row: {
+          ad_id: string | null
+          chain: string | null
+          state: string | null
+        }
+        Relationships: []
+      }
+      vip_sales_unpivoted: {
+        Row: {
+          cases: number | null
+          month: string | null
+          normalized_chain: string | null
+          state: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       normalize_chain_name: {
