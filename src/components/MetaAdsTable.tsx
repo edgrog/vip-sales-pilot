@@ -396,11 +396,24 @@ export const MetaAdsTable = ({ data, loading, error, onRefresh, onAdUpdate }: Me
                     <TableCell>
                       {editingCell === `${ad.id}-state` ? (
                         <MultiSelect
-                          options={[...new Set(data.flatMap(ad => ad.state).concat(['CA', 'NY', 'TX', 'FL', 'MA', 'WA', 'OR', 'NV']))]}
+                          options={['ALL', 'CA', 'TX', 'IL', 'MI', 'WI', 'FL', 'OH', 'MA']}
                           value={editingData.state || []}
                           onChange={(value) => {
                             console.log('State onChange:', value);
-                            const newData = { ...editingData, state: value };
+                            let newStateValue = value;
+                            
+                            // Handle 'ALL' selection
+                            if (value.includes('ALL')) {
+                              if (value.length === 1) {
+                                // If only 'ALL' is selected, select all states
+                                newStateValue = ['CA', 'TX', 'IL', 'MI', 'WI', 'FL', 'OH', 'MA'];
+                              } else {
+                                // If 'ALL' plus other states, remove 'ALL' and keep individual states
+                                newStateValue = value.filter(state => state !== 'ALL');
+                              }
+                            }
+                            
+                            const newData = { ...editingData, state: newStateValue };
                             setEditingData(newData);
                             // Save immediately with the new data
                             handleAutoSaveWithData(ad.id, newData, false);
