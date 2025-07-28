@@ -1278,7 +1278,7 @@ export const MainAIChat = () => {
         </Card>
 
         {/* Account Performance */}
-        <Card className="card-grog mt-12">
+        <Card className="card-grog mt-16">
           <CardHeader>
             <CardTitle className="text-lg font-semibold">Account Performance ({dashboardData.accountPerformance.length} accounts)</CardTitle>
             <CardDescription>Store-level performance data with status indicators</CardDescription>
