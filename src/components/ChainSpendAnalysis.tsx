@@ -7,20 +7,43 @@ interface ChainSpendAnalysisProps {
 export const ChainSpendAnalysis = ({
   data
 }: ChainSpendAnalysisProps) => {
-  // Aggregate spend by chain
-  const chainSpendData = data.reduce((acc, ad) => {
+  // First pass: calculate base spend for each chain (excluding General)
+  const baseChainSpend = {} as Record<string, number>;
+  let totalGeneralSpend = 0;
+
+  data.forEach(ad => {
     ad.chain.forEach(chainName => {
       if (chainName) {
-        acc[chainName] = (acc[chainName] || 0) + ad.spend;
+        if (chainName.toLowerCase() === 'general') {
+          totalGeneralSpend += ad.spend;
+        } else {
+          baseChainSpend[chainName] = (baseChainSpend[chainName] || 0) + ad.spend;
+        }
       }
     });
-    return acc;
-  }, {} as Record<string, number>);
+  });
+
+  // Calculate total base spend (excluding General)
+  const totalBaseSpend = Object.values(baseChainSpend).reduce((sum, spend) => sum + spend, 0);
+  
+  // Second pass: distribute General spend proportionally
+  const finalChainSpend = {} as Record<string, number>;
+  
+  if (totalBaseSpend > 0) {
+    Object.entries(baseChainSpend).forEach(([chain, spend]) => {
+      const proportion = spend / totalBaseSpend;
+      const distributedGeneralSpend = totalGeneralSpend * proportion;
+      finalChainSpend[chain] = spend + distributedGeneralSpend;
+    });
+  } else {
+    // If no base spend, just use the base spend as is
+    Object.assign(finalChainSpend, baseChainSpend);
+  }
 
   // Convert to array and sort by spend
-  const chartData = Object.entries(chainSpendData).map(([chain, spend]) => ({
+  const chartData = Object.entries(finalChainSpend).map(([chain, spend]) => ({
     chain,
-    spend
+    spend: Math.round(spend * 100) / 100 // Round to 2 decimal places
   })).sort((a, b) => b.spend - a.spend).slice(0, 15); // Top 15 chains
 
   // Pie chart data for top chains
@@ -37,7 +60,7 @@ export const ChainSpendAnalysis = ({
             <CardTitle className="text-sm font-medium">Total Chains Advertised</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{Object.keys(chainSpendData).length}</div>
+            <div className="text-2xl font-bold">{Object.keys(finalChainSpend).length}</div>
           </CardContent>
         </Card>
         <Card>
@@ -134,6 +157,9 @@ export const ChainSpendAnalysis = ({
                 <p>• Consider expanding spend with {chartData[0]?.chain}</p>
                 <p>• Monitor performance of smaller chains for optimization</p>
                 <p>• Test new creative formats for underperforming chains</p>
+                {totalGeneralSpend > 0 && (
+                  <p>• ${totalGeneralSpend.toLocaleString()} from General campaigns distributed proportionally</p>
+                )}
               </div>
             </div>
           </div>
