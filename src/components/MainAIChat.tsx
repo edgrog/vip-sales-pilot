@@ -10,6 +10,7 @@ import { Send, Bot, User, TrendingDown, TrendingUp, AlertTriangle, Users, Dollar
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { getChainLogo, getChainInitial } from "@/utils/chainLogos";
 import { Progress } from "@/components/ui/progress";
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -1199,8 +1200,16 @@ export const MainAIChat = () => {
                       >
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                              <span className="text-sm font-semibold text-primary">{chain.chain.charAt(0)}</span>
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+                              {getChainLogo(chain.chain) ? (
+                                <img 
+                                  src={getChainLogo(chain.chain)!} 
+                                  alt={`${chain.chain} logo`}
+                                  className="w-6 h-6 object-contain"
+                                />
+                              ) : (
+                                <span className="text-sm font-semibold text-primary">{getChainInitial(chain.chain)}</span>
+                              )}
                             </div>
                             {chain.chain}
                           </div>
