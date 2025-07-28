@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { RefreshCw, Search, DollarSign, Eye, MapPin, Edit2, Save, X } from 'lucide-react';
+import { RefreshCw, Search, DollarSign, Eye, TrendingUp, Edit2, Save, X } from 'lucide-react';
 import { MetaAd } from '@/hooks/useMetaAdsData';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -129,6 +129,7 @@ export const MetaAdsTable = ({
   });
   const totalSpend = filteredData.reduce((sum, ad) => sum + ad.spend, 0);
   const totalImpressions = filteredData.reduce((sum, ad) => sum + ad.impressions, 0);
+  const costPerMil = totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0;
   const handleEdit = (ad: MetaAd, field: string) => {
     // Clear any pending save timeout when starting to edit a new cell
     if (saveTimeoutId) {
@@ -346,10 +347,10 @@ export const MetaAdsTable = ({
             </div>
           </div>
           <div className="flex items-center gap-3 p-4 bg-info/5 rounded-lg">
-            <MapPin className="w-8 h-8 text-info" />
+            <TrendingUp className="w-8 h-8 text-info" />
             <div>
-              <p className="text-sm text-muted-foreground">Active Chains</p>
-              <p className="text-2xl font-bold">{uniqueChains.length}</p>
+              <p className="text-sm text-muted-foreground">Cost Per Mil (CPM)</p>
+              <p className="text-2xl font-bold">${costPerMil.toFixed(2)}</p>
             </div>
           </div>
         </div>
