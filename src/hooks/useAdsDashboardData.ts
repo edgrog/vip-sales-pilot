@@ -59,26 +59,25 @@ export const useAdsDashboardData = () => {
 
       if (vipError) throw vipError;
 
-      // Combine the data based on meta_ads_raw as primary source
-      const combinedData: AdDashboardRow[] = metaAds?.map(metaAd => {
-        // Extract spend and date info from insights JSON
+      // Create monthly data by distributing spend across months ads were running
+      const monthlyAdData: AdDashboardRow[] = [];
+      
+      metaAds?.forEach(metaAd => {
         let spend = 0;
         let daysRunning = 1;
-        let dailySpend = 0;
-        let month = "2025-07"; // Default to current month
+        let startDate: Date;
+        let endDate: Date;
         
         if (metaAd.insights && typeof metaAd.insights === 'object') {
           const insights = metaAd.insights as any;
-          // Look for spend in common Meta insights structure
           spend = parseFloat(insights.spend) || 0;
           
-          // Calculate days running and determine month from date_start and date_stop
           if (insights.date_start && insights.date_stop) {
-            const startDate = new Date(insights.date_start);
-            const endDate = new Date(insights.date_stop);
+            startDate = new Date(insights.date_start);
+            endDate = new Date(insights.date_stop);
             const totalCalendarDays = Math.max(1, Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1);
             
-            // Check if ad is currently inactive (paused, disapproved, etc.)
+            // Check if ad is currently inactive
             const delivery = metaAd.delivery?.toUpperCase() || '';
             const isInactive = delivery.includes('PAUSED') || 
                               delivery.includes('DISAPPROVED') || 
@@ -86,51 +85,66 @@ export const useAdsDashboardData = () => {
                               delivery.includes('STOPPED');
             
             if (isInactive) {
-              // For inactive ads, assume they were active for the spending period only
-              // Use a more conservative estimate: spend suggests X days of activity
-              const estimatedActiveDays = Math.min(totalCalendarDays, Math.ceil(spend / 50)); // Assume ~$50/day minimum
+              const estimatedActiveDays = Math.min(totalCalendarDays, Math.ceil(spend / 50));
               daysRunning = Math.max(1, estimatedActiveDays);
             } else {
-              // For active ads, use full calendar days
               daysRunning = totalCalendarDays;
             }
             
-            // Use the end date to determine the month
-            month = endDate.toISOString().substring(0, 7); // YYYY-MM format
+            // Calculate daily spend
+            const dailySpend = spend / daysRunning;
+            
+            // Find matching ad tag and sales data
+            const adTag = adTags?.find(tag => tag.ad_id === metaAd.id);
+            const salesMatch = vipData?.find(vip => 
+              adTag?.chain && adTag?.state &&
+              vip["Retail Accounts"]?.toLowerCase().includes(adTag.chain.toLowerCase()) &&
+              vip.State === adTag.state
+            );
+            const monthlySales = salesMatch?.["12 Months 8/1/2024 thru 7/23/2025  Case Equivs"] || null;
+            
+            // Create entries for each month the ad was running
+            const currentMonth = new Date(startDate);
+            currentMonth.setDate(1); // Start from first day of start month
+            
+            while (currentMonth <= endDate) {
+              const monthStr = currentMonth.toISOString().substring(0, 7);
+              
+              // Calculate days this ad ran in this specific month
+              const monthStart = new Date(currentMonth);
+              const monthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+              
+              const effectiveStart = new Date(Math.max(startDate.getTime(), monthStart.getTime()));
+              const effectiveEnd = new Date(Math.min(endDate.getTime(), monthEnd.getTime()));
+              const daysInThisMonth = Math.max(1, Math.ceil((effectiveEnd.getTime() - effectiveStart.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+              
+              const monthlySpend = dailySpend * daysInThisMonth;
+              
+              console.log(`Ad ${metaAd.id}: ${monthStr} - ${daysInThisMonth} days, $${monthlySpend.toFixed(2)} spend`);
+              
+              monthlyAdData.push({
+                ad_id: metaAd.id,
+                ad_name: metaAd.name || `Campaign ${metaAd.id.slice(-4)}`,
+                spend: Number(monthlySpend) || 0,
+                daily_spend: Number(dailySpend) || 0,
+                days_running: daysInThisMonth,
+                month: monthStr,
+                delivery: metaAd.delivery || 'Unknown',
+                chain: adTag?.chain || null,
+                state: adTag?.state || null,
+                monthly_sales: monthlySales,
+                cost_per_case: monthlySales && monthlySpend ? Number(monthlySpend) / monthlySales : null
+              });
+              
+              // Move to next month
+              currentMonth.setMonth(currentMonth.getMonth() + 1);
+            }
           }
-          
-          dailySpend = spend / daysRunning;
         }
-
-        // Find matching ad tag data
-        const adTag = adTags?.find(tag => tag.ad_id === metaAd.id);
-
-        // Find matching VIP sales data
-        const salesMatch = vipData?.find(vip => 
-          adTag?.chain && adTag?.state &&
-          vip["Retail Accounts"]?.toLowerCase().includes(adTag.chain.toLowerCase()) &&
-          vip.State === adTag.state
-        );
-
-        const monthlySales = salesMatch?.["12 Months 8/1/2024 thru 7/23/2025  Case Equivs"] || null;
-
-        return {
-          ad_id: metaAd.id,
-          ad_name: metaAd.name || `Campaign ${metaAd.id.slice(-4)}`,
-          spend: Number(spend) || 0,
-          daily_spend: Number(dailySpend) || 0,
-          days_running: daysRunning,
-          month: month,
-          delivery: metaAd.delivery || 'Unknown',
-          chain: adTag?.chain || null,
-          state: adTag?.state || null,
-          monthly_sales: monthlySales,
-          cost_per_case: monthlySales && spend ? Number(spend) / monthlySales : null
-        };
-      }) || [];
+      });
 
       // Calculate monthly metrics
-      const monthlyData = combinedData.reduce((acc: { [key: string]: MonthlyMetrics }, item) => {
+      const monthlyData = monthlyAdData.reduce((acc: { [key: string]: MonthlyMetrics }, item) => {
         if (!acc[item.month]) {
           acc[item.month] = {
             month: item.month,
@@ -149,12 +163,12 @@ export const useAdsDashboardData = () => {
       }, {});
 
       // Calculate avg spend per case for each month
-      const monthlyMetricsArray = Object.values(monthlyData).map(metrics => ({
+      const monthlyMetricsArray = Object.values(monthlyData).map((metrics: MonthlyMetrics) => ({
         ...metrics,
         avg_spend_per_case: metrics.total_cases > 0 ? metrics.total_spend / metrics.total_cases : 0
       }));
 
-      setData(combinedData);
+      setData(monthlyAdData);
       setMonthlyMetrics(monthlyMetricsArray);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error occurred');
