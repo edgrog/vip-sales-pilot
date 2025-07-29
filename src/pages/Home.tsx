@@ -35,10 +35,10 @@ const Home = () => {
                 <Megaphone className="w-8 h-8 text-accent-foreground" />
               </div>
               <CardTitle className="text-2xl">Marketing</CardTitle>
-              <CardDescription className="text-base">Track ad performance & socials</CardDescription>
+              <CardDescription className="text-base">Ad Spend by Chain & Geography</CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <Button variant="outline" size="lg" className="w-full">
+              <Button variant="outline" size="lg" className="w-full bg-yellow-300 hover:bg-yellow-200">
                 Go to Marketing
               </Button>
             </CardContent>
@@ -50,10 +50,10 @@ const Home = () => {
                 <BarChart3 className="w-8 h-8 text-muted-foreground" />
               </div>
               <CardTitle className="text-2xl">Ads Dashboard</CardTitle>
-              <CardDescription className="text-base">Detailed ad metrics and campaign analytics</CardDescription>
+              <CardDescription className="text-base">Ad Spend & Sales Analytics</CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <Button variant="secondary" size="lg" className="w-full">
+              <Button variant="secondary" size="lg" className="w-full bg-red-300 hover:bg-red-200 my-[19px]">
                 Go to Ads Dashboard
               </Button>
             </CardContent>
