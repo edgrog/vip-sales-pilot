@@ -7,10 +7,11 @@ export const AdsPerformanceMetrics = () => {
 
   if (loading) return <div>Loading metrics...</div>;
 
-  // Calculate key metrics
-  const totalSpend = data.reduce((sum, item) => sum + item.spend, 0);
+  // Calculate key metrics using daily spend for accurate monthly projections
+  const totalDailySpend = data.reduce((sum, item) => sum + item.daily_spend, 0);
+  const projectedMonthlySpend = totalDailySpend * 30; // 30 days average month
   const totalCases = data.reduce((sum, item) => sum + (item.monthly_sales || 0), 0);
-  const avgSpendPerCase = totalCases > 0 ? totalSpend / totalCases : 0;
+  const avgSpendPerCase = totalCases > 0 ? projectedMonthlySpend / totalCases : 0;
   const avgMonthlySales = data.length > 0 ? totalCases / data.length : 0;
 
   // Calculate trends (mock trend calculation)

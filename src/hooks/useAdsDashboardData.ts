@@ -5,6 +5,8 @@ export interface AdDashboardRow {
   ad_id: string;
   ad_name: string;
   spend: number;
+  daily_spend: number;
+  days_running: number;
   delivery: string;
   chain: string | null;
   state: string | null;
@@ -49,12 +51,24 @@ export const useAdsDashboardData = () => {
 
       // Combine the data based on meta_ads_raw as primary source
       const combinedData: AdDashboardRow[] = metaAds?.map(metaAd => {
-        // Extract spend from insights JSON
+        // Extract spend and date info from insights JSON
         let spend = 0;
+        let daysRunning = 1;
+        let dailySpend = 0;
+        
         if (metaAd.insights && typeof metaAd.insights === 'object') {
           const insights = metaAd.insights as any;
           // Look for spend in common Meta insights structure
-          spend = insights.spend || insights.amount_spent || insights.cost || 0;
+          spend = parseFloat(insights.spend) || 0;
+          
+          // Calculate days running from date_start and date_stop
+          if (insights.date_start && insights.date_stop) {
+            const startDate = new Date(insights.date_start);
+            const endDate = new Date(insights.date_stop);
+            daysRunning = Math.max(1, Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+          }
+          
+          dailySpend = spend / daysRunning;
         }
 
         // Find matching ad tag data
@@ -73,11 +87,13 @@ export const useAdsDashboardData = () => {
           ad_id: metaAd.id,
           ad_name: metaAd.name || `Campaign ${metaAd.id.slice(-4)}`,
           spend: Number(spend) || 0,
+          daily_spend: Number(dailySpend) || 0,
+          days_running: daysRunning,
           delivery: metaAd.delivery || 'Unknown',
           chain: adTag?.chain || null,
           state: adTag?.state || null,
           monthly_sales: monthlySales,
-          cost_per_case: monthlySales && spend ? Number(spend) / monthlySales : null
+          cost_per_case: monthlySales && dailySpend ? (Number(dailySpend) * 30) / monthlySales : null
         };
       }) || [];
 

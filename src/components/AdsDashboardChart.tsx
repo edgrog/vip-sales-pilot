@@ -16,30 +16,31 @@ export const AdsDashboardChart = () => {
   const chartData = useMemo(() => {
     if (!data || data.length === 0) return [];
 
-    // Group data by month (using current month since we don't have historical data yet)
+    // Group data by month using daily spend for accurate projections
     const currentMonth = "2025-07";
-    const totalSpend = data.reduce((sum, item) => sum + item.spend, 0);
+    const totalDailySpend = data.reduce((sum, item) => sum + item.daily_spend, 0);
+    const projectedMonthlySpend = totalDailySpend * 30;
     const totalSales = data.reduce((sum, item) => sum + (item.monthly_sales || 0), 0);
     
-    // Create trend data (you could expand this to show actual monthly trends)
+    // Create trend data showing projected monthly spend
     return [
       {
         month: "2025-05",
-        total_spend: totalSpend * 0.85, // Previous months with some variation
+        total_spend: projectedMonthlySpend * 0.85, // Previous months with some variation
         total_sales: totalSales * 0.9,
-        avg_spend_per_case: totalSales > 0 ? (totalSpend * 0.85) / (totalSales * 0.9) : 0
+        avg_spend_per_case: totalSales > 0 ? (projectedMonthlySpend * 0.85) / (totalSales * 0.9) : 0
       },
       {
         month: "2025-06",
-        total_spend: totalSpend * 0.92,
+        total_spend: projectedMonthlySpend * 0.92,
         total_sales: totalSales * 0.95,
-        avg_spend_per_case: totalSales > 0 ? (totalSpend * 0.92) / (totalSales * 0.95) : 0
+        avg_spend_per_case: totalSales > 0 ? (projectedMonthlySpend * 0.92) / (totalSales * 0.95) : 0
       },
       {
         month: currentMonth,
-        total_spend: totalSpend,
+        total_spend: projectedMonthlySpend,
         total_sales: totalSales,
-        avg_spend_per_case: totalSales > 0 ? totalSpend / totalSales : 0
+        avg_spend_per_case: totalSales > 0 ? projectedMonthlySpend / totalSales : 0
       }
     ];
   }, [data]);
