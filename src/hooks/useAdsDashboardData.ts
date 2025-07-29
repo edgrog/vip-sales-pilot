@@ -7,6 +7,7 @@ export interface AdDashboardRow {
   spend: number;
   daily_spend: number;
   days_running: number;
+  month: string;
   delivery: string;
   chain: string | null;
   state: string | null;
@@ -14,8 +15,17 @@ export interface AdDashboardRow {
   cost_per_case: number | null;
 }
 
+export interface MonthlyMetrics {
+  month: string;
+  total_spend: number;
+  total_cases: number;
+  avg_spend_per_case: number;
+  ad_count: number;
+}
+
 export const useAdsDashboardData = () => {
   const [data, setData] = useState<AdDashboardRow[]>([]);
+  const [monthlyMetrics, setMonthlyMetrics] = useState<MonthlyMetrics[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,17 +65,21 @@ export const useAdsDashboardData = () => {
         let spend = 0;
         let daysRunning = 1;
         let dailySpend = 0;
+        let month = "2025-07"; // Default to current month
         
         if (metaAd.insights && typeof metaAd.insights === 'object') {
           const insights = metaAd.insights as any;
           // Look for spend in common Meta insights structure
           spend = parseFloat(insights.spend) || 0;
           
-          // Calculate days running from date_start and date_stop
+          // Calculate days running and determine month from date_start and date_stop
           if (insights.date_start && insights.date_stop) {
             const startDate = new Date(insights.date_start);
             const endDate = new Date(insights.date_stop);
             daysRunning = Math.max(1, Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+            
+            // Use the end date to determine the month
+            month = endDate.toISOString().substring(0, 7); // YYYY-MM format
           }
           
           dailySpend = spend / daysRunning;
@@ -89,15 +103,42 @@ export const useAdsDashboardData = () => {
           spend: Number(spend) || 0,
           daily_spend: Number(dailySpend) || 0,
           days_running: daysRunning,
+          month: month,
           delivery: metaAd.delivery || 'Unknown',
           chain: adTag?.chain || null,
           state: adTag?.state || null,
           monthly_sales: monthlySales,
-          cost_per_case: monthlySales && dailySpend ? (Number(dailySpend) * 30) / monthlySales : null
+          cost_per_case: monthlySales && spend ? Number(spend) / monthlySales : null
         };
       }) || [];
 
+      // Calculate monthly metrics
+      const monthlyData = combinedData.reduce((acc: { [key: string]: MonthlyMetrics }, item) => {
+        if (!acc[item.month]) {
+          acc[item.month] = {
+            month: item.month,
+            total_spend: 0,
+            total_cases: 0,
+            avg_spend_per_case: 0,
+            ad_count: 0
+          };
+        }
+        
+        acc[item.month].total_spend += item.spend;
+        acc[item.month].total_cases += item.monthly_sales || 0;
+        acc[item.month].ad_count += 1;
+        
+        return acc;
+      }, {});
+
+      // Calculate avg spend per case for each month
+      const monthlyMetricsArray = Object.values(monthlyData).map(metrics => ({
+        ...metrics,
+        avg_spend_per_case: metrics.total_cases > 0 ? metrics.total_spend / metrics.total_cases : 0
+      }));
+
       setData(combinedData);
+      setMonthlyMetrics(monthlyMetricsArray);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error occurred');
     } finally {
@@ -124,5 +165,5 @@ export const useAdsDashboardData = () => {
     fetchData();
   }, []);
 
-  return { data, loading, error, refetch: fetchData, updateAdTag };
+  return { data, monthlyMetrics, loading, error, refetch: fetchData, updateAdTag };
 };
