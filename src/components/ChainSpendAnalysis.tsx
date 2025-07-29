@@ -12,7 +12,6 @@ export const ChainSpendAnalysis = ({
   const baseChainImpressions = {} as Record<string, number>;
   let totalGeneralSpend = 0;
   let totalGeneralImpressions = 0;
-
   data.forEach(ad => {
     ad.chain.forEach(chainName => {
       if (chainName) {
@@ -30,11 +29,10 @@ export const ChainSpendAnalysis = ({
   // Calculate total base spend and impressions (excluding General)
   const totalBaseSpend = Object.values(baseChainSpend).reduce((sum, spend) => sum + spend, 0);
   const totalBaseImpressions = Object.values(baseChainImpressions).reduce((sum, impressions) => sum + impressions, 0);
-  
+
   // Second pass: distribute General spend and impressions proportionally
   const finalChainSpend = {} as Record<string, number>;
   const finalChainImpressions = {} as Record<string, number>;
-  
   if (totalBaseSpend > 0) {
     Object.entries(baseChainSpend).forEach(([chain, spend]) => {
       const proportion = spend / totalBaseSpend;
@@ -52,7 +50,8 @@ export const ChainSpendAnalysis = ({
   // Convert to array and sort by spend
   const chartData = Object.entries(finalChainSpend).map(([chain, spend]) => ({
     chain,
-    spend: Math.round(spend * 100) / 100, // Round to 2 decimal places
+    spend: Math.round(spend * 100) / 100,
+    // Round to 2 decimal places
     impressions: Math.round(finalChainImpressions[chain] || 0)
   })).sort((a, b) => b.spend - a.spend).slice(0, 15); // Top 15 chains
 
@@ -61,7 +60,6 @@ export const ChainSpendAnalysis = ({
     ...item,
     fill: `hsl(${index * 45 % 360}, 70%, 50%)`
   }));
-  
   const totalSpend = chartData.reduce((sum, item) => sum + item.spend, 0);
   const totalImpressions = chartData.reduce((sum, item) => sum + item.impressions, 0);
   return <div className="grid gap-6">
@@ -200,21 +198,7 @@ export const ChainSpendAnalysis = ({
                   </div>)}
               </div>
             </div>
-            <div>
-              <h4 className="font-semibold mb-2">Recommendations</h4>
-              <div className="text-sm text-muted-foreground space-y-1">
-                <p>• Focus budget on top 5 performing chains</p>
-                <p>• Consider expanding spend with {chartData[0]?.chain}</p>
-                <p>• Monitor performance of smaller chains for optimization</p>
-                <p>• Test new creative formats for underperforming chains</p>
-                {totalGeneralSpend > 0 && (
-                  <p>• ${totalGeneralSpend.toLocaleString()} from General campaigns distributed proportionally</p>
-                )}
-                {totalGeneralImpressions > 0 && (
-                  <p>• {totalGeneralImpressions.toLocaleString()} impressions from General campaigns distributed</p>
-                )}
-              </div>
-            </div>
+            
           </div>
         </CardContent>
       </Card>
