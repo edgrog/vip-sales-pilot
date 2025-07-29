@@ -26,12 +26,9 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
             <Route path="/marketing" element={<ProtectedRoute><Marketing /></ProtectedRoute>} />
-            <Route path="/marketing/ads-dashboard" element={<ProtectedRoute><AdsDashboard /></ProtectedRoute>} />
             <Route path="/ads-dashboard" element={<ProtectedRoute><AdsDashboard /></ProtectedRoute>} />
-            <Route path="/accounts/:accountId" element={<ProtectedRoute><AccountOverview /></ProtectedRoute>} />
-            <Route path="/chains/:chainId" element={<ProtectedRoute><ChainOverview /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
