@@ -152,7 +152,12 @@ export const useAdsDashboardData = () => {
           "1 Month 7/1/2025 thru 7/23/2025  Case Equivs"
         `);
 
-      if (salesError) throw salesError;
+      if (salesError) {
+        console.error("Sales data error:", salesError);
+        throw salesError;
+      }
+
+      console.log("Sales data sample:", salesByMonth?.slice(0, 3));
 
       // Initialize monthly data with sales data for May, June, July
       const monthlyData: { [key: string]: MonthlyMetrics } = {};
@@ -162,6 +167,8 @@ export const useAdsDashboardData = () => {
         const val = row["1 Month 5/1/2025 thru 5/31/2025  Case Equivs"];
         return sum + (val && typeof val === 'number' ? val : (typeof val === 'string' && val !== '' ? parseFloat(val) : 0));
       }, 0) || 0;
+      
+      console.log("May sales total:", maySales);
       
       monthlyData["2025-05"] = {
         month: "2025-05",
@@ -177,6 +184,8 @@ export const useAdsDashboardData = () => {
         return sum + (val && typeof val === 'number' ? val : (typeof val === 'string' && val !== '' ? parseFloat(val) : 0));
       }, 0) || 0;
       
+      console.log("June sales total:", juneSales);
+      
       monthlyData["2025-06"] = {
         month: "2025-06",
         total_spend: 0,
@@ -191,6 +200,8 @@ export const useAdsDashboardData = () => {
         return sum + (val && typeof val === 'number' ? val : (typeof val === 'string' && val !== '' ? parseFloat(val) : 0));
       }, 0) || 0;
       
+      console.log("July sales total:", julySales);
+      
       monthlyData["2025-07"] = {
         month: "2025-07",
         total_spend: 0,
@@ -204,14 +215,27 @@ export const useAdsDashboardData = () => {
         if (monthlyData[item.month]) {
           monthlyData[item.month].total_spend += item.spend;
           monthlyData[item.month].ad_count += 1;
+        } else {
+          // Create month if it doesn't exist (shouldn't happen for June/July but just in case)
+          monthlyData[item.month] = {
+            month: item.month,
+            total_spend: item.spend,
+            total_cases: item.monthly_sales || 0,
+            avg_spend_per_case: 0,
+            ad_count: 1
+          };
         }
       });
+
+      console.log("Monthly data before final calculation:", monthlyData);
 
       // Calculate avg spend per case for each month
       const monthlyMetricsArray = Object.values(monthlyData).map((metrics: MonthlyMetrics) => ({
         ...metrics,
         avg_spend_per_case: metrics.total_cases > 0 ? metrics.total_spend / metrics.total_cases : 0
       }));
+
+      console.log("Final monthly metrics:", monthlyMetricsArray);
 
       setData(monthlyAdData);
       setMonthlyMetrics(monthlyMetricsArray);
