@@ -44,8 +44,7 @@ const IGOrganicTrends = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">IG Organic Trends</h2>
+      <div className="flex items-center justify-end">
         <div className="flex gap-2">
           <Button
             variant={dateRange === 7 ? "default" : "outline"}

@@ -66,7 +66,10 @@ const Marketing = () => {
 
           <TabsContent value="campaigns" className="space-y-6">
             {/* IG Organic Trends */}
-            <IGOrganicTrends />
+            <div>
+              <h3 className="text-xl font-semibold mb-4">IG Organic Trends</h3>
+              <IGOrganicTrends />
+            </div>
             
             {/* Meta Ads Table */}
             <MetaAdsTable data={data} loading={loading} error={error} onRefresh={refetch} onAdUpdate={updateAd} />
