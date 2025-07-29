@@ -32,7 +32,7 @@ const Home = () => {
           <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer" onClick={() => navigate('/marketing')}>
             <CardHeader className="text-center pb-4">
               <div className="mx-auto w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mb-4">
-                <Megaphone className="w-8 h-8 text-accent-foreground" />
+                <Megaphone className="w-8 h-8 text-yellow-500" strokeWidth={3} />
               </div>
               <CardTitle className="text-2xl">Marketing</CardTitle>
               <CardDescription className="text-base">Ad Spend by Chain & Geography</CardDescription>
