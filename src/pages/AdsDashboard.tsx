@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { AdsDashboardTable } from "@/components/AdsDashboardTable";
 import { AdsDashboardChart } from "@/components/AdsDashboardChart";
+import { AdsPerformanceMetrics } from "@/components/AdsPerformanceMetrics";
 
 const AdsDashboard = () => {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ const AdsDashboard = () => {
             <ArrowLeft className="w-4 h-4" />
             Back to Home
           </Button>
-          <h1 className="text-3xl font-bold">Ads Dashboard</h1>
+          <h1 className="text-3xl font-bold">Ads Performance Dashboard</h1>
         </div>
 
         {/* Filters */}
@@ -57,6 +58,9 @@ const AdsDashboard = () => {
             <option value="cost_per_case">Sort by Cost per Case</option>
           </select>
         </div>
+
+        {/* Performance Metrics */}
+        <AdsPerformanceMetrics />
 
         {/* Chart */}
         <AdsDashboardChart />

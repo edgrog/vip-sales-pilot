@@ -7,6 +7,7 @@ interface ChartData {
   month: string;
   total_spend: number;
   total_sales: number;
+  avg_spend_per_case: number;
 }
 
 export const AdsDashboardChart = () => {
@@ -27,11 +28,26 @@ export const AdsDashboardChart = () => {
             "1 Month 7/1/2025 thru 7/23/2025  Case Equivs"
           `);
 
-        // Create mock chart data
+        // Create mock chart data with spend per case calculations
         const mockData = [
-          { month: "2025-05", total_spend: 45000, total_sales: 2800 },
-          { month: "2025-06", total_spend: 52000, total_sales: 3200 },
-          { month: "2025-07", total_spend: 48000, total_sales: 2950 },
+          { 
+            month: "2025-05", 
+            total_spend: 45000, 
+            total_sales: 2800, 
+            avg_spend_per_case: 45000 / 2800 
+          },
+          { 
+            month: "2025-06", 
+            total_spend: 52000, 
+            total_sales: 3200, 
+            avg_spend_per_case: 52000 / 3200 
+          },
+          { 
+            month: "2025-07", 
+            total_spend: 48000, 
+            total_sales: 2950, 
+            avg_spend_per_case: 48000 / 2950 
+          },
         ];
 
         setChartData(mockData);
@@ -50,7 +66,7 @@ export const AdsDashboardChart = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Monthly Spend vs Sales Trends</CardTitle>
+        <CardTitle>Trends in Spend and Case Sales</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={400}>
@@ -74,6 +90,13 @@ export const AdsDashboardChart = () => {
               dataKey="total_sales" 
               stroke="#82ca9d" 
               name="Total Sales (Cases)"
+            />
+            <Line 
+              yAxisId="left"
+              type="monotone" 
+              dataKey="avg_spend_per_case" 
+              stroke="#ff7300" 
+              name="Avg Spend per Case ($)"
             />
           </LineChart>
         </ResponsiveContainer>
