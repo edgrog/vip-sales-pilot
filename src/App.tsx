@@ -29,6 +29,7 @@ const App = () => (
             <Route path="/wholesale" element={<Index />} />
             <Route path="/marketing" element={<ProtectedRoute><Marketing /></ProtectedRoute>} />
             <Route path="/ads-dashboard" element={<ProtectedRoute><AdsDashboard /></ProtectedRoute>} />
+            <Route path="/chains/:chainId" element={<ProtectedRoute><ChainOverview /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
