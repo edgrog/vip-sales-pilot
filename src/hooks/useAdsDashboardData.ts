@@ -76,7 +76,24 @@ export const useAdsDashboardData = () => {
           if (insights.date_start && insights.date_stop) {
             const startDate = new Date(insights.date_start);
             const endDate = new Date(insights.date_stop);
-            daysRunning = Math.max(1, Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+            const totalCalendarDays = Math.max(1, Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+            
+            // Check if ad is currently inactive (paused, disapproved, etc.)
+            const delivery = metaAd.delivery?.toUpperCase() || '';
+            const isInactive = delivery.includes('PAUSED') || 
+                              delivery.includes('DISAPPROVED') || 
+                              delivery.includes('REJECTED') ||
+                              delivery.includes('STOPPED');
+            
+            if (isInactive) {
+              // For inactive ads, assume they were active for the spending period only
+              // Use a more conservative estimate: spend suggests X days of activity
+              const estimatedActiveDays = Math.min(totalCalendarDays, Math.ceil(spend / 50)); // Assume ~$50/day minimum
+              daysRunning = Math.max(1, estimatedActiveDays);
+            } else {
+              // For active ads, use full calendar days
+              daysRunning = totalCalendarDays;
+            }
             
             // Use the end date to determine the month
             month = endDate.toISOString().substring(0, 7); // YYYY-MM format
