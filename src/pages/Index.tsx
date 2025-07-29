@@ -2,7 +2,7 @@ import { Dashboard } from "@/components/Dashboard";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
-import { Home } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 const Index = () => {
   const { user, signOut } = useAuth();
@@ -11,9 +11,9 @@ const Index = () => {
     <div className="min-h-screen">
       <div className="fixed top-4 left-4 z-50">
         <Link to="/home">
-          <Button variant="outline" size="sm">
-            <Home className="w-4 h-4 mr-2" />
-            Home
+          <Button variant="ghost" size="sm" className="flex items-center gap-2">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Home
           </Button>
         </Link>
       </div>

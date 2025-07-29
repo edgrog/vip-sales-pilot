@@ -260,11 +260,11 @@ const ChainOverview = () => {
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => navigate('/wholesale')}
-            className="gap-2"
+            onClick={() => navigate('/home')}
+            className="flex items-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Dashboard
+            Back to Home
           </Button>
           
           <div>

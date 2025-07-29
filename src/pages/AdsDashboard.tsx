@@ -16,9 +16,9 @@ const AdsDashboard = () => {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate("/marketing")}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Marketing
+          <Button variant="ghost" size="sm" onClick={() => navigate("/home")} className="flex items-center gap-2">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Home
           </Button>
           <h1 className="text-3xl font-bold">Ads Dashboard</h1>
         </div>
