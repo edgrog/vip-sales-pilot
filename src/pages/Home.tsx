@@ -46,8 +46,8 @@ const Home = () => {
 
           <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer" onClick={() => navigate('/ads-dashboard')}>
             <CardHeader className="text-center pb-4">
-              <div className="mx-auto w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mb-4">
-                <BarChart3 className="w-8 h-8 text-muted-foreground" />
+              <div className="mx-auto w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mb-4">
+                <BarChart3 className="w-8 h-8 text-muted-foreground" strokeWidth={3} />
               </div>
               <CardTitle className="text-2xl">Ads Dashboard</CardTitle>
               <CardDescription className="text-base">Ad Spend & Sales Analytics</CardDescription>
