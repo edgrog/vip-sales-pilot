@@ -22,7 +22,14 @@ export const useAdsDashboardData = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch ad tags (primary data source)
+      // Fetch real ad data from meta_ads_raw
+      const { data: metaAds, error: metaError } = await supabase
+        .from("meta_ads_raw")
+        .select("id, name, delivery, insights");
+
+      if (metaError) throw metaError;
+
+      // Fetch ad tags (for chain/state mapping)
       const { data: adTags, error: tagsError } = await supabase
         .from("ad_tags")
         .select("ad_id, chain, state, notes");
@@ -40,28 +47,37 @@ export const useAdsDashboardData = () => {
 
       if (vipError) throw vipError;
 
-      // Combine the data based on ad_tags as primary source
-      const combinedData: AdDashboardRow[] = adTags?.map(adTag => {
-        // Mock spend data (in real app this would come from meta_ads_raw)
-        const spend = Math.random() * 5000 + 1000; // Random spend between $1000-$6000
+      // Combine the data based on meta_ads_raw as primary source
+      const combinedData: AdDashboardRow[] = metaAds?.map(metaAd => {
+        // Extract spend from insights JSON
+        let spend = 0;
+        if (metaAd.insights && typeof metaAd.insights === 'object') {
+          const insights = metaAd.insights as any;
+          // Look for spend in common Meta insights structure
+          spend = insights.spend || insights.amount_spent || insights.cost || 0;
+        }
+
+        // Find matching ad tag data
+        const adTag = adTags?.find(tag => tag.ad_id === metaAd.id);
 
         // Find matching VIP sales data
         const salesMatch = vipData?.find(vip => 
-          vip["Retail Accounts"]?.toLowerCase().includes(adTag.chain?.toLowerCase() || '') &&
+          adTag?.chain && adTag?.state &&
+          vip["Retail Accounts"]?.toLowerCase().includes(adTag.chain.toLowerCase()) &&
           vip.State === adTag.state
         );
 
         const monthlySales = salesMatch?.["12 Months 8/1/2024 thru 7/23/2025  Case Equivs"] || null;
 
         return {
-          ad_id: adTag.ad_id,
-          ad_name: `Campaign ${adTag.ad_id.slice(-4)}`, // Mock ad name
-          spend,
-          delivery: Math.random() > 0.5 ? 'Active' : 'Paused', // Mock delivery status
-          chain: adTag.chain,
-          state: adTag.state,
+          ad_id: metaAd.id,
+          ad_name: metaAd.name || `Campaign ${metaAd.id.slice(-4)}`,
+          spend: Number(spend) || 0,
+          delivery: metaAd.delivery || 'Unknown',
+          chain: adTag?.chain || null,
+          state: adTag?.state || null,
           monthly_sales: monthlySales,
-          cost_per_case: monthlySales ? spend / monthlySales : null
+          cost_per_case: monthlySales && spend ? Number(spend) / monthlySales : null
         };
       }) || [];
 
