@@ -14,7 +14,7 @@ const Home = () => {
         </div>
         
         <div className="grid md:grid-cols-3 gap-6">
-          <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer" onClick={() => navigate('/')}>
+          <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer" onClick={() => navigate('/wholesale')}>
             <CardHeader className="text-center pb-4">
               <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                 <ShoppingCart className="w-8 h-8 text-primary" />
