@@ -143,24 +143,69 @@ export const useAdsDashboardData = () => {
         }
       });
 
-      // Calculate monthly metrics
-      const monthlyData = monthlyAdData.reduce((acc: { [key: string]: MonthlyMetrics }, item) => {
-        if (!acc[item.month]) {
-          acc[item.month] = {
-            month: item.month,
-            total_spend: 0,
-            total_cases: 0,
-            avg_spend_per_case: 0,
-            ad_count: 0
-          };
+      // Calculate monthly metrics starting with all months that have sales data
+      const { data: salesByMonth, error: salesError } = await supabase
+        .from("VIP_RAW_12MO")
+        .select(`
+          "1 Month 5/1/2025 thru 5/31/2025  Case Equivs",
+          "1 Month 6/1/2025 thru 6/30/2025  Case Equivs", 
+          "1 Month 7/1/2025 thru 7/23/2025  Case Equivs"
+        `);
+
+      if (salesError) throw salesError;
+
+      // Initialize monthly data with sales data for May, June, July
+      const monthlyData: { [key: string]: MonthlyMetrics } = {};
+      
+      // Add May data (sales but no spend)
+      const maySales = salesByMonth?.reduce((sum, row) => {
+        const val = row["1 Month 5/1/2025 thru 5/31/2025  Case Equivs"];
+        return sum + (val && typeof val === 'number' ? val : (typeof val === 'string' && val !== '' ? parseFloat(val) : 0));
+      }, 0) || 0;
+      
+      monthlyData["2025-05"] = {
+        month: "2025-05",
+        total_spend: 0,
+        total_cases: maySales,
+        avg_spend_per_case: 0,
+        ad_count: 0
+      };
+
+      // Add June data (sales but no spend initially)
+      const juneSales = salesByMonth?.reduce((sum, row) => {
+        const val = row["1 Month 6/1/2025 thru 6/30/2025  Case Equivs"];
+        return sum + (val && typeof val === 'number' ? val : (typeof val === 'string' && val !== '' ? parseFloat(val) : 0));
+      }, 0) || 0;
+      
+      monthlyData["2025-06"] = {
+        month: "2025-06",
+        total_spend: 0,
+        total_cases: juneSales,
+        avg_spend_per_case: 0,
+        ad_count: 0
+      };
+
+      // Add July data (sales but no spend initially)
+      const julySales = salesByMonth?.reduce((sum, row) => {
+        const val = row["1 Month 7/1/2025 thru 7/23/2025  Case Equivs"];
+        return sum + (val && typeof val === 'number' ? val : (typeof val === 'string' && val !== '' ? parseFloat(val) : 0));
+      }, 0) || 0;
+      
+      monthlyData["2025-07"] = {
+        month: "2025-07",
+        total_spend: 0,
+        total_cases: julySales,
+        avg_spend_per_case: 0,
+        ad_count: 0
+      };
+
+      // Now add ad spend data to existing months
+      monthlyAdData.forEach(item => {
+        if (monthlyData[item.month]) {
+          monthlyData[item.month].total_spend += item.spend;
+          monthlyData[item.month].ad_count += 1;
         }
-        
-        acc[item.month].total_spend += item.spend;
-        acc[item.month].total_cases += item.monthly_sales || 0;
-        acc[item.month].ad_count += 1;
-        
-        return acc;
-      }, {});
+      });
 
       // Calculate avg spend per case for each month
       const monthlyMetricsArray = Object.values(monthlyData).map((metrics: MonthlyMetrics) => ({
