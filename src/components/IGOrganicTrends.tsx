@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -43,139 +43,145 @@ const IGOrganicTrends = () => {
   if (error) return <div>Error loading data: {error}</div>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-end">
-        <div className="flex gap-2">
-          <Button
-            variant={dateRange === 7 ? "default" : "outline"}
-            size="sm"
-            onClick={() => handleDateRangeChange(7)}
-          >
-            7d
-          </Button>
-          <Button
-            variant={dateRange === 30 ? "default" : "outline"}
-            size="sm"
-            onClick={() => handleDateRangeChange(30)}
-          >
-            30d
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => refetch(dateRange)}
-          >
-            <RefreshCw className="w-4 h-4" />
-          </Button>
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5" />
+              IG Organic Performance
+              <Badge variant="secondary">{data.length} data points</Badge>
+            </CardTitle>
+            <CardDescription>
+              Instagram organic reach, profile views, and website clicks over time
+            </CardDescription>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant={dateRange === 7 ? "default" : "outline"}
+              size="sm"
+              onClick={() => handleDateRangeChange(7)}
+            >
+              7d
+            </Button>
+            <Button
+              variant={dateRange === 30 ? "default" : "outline"}
+              size="sm"
+              onClick={() => handleDateRangeChange(30)}
+            >
+              30d
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch(dateRange)}
+              disabled={loading}
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </div>
         </div>
-      </div>
+      </CardHeader>
+      <CardContent>
 
-      {/* Summary Cards */}
-      <div className="grid md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Reach</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatNumber(summary.totalReach)}</div>
-            <div className="flex items-center text-xs text-muted-foreground">
-              {summary.reachChange >= 0 ? (
-                <ArrowUp className="h-3 w-3 mr-1 text-green-500" />
-              ) : (
-                <ArrowDown className="h-3 w-3 mr-1 text-red-500" />
-              )}
-              <span className={summary.reachChange >= 0 ? "text-green-500" : "text-red-500"}>
-                {formatPercentage(summary.reachChange)}
-              </span>
-              <span className="ml-1">vs previous 30d</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Profile Views</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatNumber(summary.totalProfileViews)}</div>
-            <div className="flex items-center text-xs text-muted-foreground">
-              {summary.profileViewsChange >= 0 ? (
-                <ArrowUp className="h-3 w-3 mr-1 text-green-500" />
-              ) : (
-                <ArrowDown className="h-3 w-3 mr-1 text-red-500" />
-              )}
-              <span className={summary.profileViewsChange >= 0 ? "text-green-500" : "text-red-500"}>
-                {formatPercentage(summary.profileViewsChange)}
-              </span>
-              <span className="ml-1">vs previous 30d</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Website Clicks</CardTitle>
-            <MousePointer className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatNumber(summary.totalWebsiteClicks)}</div>
-            <div className="flex items-center text-xs text-muted-foreground">
-              {summary.websiteClicksChange >= 0 ? (
-                <ArrowUp className="h-3 w-3 mr-1 text-green-500" />
-              ) : (
-                <ArrowDown className="h-3 w-3 mr-1 text-red-500" />
-              )}
-              <span className={summary.websiteClicksChange >= 0 ? "text-green-500" : "text-red-500"}>
-                {formatPercentage(summary.websiteClicksChange)}
-              </span>
-              <span className="ml-1">vs previous 30d</span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Chart */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Metrics Over Time</CardTitle>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="reach"
-                  checked={selectedMetrics.reach}
-                  onCheckedChange={() => handleMetricToggle('reach')}
-                />
-                <label htmlFor="reach" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Reach
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="profile_views"
-                  checked={selectedMetrics.profile_views}
-                  onCheckedChange={() => handleMetricToggle('profile_views')}
-                />
-                <label htmlFor="profile_views" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Profile Views
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="website_clicks"
-                  checked={selectedMetrics.website_clicks}
-                  onCheckedChange={() => handleMetricToggle('website_clicks')}
-                />
-                <label htmlFor="website_clicks" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Website Clicks
-                </label>
+        {/* Summary Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="flex items-center gap-3 p-4 bg-primary/5 rounded-lg">
+            <Eye className="w-8 h-8 text-primary" />
+            <div>
+              <p className="text-sm text-muted-foreground">Total Reach (Last {dateRange}d)</p>
+              <p className="text-2xl font-bold">{formatNumber(summary.totalReach)}</p>
+              <div className="flex items-center text-xs text-muted-foreground">
+                {summary.reachChange >= 0 ? (
+                  <ArrowUp className="h-3 w-3 mr-1 text-green-500" />
+                ) : (
+                  <ArrowDown className="h-3 w-3 mr-1 text-red-500" />
+                )}
+                <span className={summary.reachChange >= 0 ? "text-green-500" : "text-red-500"}>
+                  {formatPercentage(summary.reachChange)}
+                </span>
+                <span className="ml-1">vs previous 30d</span>
               </div>
             </div>
           </div>
-        </CardHeader>
-        <CardContent>
+
+          <div className="flex items-center gap-3 p-4 bg-success/5 rounded-lg">
+            <TrendingUp className="w-8 h-8 text-success" />
+            <div>
+              <p className="text-sm text-muted-foreground">Profile Views</p>
+              <p className="text-2xl font-bold">{formatNumber(summary.totalProfileViews)}</p>
+              <div className="flex items-center text-xs text-muted-foreground">
+                {summary.profileViewsChange >= 0 ? (
+                  <ArrowUp className="h-3 w-3 mr-1 text-green-500" />
+                ) : (
+                  <ArrowDown className="h-3 w-3 mr-1 text-red-500" />
+                )}
+                <span className={summary.profileViewsChange >= 0 ? "text-green-500" : "text-red-500"}>
+                  {formatPercentage(summary.profileViewsChange)}
+                </span>
+                <span className="ml-1">vs previous 30d</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 p-4 bg-info/5 rounded-lg">
+            <MousePointer className="w-8 h-8 text-info" />
+            <div>
+              <p className="text-sm text-muted-foreground">Website Clicks</p>
+              <p className="text-2xl font-bold">{formatNumber(summary.totalWebsiteClicks)}</p>
+              <div className="flex items-center text-xs text-muted-foreground">
+                {summary.websiteClicksChange >= 0 ? (
+                  <ArrowUp className="h-3 w-3 mr-1 text-green-500" />
+                ) : (
+                  <ArrowDown className="h-3 w-3 mr-1 text-red-500" />
+                )}
+                <span className={summary.websiteClicksChange >= 0 ? "text-green-500" : "text-red-500"}>
+                  {formatPercentage(summary.websiteClicksChange)}
+                </span>
+                <span className="ml-1">vs previous 30d</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Metric Filters */}
+        <div className="flex flex-wrap items-center gap-4 mb-6">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="reach"
+              checked={selectedMetrics.reach}
+              onCheckedChange={() => handleMetricToggle('reach')}
+            />
+            <label htmlFor="reach" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              Reach
+            </label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="profile_views"
+              checked={selectedMetrics.profile_views}
+              onCheckedChange={() => handleMetricToggle('profile_views')}
+            />
+            <label htmlFor="profile_views" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              Profile Views
+            </label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="website_clicks"
+              checked={selectedMetrics.website_clicks}
+              onCheckedChange={() => handleMetricToggle('website_clicks')}
+            />
+            <label htmlFor="website_clicks" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              Website Clicks
+            </label>
+          </div>
+        </div>
+        
+        {/* Chart */}
+        <div className="border rounded-lg">
           <ResponsiveContainer width="100%" height={400}>
             <LineChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -226,9 +232,9 @@ const IGOrganicTrends = () => {
               )}
             </LineChart>
           </ResponsiveContainer>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
