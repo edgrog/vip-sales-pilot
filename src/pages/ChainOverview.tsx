@@ -260,7 +260,7 @@ const ChainOverview = () => {
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/wholesale')}
             className="gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
