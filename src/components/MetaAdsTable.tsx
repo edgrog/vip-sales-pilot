@@ -36,6 +36,7 @@ export const MetaAdsTable = ({
     adId: string;
     previousData: Partial<MetaAd>;
   } | null>(null);
+  const [showAllCampaigns, setShowAllCampaigns] = useState(false);
   const {
     toast
   } = useToast();
@@ -127,6 +128,13 @@ export const MetaAdsTable = ({
     const matchesChain = filterChain === 'all' || ad.chain.includes(filterChain);
     return matchesSearch && matchesTag && matchesChain;
   });
+
+  // Sort by spend (highest first) and separate top 3 from rest
+  const sortedData = [...filteredData].sort((a, b) => b.spend - a.spend);
+  const topThreeCampaigns = sortedData.slice(0, 3);
+  const remainingCampaigns = sortedData.slice(3);
+  const displayData = showAllCampaigns ? sortedData : topThreeCampaigns;
+
   const totalSpend = filteredData.reduce((sum, ad) => sum + ad.spend, 0);
   const totalImpressions = filteredData.reduce((sum, ad) => sum + ad.impressions, 0);
   const costPerMil = totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0;
@@ -404,7 +412,7 @@ export const MetaAdsTable = ({
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredData.map(ad => (
+                displayData.map(ad => (
                   <TableRow key={ad.id}>
                     {/* Ad Name */}
                     <TableCell className="font-medium max-w-xs truncate">
@@ -541,6 +549,23 @@ export const MetaAdsTable = ({
             </TableBody>
           </Table>
         </div>
+        
+        {/* Show More/Less Button */}
+        {remainingCampaigns.length > 0 && (
+          <div className="mt-4 text-center">
+            <Button
+              variant="outline"
+              onClick={() => setShowAllCampaigns(!showAllCampaigns)}
+              className="gap-2"
+            >
+              {showAllCampaigns ? (
+                <>Show Top 3 Only</>
+              ) : (
+                <>Show All {filteredData.length} Campaigns</>
+              )}
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>;
 };
