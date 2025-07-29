@@ -203,8 +203,8 @@ const ChainOverview = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-        <div className="container mx-auto px-6 py-8">
+      <div className="min-h-screen bg-background p-6">
+        <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-4 mb-8">
             <Skeleton className="h-10 w-10 rounded" />
             <Skeleton className="h-8 w-64" />
@@ -228,17 +228,17 @@ const ChainOverview = () => {
 
   if (!chainData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-        <div className="container mx-auto px-6 py-8">
+      <div className="min-h-screen bg-background p-6">
+        <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-4 mb-8">
             <Button 
               variant="ghost" 
               size="sm" 
-              onClick={() => navigate('/')}
-              className="gap-2"
+              onClick={() => navigate('/home')}
+              className="flex items-center gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to Dashboard
+              Back to Home
             </Button>
           </div>
           
@@ -253,8 +253,8 @@ const ChainOverview = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <div className="container mx-auto px-6 py-8">
+    <div className="min-h-screen bg-background p-6">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <Button 
