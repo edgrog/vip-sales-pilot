@@ -31,14 +31,14 @@ const Home = () => {
 
           <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer" onClick={() => navigate('/marketing')}>
             <CardHeader className="text-center pb-4">
-              <div className="mx-auto w-16 h-16 bg-warning/10 rounded-full flex items-center justify-center mb-4">
-                <Megaphone className="w-8 h-8 text-warning" strokeWidth={3} />
+              <div className="mx-auto w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+                <Megaphone className="w-8 h-8 text-yellow-500" strokeWidth={3} />
               </div>
               <CardTitle className="text-2xl">Marketing</CardTitle>
               <CardDescription className="text-base">Ad Spend by Chain & Geography</CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <Button variant="outline" size="lg" className="w-full bg-warning text-warning-foreground hover:bg-warning/90">
+              <Button variant="outline" size="lg" className="w-full text-slate-50 bg-amber-500 hover:bg-amber-400">
                 Go to Marketing
               </Button>
             </CardContent>
@@ -46,14 +46,14 @@ const Home = () => {
 
           <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer" onClick={() => navigate('/ads-dashboard')}>
             <CardHeader className="text-center pb-4">
-              <div className="mx-auto w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mb-4">
-                <BarChart3 className="w-8 h-8 text-destructive" strokeWidth={3} />
+              <div className="mx-auto w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mb-4">
+                <BarChart3 className="w-8 h-8 text-pink-500" strokeWidth={3} />
               </div>
-              <CardTitle className="text-2xl">Ads Dashboard</CardTitle>
-              <CardDescription className="text-base">Ad Spend & Sales Analytics</CardDescription>
+              <CardTitle className="text-2xl">Impact</CardTitle>
+              <CardDescription className="text-base">ROI Analysis</CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <Button variant="secondary" size="lg" className="w-full my-[19px] shadow-sm bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              <Button variant="secondary" size="lg" className="w-full my-[19px] shadow-sm text-slate-50 bg-red-500 hover:bg-red-400">
                 Go to Ads Dashboard
               </Button>
             </CardContent>
