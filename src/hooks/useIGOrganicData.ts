@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface IGOrganicData {
   date: string;
@@ -32,38 +33,106 @@ export const useIGOrganicData = () => {
   const fetchData = async (days: number = 30) => {
     try {
       setLoading(true);
+      setError(null);
       
-      // Generate sample data for demonstration
-      // In a real implementation, this would fetch from ig_organic_insights table
-      const sampleData: IGOrganicData[] = [];
-      for (let i = days - 1; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        sampleData.push({
-          date: date.toISOString().split('T')[0],
-          reach: Math.floor(Math.random() * 5000) + 1000,
-          profile_views: Math.floor(Math.random() * 500) + 100,
-          website_clicks: Math.floor(Math.random() * 100) + 20
+      // Calculate date range
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+      
+      // Fetch data from ig_organic_insights table using raw SQL
+      const { data: igData, error: fetchError } = await supabase.rpc('get_ig_organic_data', {
+        start_date: startDate.toISOString().split('T')[0],
+        end_date: endDate.toISOString().split('T')[0]
+      });
+
+      if (fetchError) {
+        // Fallback to direct table query if RPC doesn't exist
+        const query = `
+          SELECT date, reach, profile_views, website_clicks 
+          FROM ig_organic_insights 
+          WHERE date >= '${startDate.toISOString().split('T')[0]}' 
+            AND date <= '${endDate.toISOString().split('T')[0]}'
+          ORDER BY date ASC
+        `;
+        
+        const { data: fallbackData, error: fallbackError } = await supabase.rpc('exec_sql', { query });
+        
+        if (fallbackError) {
+          throw new Error('Failed to fetch Instagram organic data from database');
+        }
+        
+        const transformedData: IGOrganicData[] = (fallbackData || []).map((item: any) => ({
+          date: item.date || '',
+          reach: item.reach || 0,
+          profile_views: item.profile_views || 0,
+          website_clicks: item.website_clicks || 0
+        }));
+
+        setData(transformedData);
+        
+        // Calculate summary
+        const totalReach = transformedData.reduce((sum, d) => sum + d.reach, 0);
+        const totalProfileViews = transformedData.reduce((sum, d) => sum + d.profile_views, 0);
+        const totalWebsiteClicks = transformedData.reduce((sum, d) => sum + d.website_clicks, 0);
+        
+        setSummary({
+          totalReach,
+          totalProfileViews,
+          totalWebsiteClicks,
+          reachChange: 0, // Set to 0 since we can't calculate previous period easily
+          profileViewsChange: 0,
+          websiteClicksChange: 0
         });
+        return;
       }
-      setData(sampleData);
+
+      // Transform data to match expected format
+      const transformedData: IGOrganicData[] = (igData || []).map((item: any) => ({
+        date: item.date || '',
+        reach: item.reach || 0,
+        profile_views: item.profile_views || 0,
+        website_clicks: item.website_clicks || 0
+      }));
+
+      setData(transformedData);
       
-      // Calculate summary
-      const totalReach = sampleData.reduce((sum, d) => sum + d.reach, 0);
-      const totalProfileViews = sampleData.reduce((sum, d) => sum + d.profile_views, 0);
-      const totalWebsiteClicks = sampleData.reduce((sum, d) => sum + d.website_clicks, 0);
+      // Calculate summary for current period
+      const totalReach = transformedData.reduce((sum, d) => sum + d.reach, 0);
+      const totalProfileViews = transformedData.reduce((sum, d) => sum + d.profile_views, 0);
+      const totalWebsiteClicks = transformedData.reduce((sum, d) => sum + d.website_clicks, 0);
+      
+      // Calculate previous period for comparison
+      const prevStartDate = new Date(startDate);
+      prevStartDate.setDate(prevStartDate.getDate() - days);
+      const prevEndDate = new Date(startDate);
+      prevEndDate.setDate(prevEndDate.getDate() - 1);
+      
+      const { data: prevData } = await supabase.rpc('get_ig_organic_data', {
+        start_date: prevStartDate.toISOString().split('T')[0],
+        end_date: prevEndDate.toISOString().split('T')[0]
+      });
+
+      const prevTotalReach = (prevData || []).reduce((sum: number, d: any) => sum + (d.reach || 0), 0);
+      const prevTotalProfileViews = (prevData || []).reduce((sum: number, d: any) => sum + (d.profile_views || 0), 0);
+      const prevTotalWebsiteClicks = (prevData || []).reduce((sum: number, d: any) => sum + (d.website_clicks || 0), 0);
+      
+      // Calculate percentage changes
+      const reachChange = prevTotalReach > 0 ? ((totalReach - prevTotalReach) / prevTotalReach) * 100 : 0;
+      const profileViewsChange = prevTotalProfileViews > 0 ? ((totalProfileViews - prevTotalProfileViews) / prevTotalProfileViews) * 100 : 0;
+      const websiteClicksChange = prevTotalWebsiteClicks > 0 ? ((totalWebsiteClicks - prevTotalWebsiteClicks) / prevTotalWebsiteClicks) * 100 : 0;
       
       setSummary({
         totalReach,
         totalProfileViews,
         totalWebsiteClicks,
-        reachChange: Math.random() > 0.5 ? Math.random() * 20 : -Math.random() * 10,
-        profileViewsChange: Math.random() > 0.5 ? Math.random() * 30 : -Math.random() * 15,
-        websiteClicksChange: Math.random() > 0.5 ? Math.random() * 25 : -Math.random() * 12
+        reachChange,
+        profileViewsChange,
+        websiteClicksChange
       });
 
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : 'Failed to fetch Instagram organic data');
     } finally {
       setLoading(false);
     }
