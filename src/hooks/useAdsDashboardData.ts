@@ -165,7 +165,8 @@ export const useAdsDashboardData = () => {
       // Add May data (sales but no spend)
       const maySales = salesByMonth?.reduce((sum, row) => {
         const val = row["1 Month 5/1/2025 thru 5/31/2025  Case Equivs"];
-        return sum + (val && typeof val === 'number' ? val : (typeof val === 'string' && val !== '' ? parseFloat(val) : 0));
+        const numVal = typeof val === 'number' ? val : (typeof val === 'string' && val !== '' ? parseFloat(val) : 0);
+        return sum + (isNaN(numVal) ? 0 : numVal);
       }, 0) || 0;
       
       console.log("May sales total:", maySales);
@@ -181,7 +182,8 @@ export const useAdsDashboardData = () => {
       // Add June data (sales but no spend initially)
       const juneSales = salesByMonth?.reduce((sum, row) => {
         const val = row["1 Month 6/1/2025 thru 6/30/2025  Case Equivs"];
-        return sum + (val && typeof val === 'number' ? val : (typeof val === 'string' && val !== '' ? parseFloat(val) : 0));
+        const numVal = typeof val === 'number' ? val : (typeof val === 'string' && val !== '' ? parseFloat(val) : 0);
+        return sum + (isNaN(numVal) ? 0 : numVal);
       }, 0) || 0;
       
       console.log("June sales total:", juneSales);
@@ -197,7 +199,8 @@ export const useAdsDashboardData = () => {
       // Add July data (sales but no spend initially)
       const julySales = salesByMonth?.reduce((sum, row) => {
         const val = row["1 Month 7/1/2025 thru 7/23/2025  Case Equivs"];
-        return sum + (val && typeof val === 'number' ? val : (typeof val === 'string' && val !== '' ? parseFloat(val) : 0));
+        const numVal = typeof val === 'number' ? val : (typeof val === 'string' && val !== '' ? parseFloat(val) : 0);
+        return sum + (isNaN(numVal) ? 0 : numVal);
       }, 0) || 0;
       
       console.log("July sales total:", julySales);
