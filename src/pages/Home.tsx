@@ -53,7 +53,7 @@ const Home = () => {
               <CardDescription className="text-base">Ad Spend & Sales Analytics</CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <Button variant="secondary" size="lg" className="w-full bg-red-300 hover:bg-red-200 my-[19px]">
+              <Button variant="secondary" size="lg" className="w-full bg-red-300 hover:bg-red-200 my-[19px] shadow-sm">
                 Go to Ads Dashboard
               </Button>
             </CardContent>
