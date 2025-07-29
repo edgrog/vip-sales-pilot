@@ -8,6 +8,7 @@ import { useMetaAdsData } from "@/hooks/useMetaAdsData";
 import { MetaAdsTable } from "@/components/MetaAdsTable";
 import { ChainSpendAnalysis } from "@/components/ChainSpendAnalysis";
 import { StateSpendAnalysis } from "@/components/StateSpendAnalysis";
+import IGOrganicTrends from "@/components/IGOrganicTrends";
 const Marketing = () => {
   const navigate = useNavigate();
   const {
@@ -48,10 +49,14 @@ const Marketing = () => {
         </div>
 
         <Tabs defaultValue="campaigns" className="space-y-6">
-          <TabsList className="grid w-full lg:w-auto lg:grid-cols-3">
+          <TabsList className="grid w-full lg:w-auto lg:grid-cols-4">
             <TabsTrigger value="campaigns" className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4" />
               Campaigns
+            </TabsTrigger>
+            <TabsTrigger value="ig-organic" className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4" />
+              IG Organic
             </TabsTrigger>
             <TabsTrigger value="chains" className="flex items-center gap-2">
               <BarChart className="w-4 h-4" />
@@ -121,6 +126,10 @@ const Marketing = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="ig-organic" className="space-y-6">
+            <IGOrganicTrends />
           </TabsContent>
 
           <TabsContent value="chains" className="space-y-6">
