@@ -52,7 +52,7 @@ const Marketing = () => {
           <TabsList className="grid w-full lg:w-auto lg:grid-cols-3">
             <TabsTrigger value="campaigns" className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4" />
-              Campaigns
+              Overview
             </TabsTrigger>
             <TabsTrigger value="chains" className="flex items-center gap-2">
               <BarChart className="w-4 h-4" />
