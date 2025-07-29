@@ -8,33 +8,31 @@ import { useMetaAdsData } from "@/hooks/useMetaAdsData";
 import { MetaAdsTable } from "@/components/MetaAdsTable";
 import { ChainSpendAnalysis } from "@/components/ChainSpendAnalysis";
 import { StateSpendAnalysis } from "@/components/StateSpendAnalysis";
-
 const Marketing = () => {
   const navigate = useNavigate();
-  const { data, loading, error, refetch, updateAd } = useMetaAdsData();
+  const {
+    data,
+    loading,
+    error,
+    refetch,
+    updateAd
+  } = useMetaAdsData();
 
   // Calculate average CPM for comparison
   const totalSpend = data.reduce((sum, ad) => sum + ad.spend, 0);
   const totalImpressions = data.reduce((sum, ad) => sum + ad.impressions, 0);
-  const averageCPM = totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0;
+  const averageCPM = totalImpressions > 0 ? totalSpend / totalImpressions * 1000 : 0;
 
   // Identify fatigued ads (30+ days running with above-average CPM)
   const fatiguedAds = data.filter(ad => {
-    const adCPM = ad.impressions > 0 ? (ad.spend / ad.impressions) * 1000 : 0;
+    const adCPM = ad.impressions > 0 ? ad.spend / ad.impressions * 1000 : 0;
     return ad.days_running >= 30 && adCPM > averageCPM;
   });
-
-  return (
-    <div className="min-h-screen bg-background p-6">
+  return <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => navigate('/home')}
-              className="flex items-center gap-2"
-            >
+            <Button variant="ghost" size="sm" onClick={() => navigate('/home')} className="flex items-center gap-2">
               <ArrowLeft className="w-4 h-4" />
               Back to Home
             </Button>
@@ -44,22 +42,8 @@ const Marketing = () => {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button 
-              onClick={() => navigate('/marketing/ads-dashboard')}
-              variant="default"
-              className="flex items-center gap-2"
-            >
-              <BarChart className="w-4 h-4" />
-              Ads Dashboard
-            </Button>
-            <Button 
-              onClick={() => navigate('/wholesale')}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <BarChart className="w-4 h-4" />
-              Wholesale
-            </Button>
+            
+            
           </div>
         </div>
 
@@ -81,13 +65,7 @@ const Marketing = () => {
 
           <TabsContent value="campaigns" className="space-y-6">
             {/* Meta Ads Table */}
-            <MetaAdsTable 
-              data={data}
-              loading={loading}
-              error={error}
-              onRefresh={refetch}
-              onAdUpdate={updateAd}
-            />
+            <MetaAdsTable data={data} loading={loading} error={error} onRefresh={refetch} onAdUpdate={updateAd} />
 
             {/* Additional Marketing Features */}
             <div className="grid md:grid-cols-2 gap-6">
@@ -102,16 +80,12 @@ const Marketing = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {fatiguedAds.length === 0 ? (
-                    <p className="text-muted-foreground">
+                  {fatiguedAds.length === 0 ? <p className="text-muted-foreground">
                       No fatigued ads detected. All ads are performing within expected CPM ranges.
-                    </p>
-                  ) : (
-                    <div className="space-y-3">
+                    </p> : <div className="space-y-3">
                       {fatiguedAds.slice(0, 3).map(ad => {
-                        const adCPM = ad.impressions > 0 ? (ad.spend / ad.impressions) * 1000 : 0;
-                        return (
-                          <div key={ad.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    const adCPM = ad.impressions > 0 ? ad.spend / ad.impressions * 1000 : 0;
+                    return <div key={ad.id} className="flex items-center justify-between p-3 border rounded-lg">
                             <div className="flex-1">
                               <p className="font-medium text-sm truncate max-w-xs">{ad.name}</p>
                               <div className="flex items-center gap-2 mt-1">
@@ -127,16 +101,12 @@ const Marketing = () => {
                               <p className="font-bold text-sm">${ad.spend.toLocaleString()}</p>
                               <p className="text-xs text-muted-foreground">spent</p>
                             </div>
-                          </div>
-                        );
-                      })}
-                      {fatiguedAds.length > 3 && (
-                        <p className="text-xs text-muted-foreground text-center">
+                          </div>;
+                  })}
+                      {fatiguedAds.length > 3 && <p className="text-xs text-muted-foreground text-center">
                           +{fatiguedAds.length - 3} more fatigued ads
-                        </p>
-                      )}
-                    </div>
-                  )}
+                        </p>}
+                    </div>}
                 </CardContent>
               </Card>
 
@@ -162,8 +132,6 @@ const Marketing = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Marketing;
