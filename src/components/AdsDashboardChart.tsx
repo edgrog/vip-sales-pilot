@@ -25,20 +25,31 @@ export const AdsDashboardChart = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Monthly Spend per Case</CardTitle>
+        <CardTitle>Monthly Spend per Case & Cases Sold</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={400}>
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="month" />
-            <YAxis />
+            <YAxis yAxisId="left" />
+            <YAxis yAxisId="right" orientation="right" />
             <Tooltip />
+            <Legend />
             <Line 
+              yAxisId="left"
               type="monotone" 
               dataKey="avg_spend_per_case" 
               stroke="#ff7300" 
               name="Spend per Case ($)"
+              strokeWidth={2}
+            />
+            <Line 
+              yAxisId="right"
+              type="monotone" 
+              dataKey="total_sales" 
+              stroke="#82ca9d" 
+              name="Cases Sold"
               strokeWidth={2}
             />
           </LineChart>
