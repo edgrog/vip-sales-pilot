@@ -38,7 +38,7 @@ const Home = () => {
               <CardDescription className="text-base">Ad Spend by Chain & Geography</CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <Button variant="outline" size="lg" className="w-full text-slate-50 bg-amber-400 hover:bg-amber-300">
+              <Button variant="outline" size="lg" className="w-full text-slate-50 bg-amber-500 hover:bg-amber-400">
                 Go to Marketing
               </Button>
             </CardContent>
@@ -53,7 +53,7 @@ const Home = () => {
               <CardDescription className="text-base">Ad Spend & Sales Analytics</CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <Button variant="secondary" size="lg" className="w-full my-[19px] shadow-sm text-slate-50 bg-red-400 hover:bg-red-300">
+              <Button variant="secondary" size="lg" className="w-full my-[19px] shadow-sm text-slate-50 bg-red-500 hover:bg-red-400">
                 Go to Ads Dashboard
               </Button>
             </CardContent>
