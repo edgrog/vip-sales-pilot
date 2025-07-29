@@ -38,6 +38,48 @@ export type Database = {
         }
         Relationships: []
       }
+      ig_organic_insights: {
+        Row: {
+          created_at: string | null
+          date: string | null
+          fetched_at: string | null
+          followers_count: number | null
+          id: string
+          name: string | null
+          profile_views: number | null
+          reach: number | null
+          title: string | null
+          value: number | null
+          website_clicks: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          date?: string | null
+          fetched_at?: string | null
+          followers_count?: number | null
+          id?: string
+          name?: string | null
+          profile_views?: number | null
+          reach?: number | null
+          title?: string | null
+          value?: number | null
+          website_clicks?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          date?: string | null
+          fetched_at?: string | null
+          followers_count?: number | null
+          id?: string
+          name?: string | null
+          profile_views?: number | null
+          reach?: number | null
+          title?: string | null
+          value?: number | null
+          website_clicks?: number | null
+        }
+        Relationships: []
+      }
       meta_ads_raw: {
         Row: {
           delivery: string | null
@@ -59,6 +101,42 @@ export type Database = {
           id?: string
           insights?: Json | null
           name?: string | null
+        }
+        Relationships: []
+      }
+      meta_ig_organic: {
+        Row: {
+          caption: string | null
+          engagement: number | null
+          fetched_at: string | null
+          impressions: number | null
+          media_type: string | null
+          media_url: string | null
+          post_id: string
+          reach: number | null
+          timestamp: string | null
+        }
+        Insert: {
+          caption?: string | null
+          engagement?: number | null
+          fetched_at?: string | null
+          impressions?: number | null
+          media_type?: string | null
+          media_url?: string | null
+          post_id: string
+          reach?: number | null
+          timestamp?: string | null
+        }
+        Update: {
+          caption?: string | null
+          engagement?: number | null
+          fetched_at?: string | null
+          impressions?: number | null
+          media_type?: string | null
+          media_url?: string | null
+          post_id?: string
+          reach?: number | null
+          timestamp?: string | null
         }
         Relationships: []
       }
@@ -193,6 +271,15 @@ export type Database = {
       }
     }
     Functions: {
+      get_ig_organic_data: {
+        Args: { start_date: string; end_date: string }
+        Returns: {
+          date: string
+          reach: number
+          profile_views: number
+          website_clicks: number
+        }[]
+      }
       normalize_chain_name: {
         Args: { retail_account: string }
         Returns: string
