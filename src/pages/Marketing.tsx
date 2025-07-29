@@ -49,14 +49,10 @@ const Marketing = () => {
         </div>
 
         <Tabs defaultValue="campaigns" className="space-y-6">
-          <TabsList className="grid w-full lg:w-auto lg:grid-cols-4">
+          <TabsList className="grid w-full lg:w-auto lg:grid-cols-3">
             <TabsTrigger value="campaigns" className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4" />
               Campaigns
-            </TabsTrigger>
-            <TabsTrigger value="ig-organic" className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4" />
-              IG Organic
             </TabsTrigger>
             <TabsTrigger value="chains" className="flex items-center gap-2">
               <BarChart className="w-4 h-4" />
@@ -69,6 +65,9 @@ const Marketing = () => {
           </TabsList>
 
           <TabsContent value="campaigns" className="space-y-6">
+            {/* IG Organic Trends */}
+            <IGOrganicTrends />
+            
             {/* Meta Ads Table */}
             <MetaAdsTable data={data} loading={loading} error={error} onRefresh={refetch} onAdUpdate={updateAd} />
 
@@ -126,10 +125,6 @@ const Marketing = () => {
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
-
-          <TabsContent value="ig-organic" className="space-y-6">
-            <IGOrganicTrends />
           </TabsContent>
 
           <TabsContent value="chains" className="space-y-6">
