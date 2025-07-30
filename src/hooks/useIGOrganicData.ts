@@ -65,7 +65,7 @@ export const useIGOrganicData = () => {
       const followersQuery: any = await client
         .from('ig_analytics_followers')
         .select('value')
-        .eq('metric', 'followers')
+        .eq('metric', 'followers_count')
         .single();
 
       if (followersQuery.error) {
