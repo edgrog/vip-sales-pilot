@@ -61,12 +61,10 @@ export const useIGOrganicData = () => {
         throw reachQuery.error;
       }
 
-      // Fetch website clicks data from ig_clicks table
+      // Fetch website clicks data from ig_clicks table  
       const clicksQuery: any = await client
         .from('ig_clicks')
         .select('date, value')
-        .gte('date', startDateStr)
-        .lte('date', endDateStr)
         .order('date');
 
       if (clicksQuery.error) {
