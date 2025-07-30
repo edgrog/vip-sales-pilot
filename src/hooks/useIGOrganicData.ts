@@ -61,6 +61,18 @@ export const useIGOrganicData = () => {
         throw reachQuery.error;
       }
 
+      // Fetch website clicks data from ig_clicks table
+      const clicksQuery: any = await client
+        .from('ig_clicks')
+        .select('date, value')
+        .gte('date', startDateStr)
+        .lte('date', endDateStr)
+        .order('date');
+
+      if (clicksQuery.error) {
+        throw clicksQuery.error;
+      }
+
       // Fetch current followers count from ig_analytics_followers table
       const followersQuery: any = await client
         .from('ig_analytics_followers')
@@ -84,6 +96,16 @@ export const useIGOrganicData = () => {
         });
       }
 
+      const clicksMap = new Map<string, number>();
+      if (clicksQuery.data) {
+        clicksQuery.data.forEach((item: any) => {
+          if (item.date) {
+            const dateStr = new Date(item.date).toISOString().split('T')[0];
+            clicksMap.set(dateStr, Number(item.value) || 0);
+          }
+        });
+      }
+
       // Generate data for all days in range, using real data where available
       const transformedData: IGOrganicData[] = [];
       
@@ -92,12 +114,13 @@ export const useIGOrganicData = () => {
         const currentDate = new Date(currentDateMs);
         const dateStr = currentDate.toISOString().split('T')[0];
         const realReach = reachMap.get(dateStr) || 0;
+        const realClicks = clicksMap.get(dateStr) || 0;
         
         transformedData.push({
           date: dateStr,
           reach: realReach, // Use real data from database
           followers: currentFollowers, // Use static followers count for all dates
-          website_clicks: Math.floor(Math.random() * 50 + 10) // Mock data
+          website_clicks: realClicks // Use real data from database
         });
       }
 
