@@ -11,7 +11,7 @@ const IGOrganicTrends = () => {
   const { data, summary, loading, error, refetch } = useIGOrganicData();
   const [selectedMetrics, setSelectedMetrics] = useState({
     reach: true,
-    profile_views: true,
+    followers: true,
     website_clicks: true
   });
   const [dateRange, setDateRange] = useState(30);
@@ -110,16 +110,16 @@ const IGOrganicTrends = () => {
           <div className="flex items-center gap-3 p-4 bg-success/5 rounded-lg">
             <TrendingUp className="w-8 h-8 text-success" />
             <div>
-              <p className="text-sm text-muted-foreground">Profile Views</p>
-              <p className="text-2xl font-bold">{formatNumber(summary.totalProfileViews)}</p>
+              <p className="text-sm text-muted-foreground">Followers</p>
+              <p className="text-2xl font-bold">{formatNumber(summary.totalFollowers)}</p>
               <div className="flex items-center text-xs text-muted-foreground">
-                {summary.profileViewsChange >= 0 ? (
+                {summary.followersChange >= 0 ? (
                   <ArrowUp className="h-3 w-3 mr-1 text-green-500" />
                 ) : (
                   <ArrowDown className="h-3 w-3 mr-1 text-red-500" />
                 )}
-                <span className={summary.profileViewsChange >= 0 ? "text-green-500" : "text-red-500"}>
-                  {formatPercentage(summary.profileViewsChange)}
+                <span className={summary.followersChange >= 0 ? "text-green-500" : "text-red-500"}>
+                  {formatPercentage(summary.followersChange)}
                 </span>
                 <span className="ml-1">vs previous 30d</span>
               </div>
@@ -160,12 +160,12 @@ const IGOrganicTrends = () => {
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox
-              id="profile_views"
-              checked={selectedMetrics.profile_views}
-              onCheckedChange={() => handleMetricToggle('profile_views')}
+              id="followers"
+              checked={selectedMetrics.followers}
+              onCheckedChange={() => handleMetricToggle('followers')}
             />
-            <label htmlFor="profile_views" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Profile Views
+            <label htmlFor="followers" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              Followers
             </label>
           </div>
           <div className="flex items-center space-x-2">
@@ -210,12 +210,12 @@ const IGOrganicTrends = () => {
                   dot={{ r: 4 }}
                 />
               )}
-              {selectedMetrics.profile_views && (
+              {selectedMetrics.followers && (
                 <Line 
                   type="monotone" 
-                  dataKey="profile_views" 
+                  dataKey="followers" 
                   stroke="#06b6d4" 
-                  name="Profile Views"
+                  name="Followers"
                   strokeWidth={2}
                   dot={{ r: 4 }}
                 />
