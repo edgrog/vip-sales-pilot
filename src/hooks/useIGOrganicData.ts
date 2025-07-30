@@ -92,7 +92,7 @@ export const useIGOrganicData = () => {
       
       // Calculate summary for current period
       const totalReach = transformedData.reduce((sum, d) => sum + d.reach, 0);
-      const totalFollowers = transformedData.reduce((sum, d) => sum + d.followers, 0);
+      const totalFollowers = transformedData.length > 0 ? transformedData[transformedData.length - 1].followers : 0; // Latest followers count
       const totalWebsiteClicks = transformedData.reduce((sum, d) => sum + d.website_clicks, 0);
       
       // For previous period comparison, fetch previous data
