@@ -65,6 +65,7 @@ export const useIGOrganicData = () => {
       const followersQuery: any = await client
         .from('ig_analytics_followers')
         .select('date, value')
+        .eq('metric', 'followers')
         .gte('date', startDateStr)
         .lte('date', endDateStr)
         .order('date');
