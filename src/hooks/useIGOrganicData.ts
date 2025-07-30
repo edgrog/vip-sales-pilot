@@ -61,18 +61,18 @@ export const useIGOrganicData = () => {
         throw reachQuery.error;
       }
 
-      // Fetch real followers data from ig_analytics_followers table
+      // Fetch current followers count from ig_analytics_followers table
       const followersQuery: any = await client
         .from('ig_analytics_followers')
-        .select('date, value')
+        .select('value')
         .eq('metric', 'followers')
-        .gte('date', startDateStr)
-        .lte('date', endDateStr)
-        .order('date');
+        .single();
 
       if (followersQuery.error) {
         throw followersQuery.error;
       }
+
+      const currentFollowers = followersQuery.data?.value || 0;
 
       // Create maps of dates to values
       const reachMap = new Map<string, number>();
@@ -80,16 +80,6 @@ export const useIGOrganicData = () => {
         reachQuery.data.forEach((item: any) => {
           if (item.date) {
             reachMap.set(item.date, Number(item.value) || 0);
-          }
-        });
-      }
-
-      const followersMap = new Map<string, number>();
-      if (followersQuery.data) {
-        followersQuery.data.forEach((item: any) => {
-          if (item.date) {
-            const dateStr = item.date.split('T')[0]; // Convert timestamp to date string
-            followersMap.set(dateStr, Number(item.value) || 0);
           }
         });
       }
@@ -102,12 +92,11 @@ export const useIGOrganicData = () => {
         const currentDate = new Date(currentDateMs);
         const dateStr = currentDate.toISOString().split('T')[0];
         const realReach = reachMap.get(dateStr) || 0;
-        const realFollowers = followersMap.get(dateStr) || 0;
         
         transformedData.push({
           date: dateStr,
           reach: realReach, // Use real data from database
-          followers: realFollowers, // Use real data from ig_analytics_followers
+          followers: currentFollowers, // Use static followers count for all dates
           website_clicks: Math.floor(Math.random() * 50 + 10) // Mock data
         });
       }
