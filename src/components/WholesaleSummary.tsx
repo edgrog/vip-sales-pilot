@@ -44,11 +44,12 @@ export const WholesaleSummary = () => {
         return sum + (isNaN(numVal) ? 0 : numVal);
       }, 0) || 0;
 
-      // Calculate active stores (stores with sales in last 3 months)
+      // Calculate active stores (stores with any sales in recent months)
       const activeStores = data?.filter(row => {
         const july = parseFloat(String(row["1 Month 7/1/2025 thru 7/23/2025  Case Equivs"] || 0));
         const june = parseFloat(String(row["1 Month 6/1/2025 thru 6/30/2025  Case Equivs"] || 0));
-        return july + june > 1;
+        const may = parseFloat(String(row["1 Month 5/1/2025 thru 5/31/2025  Case Equivs"] || 0));
+        return july + june + may > 0;
       }).length || 0;
 
       // Find top chain
