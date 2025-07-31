@@ -65,7 +65,6 @@ export const WholesaleDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [totalCases, setTotalCases] = useState(0);
   const [totalStores, setTotalStores] = useState(0);
-  const [showActiveStoresTrend, setShowActiveStoresTrend] = useState(false);
   const [activeStoresMonthlyData, setActiveStoresMonthlyData] = useState<MonthlyData[]>([]);
 
   useEffect(() => {
@@ -322,46 +321,6 @@ export const WholesaleDashboard = () => {
     return <div className="flex items-center justify-center h-64">Loading wholesale data...</div>;
   }
 
-  if (showActiveStoresTrend) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => setShowActiveStoresTrend(false)}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
-          </Button>
-          <h2 className="text-2xl font-bold">Active Stores Monthly Trend</h2>
-        </div>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Monthly Active Store Count</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Stores that sold more than 1 case per month
-            </p>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={400}>
-              <LineChart data={activeStoresMonthlyData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="monthName" />
-                <YAxis />
-                <Tooltip formatter={(value) => [`${Number(value).toLocaleString()} stores`, 'Active Stores']} />
-                <Line 
-                  type="monotone" 
-                  dataKey="cases" 
-                  stroke="#8884d8" 
-                  strokeWidth={2}
-                  dot={{ r: 4 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Key Metrics */}
@@ -392,10 +351,7 @@ export const WholesaleDashboard = () => {
           </CardContent>
         </Card>
 
-        <Card 
-          className="cursor-pointer hover:bg-muted/50 transition-colors"
-          onClick={() => setShowActiveStoresTrend(true)}
-        >
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Stores</CardTitle>
             <Store className="h-4 w-4 text-muted-foreground" />
@@ -403,7 +359,7 @@ export const WholesaleDashboard = () => {
           <CardContent>
             <div className="text-2xl font-bold">{totalStores.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
-              Click to view monthly trend
+              Stores selling 1+ cases (last 3 months)
             </p>
           </CardContent>
         </Card>
@@ -425,6 +381,7 @@ export const WholesaleDashboard = () => {
       <Tabs defaultValue="trends" className="space-y-4">
         <TabsList>
           <TabsTrigger value="trends">Monthly Trends</TabsTrigger>
+          <TabsTrigger value="pods">PODs</TabsTrigger>
           <TabsTrigger value="chains">Chain Performance</TabsTrigger>
           <TabsTrigger value="states">State Analysis</TabsTrigger>
         </TabsList>
@@ -445,6 +402,34 @@ export const WholesaleDashboard = () => {
                     type="monotone" 
                     dataKey="cases" 
                     stroke="#8884d8" 
+                    strokeWidth={2}
+                    dot={{ r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="pods" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Active PODs Monthly Trend</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                PODs (Points of Distribution) that sold more than 1 case per month
+              </p>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={400}>
+                <LineChart data={activeStoresMonthlyData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="monthName" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => [`${Number(value).toLocaleString()} PODs`, 'Active PODs']} />
+                  <Line 
+                    type="monotone" 
+                    dataKey="cases" 
+                    stroke="#00C49F" 
                     strokeWidth={2}
                     dot={{ r: 4 }}
                   />
