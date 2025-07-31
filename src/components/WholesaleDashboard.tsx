@@ -223,6 +223,9 @@ export const WholesaleDashboard = () => {
         return last3MonthsCases > 1;
       }).length || 0;
       
+      console.log(`Total records in activeStoresData: ${activeStoresData?.length}`);
+      console.log(`Active stores count: ${activeStoresCount}`);
+      
       setTotalCases(Math.round(totalCasesSum));
       setTotalStores(activeStoresCount);
 
