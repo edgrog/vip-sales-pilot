@@ -74,9 +74,15 @@ export const ChainSpendAnalysis = ({
     if (account.includes('publix')) return 'Publix';
     if (account.includes('heb') || account.includes('h-e-b')) return 'HEB';
     if (account.includes('whole foods')) return 'Whole Foods';
+    if (account.includes('wegman')) return 'Wegmans';
+    if (account.includes('ralph') || account.includes('ralphs')) return 'Ralphs';
+    if (account.includes('beverages & more') || account.includes('bevmo')) return 'BevMo';
+    if (account.includes('binny') || account.includes('binnys')) return 'Binny\'s';
+    if (account.includes('abc liquor')) return 'ABC Liquors';
+    if (account.includes('woodman')) return 'Woodmans';
     
-    // For other retailers, try to extract a reasonable chain name
-    return retailAccount.split(' ')[0] || 'Other';
+    // For any other account that doesn't match known chains, classify as Independent
+    return 'Independent';
   };
 
 
