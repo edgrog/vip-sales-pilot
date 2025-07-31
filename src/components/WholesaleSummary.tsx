@@ -66,7 +66,7 @@ export const WholesaleSummary = () => {
         const july = parseFloat(String(row["1 Month 7/1/2025 thru 7/23/2025  Case Equivs"] || 0));
         const june = parseFloat(String(row["1 Month 6/1/2025 thru 6/30/2025  Case Equivs"] || 0));
         const may = parseFloat(String(row["1 Month 5/1/2025 thru 5/31/2025  Case Equivs"] || 0));
-        return july + june + may > 0;
+        return july + june + may > 1;
       }).length || 0;
 
       // Find top chain
