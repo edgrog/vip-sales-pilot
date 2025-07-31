@@ -158,11 +158,17 @@ export const WholesaleDashboard = () => {
 
       setStateData(stateResults);
 
-      // Calculate totals
-      const totalCasesSum = chainResults.reduce((sum, chain) => sum + chain.totalCases, 0);
-      const totalStoresSum = chainResults.reduce((sum, chain) => sum + chain.stores, 0);
+      // Calculate total cases from all data (not just top chains)
+      const totalCasesSum = data?.reduce((sum, row) => {
+        const totalVal = row["12 Months 8/1/2024 thru 7/23/2025  Case Equivs"];
+        const totalNumVal = typeof totalVal === 'number' ? totalVal : 
+                           (typeof totalVal === 'string' && totalVal !== '' && totalVal !== null ? parseFloat(totalVal) : 0);
+        return sum + (isNaN(totalNumVal) || totalNumVal === null ? 0 : totalNumVal);
+      }, 0) || 0;
       
-      setTotalCases(totalCasesSum);
+      const totalStoresSum = data?.length || 0; // Total number of store records
+      
+      setTotalCases(Math.round(totalCasesSum));
       setTotalStores(totalStoresSum);
 
     } catch (error) {
