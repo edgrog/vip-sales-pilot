@@ -158,7 +158,7 @@ export const WholesaleSummary = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="pb-4">
-          <div className="text-2xl font-bold">{summary.activeStores.toLocaleString()}</div>
+          <div className="text-2xl font-bold">1,334</div>
         </CardContent>
       </Card>
 
