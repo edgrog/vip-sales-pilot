@@ -230,19 +230,38 @@ export const WholesaleDashboard = () => {
       setTotalCases(Math.round(totalCasesSum));
       setTotalStores(activeStoresCount);
 
-      // Calculate monthly active stores data
-      const activeStoresMonthlyResults: MonthlyData[] = monthlyColumns.map(({ col, month, name }) => {
+      // Calculate monthly active stores data (3-month rolling count)
+      const activeStoresMonthlyResults: MonthlyData[] = monthlyColumns.map(({ col, month, name }, index) => {
+        // Get current month and previous 2 months for rolling 3-month count
+        const currentMonthIndex = index;
+        const previousMonth1 = index > 0 ? monthlyColumns[index - 1] : null;
+        const previousMonth2 = index > 1 ? monthlyColumns[index - 2] : null;
+        
         const activeCount = data?.filter(row => {
-          const val = row[col];
-          const numVal = typeof val === 'number' ? val : 
-                        (typeof val === 'string' && val !== '' && val !== null ? parseFloat(val) : 0);
-          return !isNaN(numVal) && numVal > 1;
+          // Sum cases from current month and previous 2 months
+          const currentVal = row[col];
+          const currentNum = typeof currentVal === 'number' ? currentVal : 
+                            (typeof currentVal === 'string' && currentVal !== '' && currentVal !== null ? parseFloat(currentVal) : 0);
+          
+          const prev1Val = previousMonth1 ? row[previousMonth1.col] : 0;
+          const prev1Num = typeof prev1Val === 'number' ? prev1Val : 
+                          (typeof prev1Val === 'string' && prev1Val !== '' && prev1Val !== null ? parseFloat(prev1Val) : 0);
+          
+          const prev2Val = previousMonth2 ? row[previousMonth2.col] : 0;
+          const prev2Num = typeof prev2Val === 'number' ? prev2Val : 
+                          (typeof prev2Val === 'string' && prev2Val !== '' && prev2Val !== null ? parseFloat(prev2Val) : 0);
+          
+          const total3MonthCases = (isNaN(currentNum) ? 0 : currentNum) + 
+                                  (isNaN(prev1Num) ? 0 : prev1Num) + 
+                                  (isNaN(prev2Num) ? 0 : prev2Num);
+          
+          return total3MonthCases > 1;
         }).length || 0;
         
         return {
           month,
           monthName: name,
-          cases: activeCount // Using 'cases' field to match chart interface
+          cases: activeCount
         };
       });
 
@@ -414,9 +433,9 @@ export const WholesaleDashboard = () => {
         <TabsContent value="pods" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Active PODs Monthly Trend</CardTitle>
+              <CardTitle>Active PODs Monthly Trend (3-Month Rolling)</CardTitle>
               <p className="text-sm text-muted-foreground">
-                PODs (Points of Distribution) that sold more than 1 case per month
+                PODs (Points of Distribution) that sold more than 1 case in current month + previous 2 months
               </p>
             </CardHeader>
             <CardContent>
