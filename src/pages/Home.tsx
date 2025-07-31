@@ -10,7 +10,11 @@ const Home = () => {
       <div className="max-w-4xl mx-auto flex items-center justify-center min-h-[calc(100vh-200px)]">
         <div className="w-full">
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-foreground mb-4">Grog Team Dashboard</h1>
+            <img 
+              src="/lovable-uploads/16b7eb00-ca19-4bc1-96c7-0ea3abc83cb2.png" 
+              alt="Grog One" 
+              className="h-24 w-auto mx-auto mb-6"
+            />
             <p className="text-xl text-muted-foreground">
               Choose your platform to get started
             </p>
