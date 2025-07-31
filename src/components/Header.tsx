@@ -23,11 +23,6 @@ const Header = ({
   return (
     <div className="flex items-center justify-between mb-8">
       <div className="flex items-center gap-4">
-        <img 
-          src="/lovable-uploads/16b7eb00-ca19-4bc1-96c7-0ea3abc83cb2.png" 
-          alt="Grog One Logo" 
-          className="h-12 w-auto"
-        />
         {showBackButton && (
           <Button 
             variant="ghost" 
@@ -46,6 +41,11 @@ const Header = ({
         )}
       </div>
       <div className="flex items-center gap-2">
+        <img 
+          src="/lovable-uploads/16b7eb00-ca19-4bc1-96c7-0ea3abc83cb2.png" 
+          alt="Grog One Logo" 
+          className="h-12 w-auto"
+        />
         {user ? (
           <>
             <span className="text-sm text-muted-foreground">
