@@ -130,7 +130,7 @@ export const ChainSpendAnalysis = ({
   const totalImpressions = chartData.reduce((sum, item) => sum + item.impressions, 0);
   return <div className="grid gap-6">
       {/* Summary Cards */}
-      <div className="grid md:grid-cols-4 gap-4">
+      <div className="grid md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Total Chains Advertised</CardTitle>
@@ -156,14 +156,6 @@ export const ChainSpendAnalysis = ({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">${totalSpend.toLocaleString()}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Impressions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalImpressions.toLocaleString()}</div>
           </CardContent>
         </Card>
       </div>
