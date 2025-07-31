@@ -65,6 +65,8 @@ export const WholesaleDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [totalCases, setTotalCases] = useState(0);
   const [totalStores, setTotalStores] = useState(0);
+  const [showActiveStoresTrend, setShowActiveStoresTrend] = useState(false);
+  const [activeStoresMonthlyData, setActiveStoresMonthlyData] = useState<MonthlyData[]>([]);
 
   useEffect(() => {
     fetchWholesaleData();
@@ -229,6 +231,24 @@ export const WholesaleDashboard = () => {
       setTotalCases(Math.round(totalCasesSum));
       setTotalStores(activeStoresCount);
 
+      // Calculate monthly active stores data
+      const activeStoresMonthlyResults: MonthlyData[] = monthlyColumns.map(({ col, month, name }) => {
+        const activeCount = data?.filter(row => {
+          const val = row[col];
+          const numVal = typeof val === 'number' ? val : 
+                        (typeof val === 'string' && val !== '' && val !== null ? parseFloat(val) : 0);
+          return !isNaN(numVal) && numVal > 1;
+        }).length || 0;
+        
+        return {
+          month,
+          monthName: name,
+          cases: activeCount // Using 'cases' field to match chart interface
+        };
+      });
+
+      setActiveStoresMonthlyData(activeStoresMonthlyResults);
+
     } catch (error) {
       console.error("Error fetching wholesale data:", error);
     } finally {
@@ -302,6 +322,46 @@ export const WholesaleDashboard = () => {
     return <div className="flex items-center justify-center h-64">Loading wholesale data...</div>;
   }
 
+  if (showActiveStoresTrend) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" onClick={() => setShowActiveStoresTrend(false)}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Dashboard
+          </Button>
+          <h2 className="text-2xl font-bold">Active Stores Monthly Trend</h2>
+        </div>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Monthly Active Store Count</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Stores that sold more than 1 case per month
+            </p>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={400}>
+              <LineChart data={activeStoresMonthlyData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="monthName" />
+                <YAxis />
+                <Tooltip formatter={(value) => [`${Number(value).toLocaleString()} stores`, 'Active Stores']} />
+                <Line 
+                  type="monotone" 
+                  dataKey="cases" 
+                  stroke="#8884d8" 
+                  strokeWidth={2}
+                  dot={{ r: 4 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Key Metrics */}
@@ -332,7 +392,10 @@ export const WholesaleDashboard = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="cursor-pointer hover:bg-muted/50 transition-colors"
+          onClick={() => setShowActiveStoresTrend(true)}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Stores</CardTitle>
             <Store className="h-4 w-4 text-muted-foreground" />
@@ -340,7 +403,7 @@ export const WholesaleDashboard = () => {
           <CardContent>
             <div className="text-2xl font-bold">{totalStores.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
-              Retail locations
+              Click to view monthly trend
             </p>
           </CardContent>
         </Card>
