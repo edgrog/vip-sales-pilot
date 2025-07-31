@@ -42,7 +42,10 @@ export const WholesaleDashboard = () => {
       
       const { data, error } = await supabase
         .from("VIP_RAW_12MO")
-        .select("*");
+        .select(`
+          *,
+          normalized_chain:normalize_chain_name("Retail Accounts")
+        `);
 
       if (error) throw error;
 
@@ -83,15 +86,16 @@ export const WholesaleDashboard = () => {
       const chainMap = new Map<string, { total: number, recent: number, stores: Set<string> }>();
       
       data?.forEach(row => {
-        const chain = row["Retail Accounts"] || "Unknown";
+        const normalizedChain = row.normalized_chain || "Unknown";
+        const rawChain = row["Retail Accounts"] || "Unknown";
         const state = row["State"] || "Unknown";
-        const storeKey = `${chain}-${state}`;
+        const storeKey = `${rawChain}-${state}`;
         
-        if (!chainMap.has(chain)) {
-          chainMap.set(chain, { total: 0, recent: 0, stores: new Set() });
+        if (!chainMap.has(normalizedChain)) {
+          chainMap.set(normalizedChain, { total: 0, recent: 0, stores: new Set() });
         }
         
-        const chainInfo = chainMap.get(chain)!;
+        const chainInfo = chainMap.get(normalizedChain)!;
         chainInfo.stores.add(storeKey);
         
         // Add total cases from the last 3 months
@@ -132,14 +136,14 @@ export const WholesaleDashboard = () => {
       
       data?.forEach(row => {
         const state = row["State"] || "Unknown";
-        const chain = row["Retail Accounts"] || "Unknown";
+        const normalizedChain = row.normalized_chain || "Unknown";
         
         if (!stateMap.has(state)) {
           stateMap.set(state, { total: 0, chains: new Set() });
         }
         
         const stateInfo = stateMap.get(state)!;
-        stateInfo.chains.add(chain);
+        stateInfo.chains.add(normalizedChain);
         
         const totalVal = row["12 Months 8/1/2024 thru 7/23/2025  Case Equivs"];
         const totalNumVal = typeof totalVal === 'number' ? totalVal : 
