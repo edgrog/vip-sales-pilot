@@ -77,7 +77,8 @@ export const WholesaleDashboard = () => {
       
       const { data, error } = await supabase
         .from("VIP_RAW_12MO")
-        .select("*");
+        .select("*")
+        .limit(2000);
 
       // Get accurate count of active stores (more than 1 case in last 3 months)
       // Use a higher limit to get all records
