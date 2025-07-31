@@ -32,6 +32,29 @@ interface StoreBreakdown {
   recentCases: number;
 }
 
+// Client-side chain normalization function
+const normalizeChainName = (retailAccount: string): string => {
+  if (!retailAccount) return "Unknown";
+  
+  const account = retailAccount.toUpperCase().trim();
+  
+  if (account.includes('HEB')) return 'HEB';
+  if (account.includes('WALMART')) return 'Walmart';
+  if (account.includes('TARGET')) return 'Target';
+  if (account.includes('KROGER')) return 'Kroger';
+  if (account.includes('SAFEWAY')) return 'Safeway';
+  if (account.includes('PUBLIX')) return 'Publix';
+  if (account.includes('COSTCO')) return 'Costco';
+  if (account.includes('SAM')) return "Sam's Club";
+  if (account.includes('WHOLE FOODS')) return 'Whole Foods';
+  if (account.includes('CVS')) return 'CVS';
+  if (account.includes('WALGREENS')) return 'Walgreens';
+  if (account.includes('7 ELEVEN') || account.includes('7-ELEVEN')) return '7-Eleven';
+  
+  // Extract first word for other chains
+  return account.split(' ')[0];
+};
+
 export const WholesaleDashboard = () => {
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [chainData, setChainData] = useState<ChainPerformance[]>([]);
@@ -52,10 +75,7 @@ export const WholesaleDashboard = () => {
       
       const { data, error } = await supabase
         .from("VIP_RAW_12MO")
-        .select(`
-          *,
-          normalized_chain:normalize_chain_name("Retail Accounts")
-        `);
+        .select("*");
 
       if (error) throw error;
 
@@ -96,8 +116,9 @@ export const WholesaleDashboard = () => {
       const chainMap = new Map<string, { total: number, recent: number, stores: Set<string> }>();
       
       data?.forEach(row => {
-        const normalizedChain = row.normalized_chain || "Unknown";
+        // Apply normalization on client side
         const rawChain = row["Retail Accounts"] || "Unknown";
+        const normalizedChain = normalizeChainName(rawChain);
         const state = row["State"] || "Unknown";
         const storeKey = `${rawChain}-${state}`;
         
@@ -146,7 +167,8 @@ export const WholesaleDashboard = () => {
       
       data?.forEach(row => {
         const state = row["State"] || "Unknown";
-        const normalizedChain = row.normalized_chain || "Unknown";
+        const rawChain = row["Retail Accounts"] || "Unknown";
+        const normalizedChain = normalizeChainName(rawChain);
         
         if (!stateMap.has(state)) {
           stateMap.set(state, { total: 0, chains: new Set() });
@@ -196,15 +218,16 @@ export const WholesaleDashboard = () => {
     try {
       const { data, error } = await supabase
         .from("VIP_RAW_12MO")
-        .select(`
-          *,
-          normalized_chain:normalize_chain_name("Retail Accounts")
-        `);
+        .select("*");
 
       if (error) throw error;
 
       // Filter by normalized chain name on the client side
-      const filteredData = data?.filter(row => row.normalized_chain === chainName) || [];
+      const filteredData = data?.filter(row => {
+        const rawChain = row["Retail Accounts"] || "Unknown";
+        const normalizedChain = normalizeChainName(rawChain);
+        return normalizedChain === chainName;
+      }) || [];
 
       const breakdown: StoreBreakdown[] = filteredData.map(row => {
         const totalVal = row["12 Months 8/1/2024 thru 7/23/2025  Case Equivs"];
