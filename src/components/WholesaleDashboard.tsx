@@ -158,8 +158,7 @@ export const WholesaleDashboard = () => {
           recentCases: Math.round(info.recent),
           stores: info.stores.size
         }))
-        .sort((a, b) => b.totalCases - a.totalCases)
-        .slice(0, 10);
+        .sort((a, b) => b.totalCases - a.totalCases);
 
       setChainData(chainResults);
 
@@ -374,17 +373,27 @@ export const WholesaleDashboard = () => {
           <div className="grid lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Top 10 Retail Chains</CardTitle>
+                <CardTitle>All Retail Chains</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={chainData} layout="horizontal">
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" />
-                    <YAxis dataKey="chain" type="category" width={100} />
+                  <PieChart>
+                    <Pie
+                      data={chainData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ chain, percent }) => `${chain} ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={120}
+                      fill="#8884d8"
+                      dataKey="totalCases"
+                    >
+                      {chainData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
                     <Tooltip formatter={(value) => [`${Number(value).toLocaleString()} cases`, 'Total Cases']} />
-                    <Bar dataKey="totalCases" fill="#8884d8" />
-                  </BarChart>
+                  </PieChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
