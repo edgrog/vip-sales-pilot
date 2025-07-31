@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAdsDashboardData } from "@/hooks/useAdsDashboardData";
-import { TrendingUp, TrendingDown, DollarSign, Package } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Package, CreditCard } from "lucide-react";
 
 export const AdsPerformanceMetrics = () => {
   const { monthlyMetrics, loading } = useAdsDashboardData();
@@ -27,16 +27,16 @@ export const AdsPerformanceMetrics = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {/* Avg Spend per Case */}
+      {/* Total Monthly Spend */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Avg Spend per Case</CardTitle>
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
+          <CardTitle className="text-sm font-medium">Total Monthly Spend</CardTitle>
+          <CreditCard className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">${currentMonth.avg_spend_per_case.toFixed(2)}</div>
+          <div className="text-2xl font-bold">${currentMonth.total_spend.toLocaleString()}</div>
           <p className="text-xs text-muted-foreground">
-            Current month efficiency
+            Total ad spend this month
           </p>
         </CardContent>
       </Card>
@@ -44,13 +44,27 @@ export const AdsPerformanceMetrics = () => {
       {/* Monthly Sales */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Monthly Sales</CardTitle>
+          <CardTitle className="text-sm font-medium">Total Cases Sold</CardTitle>
           <Package className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{currentMonth.total_cases.toLocaleString()}</div>
           <p className="text-xs text-muted-foreground">
             Cases sold this month
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Avg Spend per Case */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Spend per Case</CardTitle>
+          <DollarSign className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">${currentMonth.avg_spend_per_case.toFixed(2)}</div>
+          <p className="text-xs text-muted-foreground">
+            Average cost per case
           </p>
         </CardContent>
       </Card>
