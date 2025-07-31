@@ -6,6 +6,7 @@ import { ArrowLeft, BarChart, MapPin, TrendingUp, AlertTriangle } from "lucide-r
 import { useNavigate } from "react-router-dom";
 import { useMetaAdsData } from "@/hooks/useMetaAdsData";
 import { MetaAdsTable } from "@/components/MetaAdsTable";
+import { MetaAdsSummaryCards } from "@/components/MetaAdsSummaryCards";
 import { ChainSpendAnalysis } from "@/components/ChainSpendAnalysis";
 import { StateSpendAnalysis } from "@/components/StateSpendAnalysis";
 import IGOrganicTrends from "@/components/IGOrganicTrends";
@@ -72,8 +73,8 @@ const Marketing = () => {
             {/* IG Organic Trends */}
             <IGOrganicTrends />
             
-            {/* Meta Ads Table */}
-            <MetaAdsTable data={data} loading={loading} error={error} onRefresh={refetch} onAdUpdate={updateAd} />
+            {/* Meta Ads Summary Cards */}
+            <MetaAdsSummaryCards data={data} loading={loading} error={error} onRefresh={refetch} />
           </TabsContent>
 
           <TabsContent value="campaign-analysis" className="space-y-6">
