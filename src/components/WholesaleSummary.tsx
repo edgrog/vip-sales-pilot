@@ -37,9 +37,9 @@ export const WholesaleSummary = () => {
 
       if (error) throw error;
 
-      // Calculate total cases
-      const totalCases = data?.reduce((sum, row) => {
-        const val = row["12 Months 8/1/2024 thru 7/23/2025  Case Equivs"];
+      // Calculate recent month total cases (July)
+      const recentMonthCases = data?.reduce((sum, row) => {
+        const val = row["1 Month 7/1/2025 thru 7/23/2025  Case Equivs"];
         const numVal = typeof val === 'number' ? val : (typeof val === 'string' && val !== '' ? parseFloat(val) : 0);
         return sum + (isNaN(numVal) ? 0 : numVal);
       }, 0) || 0;
@@ -79,7 +79,7 @@ export const WholesaleSummary = () => {
       const monthlyGrowth = juneTotal > 0 ? ((julyTotal - juneTotal) / juneTotal) * 100 : 0;
 
       setSummary({
-        totalCases: Math.round(totalCases),
+        totalCases: Math.round(recentMonthCases),
         activeStores,
         topChain,
         monthlyGrowth
@@ -121,11 +121,14 @@ export const WholesaleSummary = () => {
         <CardHeader className="pb-2">
           <CardTitle className="text-sm flex items-center gap-2">
             <Package className="h-4 w-4" />
-            Total Cases (12M)
+            Total Cases (1M)
           </CardTitle>
         </CardHeader>
         <CardContent className="pb-4">
           <div className="text-2xl font-bold">{summary.totalCases.toLocaleString()}</div>
+          <div className={`text-sm ${summary.monthlyGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            {summary.monthlyGrowth >= 0 ? '+' : ''}{summary.monthlyGrowth.toFixed(1)}% vs last month
+          </div>
         </CardContent>
       </Card>
 
