@@ -253,7 +253,7 @@ export const ChainSpendAnalysis = ({
       {/* Insights */}
       <Card>
         <CardHeader>
-          <CardTitle>Chain Performance Insights</CardTitle>
+          <CardTitle>Chain Spend Breakdown</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-2 gap-4">
