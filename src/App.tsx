@@ -5,12 +5,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { Layout } from "@/components/Layout";
 import Home from "./pages/Home";
 import Index from "./pages/Index";
 import Marketing from "./pages/Marketing";
 import AdsDashboard from "./pages/AdsDashboard";
 import AccountOverview from "./pages/AccountOverview";
 import ChainOverview from "./pages/ChainOverview";
+import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -24,13 +26,14 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-            <Route path="/wholesale" element={<Index />} />
-            <Route path="/marketing" element={<ProtectedRoute><Marketing /></ProtectedRoute>} />
-            <Route path="/ads-dashboard" element={<ProtectedRoute><AdsDashboard /></ProtectedRoute>} />
-            <Route path="/chains/:chainId" element={<ProtectedRoute><ChainOverview /></ProtectedRoute>} />
+            <Route path="/" element={<ProtectedRoute><Layout><Home /></Layout></ProtectedRoute>} />
+            <Route path="/home" element={<ProtectedRoute><Layout><Home /></Layout></ProtectedRoute>} />
+            <Route path="/wholesale" element={<Layout><Index /></Layout>} />
+            <Route path="/marketing" element={<ProtectedRoute><Layout><Marketing /></Layout></ProtectedRoute>} />
+            <Route path="/ads-dashboard" element={<ProtectedRoute><Layout><AdsDashboard /></Layout></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Layout><Settings /></Layout></ProtectedRoute>} />
+            <Route path="/chains/:chainId" element={<ProtectedRoute><Layout><ChainOverview /></Layout></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

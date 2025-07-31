@@ -2,12 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { ShoppingCart, Megaphone, BarChart3 } from "lucide-react";
-import Header from "@/components/Header";
+
 const Home = () => {
   const navigate = useNavigate();
-  return <div className="min-h-screen bg-gradient-to-br from-background to-background/50 p-6">
-      <Header />
-      <div className="max-w-4xl mx-auto flex items-center justify-center min-h-[calc(100vh-200px)]">
+  return <div className="max-w-4xl mx-auto flex items-center justify-center min-h-[calc(100vh-200px)]">
         <div className="w-full">
           <div className="text-center mb-12">
             <img 
@@ -64,7 +62,6 @@ const Home = () => {
           </Card>
         </div>
         </div>
-      </div>
-    </div>;
+      </div>;
 };
 export default Home;

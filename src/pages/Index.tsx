@@ -1,26 +1,13 @@
 import { Dashboard } from "@/components/Dashboard";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
-import Header from "@/components/Header";
 
 const Index = () => {
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
-  
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto">
-        <Header 
-          title="Wholesale Platform" 
-          subtitle="Wholesale analytics, chain performance, and sales insights"
-          showBackButton={true}
-          backButtonText="Back to Home"
-          backButtonPath="/home"
-        />
-        <Dashboard />
+    <div className="max-w-7xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-foreground mb-2">Wholesale Platform</h1>
+        <p className="text-muted-foreground">Wholesale analytics, chain performance, and sales insights</p>
       </div>
+      <Dashboard />
     </div>
   );
 };
