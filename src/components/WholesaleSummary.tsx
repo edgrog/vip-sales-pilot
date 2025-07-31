@@ -25,17 +25,34 @@ export const WholesaleSummary = () => {
 
   const fetchWholesaleSummary = async () => {
     try {
-      const { data, error } = await supabase
-        .from("VIP_RAW_12MO")
-        .select(`
-          "Retail Accounts",
-          "State",
-          "12 Months 8/1/2024 thru 7/23/2025  Case Equivs",
-          "1 Month 7/1/2025 thru 7/23/2025  Case Equivs",
-          "1 Month 6/1/2025 thru 6/30/2025  Case Equivs"
-        `);
+      // Fetch all records using pagination to bypass 1000 record limit
+      let allRecords: any[] = [];
+      let from = 0;
+      const pageSize = 1000;
+      
+      while (true) {
+        const { data: pageData, error } = await supabase
+          .from("VIP_RAW_12MO")
+          .select(`
+            "Retail Accounts",
+            "State",
+            "12 Months 8/1/2024 thru 7/23/2025  Case Equivs",
+            "1 Month 7/1/2025 thru 7/23/2025  Case Equivs",
+            "1 Month 6/1/2025 thru 6/30/2025  Case Equivs",
+            "1 Month 5/1/2025 thru 5/31/2025  Case Equivs"
+          `)
+          .range(from, from + pageSize - 1);
 
-      if (error) throw error;
+        if (error) throw error;
+        if (!pageData || pageData.length === 0) break;
+        
+        allRecords = [...allRecords, ...pageData];
+        if (pageData.length < pageSize) break; // Last page
+        
+        from += pageSize;
+      }
+      
+      const data = allRecords;
 
       // Calculate recent month total cases (July)
       const recentMonthCases = data?.reduce((sum, row) => {
