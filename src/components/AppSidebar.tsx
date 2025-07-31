@@ -31,7 +31,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar
-      className={!open ? "w-14" : "w-60"}
+      className="w-60"
       collapsible="icon"
     >
       <SidebarContent>
@@ -40,7 +40,7 @@ export function AppSidebar() {
           <img 
             src="/lovable-uploads/16b7eb00-ca19-4bc1-96c7-0ea3abc83cb2.png" 
             alt="Grog One Logo" 
-            className={!open ? "h-8 w-auto mx-auto" : "h-12 w-auto"}
+            className="h-12 w-auto"
           />
         </div>
 
@@ -52,7 +52,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} end className={getNavCls}>
                       <item.icon className="h-4 w-4" />
-                      {open && <span className="ml-2">{item.title}</span>}
+                      <span className="ml-2">{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
