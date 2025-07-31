@@ -15,6 +15,9 @@ interface ChainPerformance {
   totalCases: number;
   recentCases: number;
   stores: number;
+  thisMonthCases: number;
+  lastMonthCases: number;
+  growthRate: number;
 }
 interface StateData {
   state: string;
@@ -26,6 +29,9 @@ interface StoreBreakdown {
   state: string;
   totalCases: number;
   recentCases: number;
+  thisMonthCases: number;
+  lastMonthCases: number;
+  growthRate: number;
 }
 
 // Client-side chain normalization function
@@ -157,6 +163,8 @@ export const WholesaleDashboard = () => {
       const chainMap = new Map<string, {
         total: number;
         recent: number;
+        thisMonth: number;
+        lastMonth: number;
         stores: Set<string>;
       }>();
       data?.forEach(row => {
@@ -169,6 +177,8 @@ export const WholesaleDashboard = () => {
           chainMap.set(normalizedChain, {
             total: 0,
             recent: 0,
+            thisMonth: 0,
+            lastMonth: 0,
             stores: new Set()
           });
         }
@@ -183,17 +193,36 @@ export const WholesaleDashboard = () => {
           chainInfo.recent += isNaN(numVal) || numVal === null ? 0 : numVal;
         });
 
+        // Add this month's cases (July 2025)
+        const thisMonthVal = row["1 Month 7/1/2025 thru 7/23/2025  Case Equivs"];
+        const thisMonthNum = typeof thisMonthVal === 'number' ? thisMonthVal : typeof thisMonthVal === 'string' && thisMonthVal !== '' && thisMonthVal !== null ? parseFloat(thisMonthVal) : 0;
+        chainInfo.thisMonth += isNaN(thisMonthNum) || thisMonthNum === null ? 0 : thisMonthNum;
+
+        // Add last month's cases (June 2025)
+        const lastMonthVal = row["1 Month 6/1/2025 thru 6/30/2025  Case Equivs"];
+        const lastMonthNum = typeof lastMonthVal === 'number' ? lastMonthVal : typeof lastMonthVal === 'string' && lastMonthVal !== '' && lastMonthVal !== null ? parseFloat(lastMonthVal) : 0;
+        chainInfo.lastMonth += isNaN(lastMonthNum) || lastMonthNum === null ? 0 : lastMonthNum;
+
         // Add total from 12-month column
         const totalVal = row["12 Months 8/1/2024 thru 7/23/2025  Case Equivs"];
         const totalNumVal = typeof totalVal === 'number' ? totalVal : typeof totalVal === 'string' && totalVal !== '' && totalVal !== null ? parseFloat(totalVal) : 0;
         chainInfo.total += isNaN(totalNumVal) || totalNumVal === null ? 0 : totalNumVal;
       });
-      const chainResults: ChainPerformance[] = Array.from(chainMap.entries()).map(([chain, info]) => ({
-        chain,
-        totalCases: Math.round(info.total),
-        recentCases: Math.round(info.recent),
-        stores: info.stores.size
-      })).sort((a, b) => b.totalCases - a.totalCases).slice(0, 10);
+      const chainResults: ChainPerformance[] = Array.from(chainMap.entries()).map(([chain, info]) => {
+        const thisMonth = Math.round(info.thisMonth);
+        const lastMonth = Math.round(info.lastMonth);
+        const growthRate = lastMonth > 0 ? ((thisMonth - lastMonth) / lastMonth) * 100 : 0;
+        
+        return {
+          chain,
+          totalCases: Math.round(info.total),
+          recentCases: Math.round(info.recent),
+          thisMonthCases: thisMonth,
+          lastMonthCases: lastMonth,
+          growthRate: growthRate,
+          stores: info.stores.size
+        };
+      }).sort((a, b) => b.totalCases - a.totalCases).slice(0, 10);
       setChainData(chainResults);
 
       // Process state data
@@ -300,11 +329,24 @@ export const WholesaleDashboard = () => {
           const numVal = typeof val === 'number' ? val : typeof val === 'string' && val !== '' && val !== null ? parseFloat(val) : 0;
           return sum + (isNaN(numVal) || numVal === null ? 0 : numVal);
         }, 0);
+        
+        // Get this month (July 2025) and last month (June 2025) cases
+        const thisMonthVal = row["1 Month 7/1/2025 thru 7/23/2025  Case Equivs"];
+        const thisMonthCases = typeof thisMonthVal === 'number' ? thisMonthVal : typeof thisMonthVal === 'string' && thisMonthVal !== '' && thisMonthVal !== null ? parseFloat(thisMonthVal) : 0;
+        
+        const lastMonthVal = row["1 Month 6/1/2025 thru 6/30/2025  Case Equivs"];
+        const lastMonthCases = typeof lastMonthVal === 'number' ? lastMonthVal : typeof lastMonthVal === 'string' && lastMonthVal !== '' && lastMonthVal !== null ? parseFloat(lastMonthVal) : 0;
+        
+        const growthRate = lastMonthCases > 0 ? ((thisMonthCases - lastMonthCases) / lastMonthCases) * 100 : 0;
+        
         return {
           storeName: row["Retail Accounts"] || "Unknown",
           state: row["State"] || "Unknown",
           totalCases: Math.round(isNaN(totalCases) ? 0 : totalCases),
-          recentCases: Math.round(recentCases)
+          recentCases: Math.round(recentCases),
+          thisMonthCases: Math.round(thisMonthCases),
+          lastMonthCases: Math.round(lastMonthCases),
+          growthRate: growthRate
         };
       }).sort((a, b) => b.totalCases - a.totalCases);
       setChainBreakdown(breakdown);
@@ -476,9 +518,19 @@ export const WholesaleDashboard = () => {
                           <p className="text-xs text-muted-foreground">{store.state}</p>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold">{store.totalCases.toLocaleString()}</p>
-                          <p className="text-xs text-muted-foreground">total cases</p>
-                          <p className="text-xs text-muted-foreground">{store.recentCases.toLocaleString()} recent</p>
+                          <div className="flex items-center gap-2">
+                            <div>
+                              <p className="font-bold">{store.totalCases.toLocaleString()}</p>
+                              <p className="text-xs text-muted-foreground">total cases</p>
+                            </div>
+                            <div className="border-l pl-2 ml-2">
+                              <p className="text-sm font-medium">{store.thisMonthCases.toLocaleString()}</p>
+                              <p className="text-xs text-muted-foreground">this month</p>
+                              <p className={`text-xs font-medium ${store.growthRate > 0 ? 'text-emerald-600' : store.growthRate < 0 ? 'text-red-600' : 'text-muted-foreground'}`}>
+                                {store.growthRate > 0 ? '+' : ''}{store.growthRate.toFixed(1)}%
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       </div>)}
                   </div> : <div className="space-y-4 max-h-96 overflow-y-auto">
@@ -488,8 +540,19 @@ export const WholesaleDashboard = () => {
                           <p className="text-xs text-muted-foreground">{chain.stores} stores</p>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold">{chain.totalCases.toLocaleString()}</p>
-                          <p className="text-xs text-muted-foreground">cases</p>
+                          <div className="flex items-center gap-2">
+                            <div>
+                              <p className="font-bold">{chain.totalCases.toLocaleString()}</p>
+                              <p className="text-xs text-muted-foreground">total cases</p>
+                            </div>
+                            <div className="border-l pl-2 ml-2">
+                              <p className="text-sm font-medium">{chain.thisMonthCases.toLocaleString()}</p>
+                              <p className="text-xs text-muted-foreground">this month</p>
+                              <p className={`text-xs font-medium ${chain.growthRate > 0 ? 'text-emerald-600' : chain.growthRate < 0 ? 'text-red-600' : 'text-muted-foreground'}`}>
+                                {chain.growthRate > 0 ? '+' : ''}{chain.growthRate.toFixed(1)}%
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       </div>)}
                   </div>}
