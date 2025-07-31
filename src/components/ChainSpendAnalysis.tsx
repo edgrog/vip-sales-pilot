@@ -24,24 +24,25 @@ export const ChainSpendAnalysis = ({
         
         if (error) throw error;
         
-        // Process sales data by chain
+        // Process sales data by chain, grouping by broader chain categories
         const chainSalesMap: Record<string, number> = {};
         
         vipData?.forEach(row => {
           const retailAccount = row["Retail Accounts"];
           if (retailAccount && retailAccount !== 'Total') {
-            // Normalize chain name to match what's in ads data
-            const normalizedChain = normalizeChainName(retailAccount);
+            // Map retail accounts to broader chain categories that match ads data
+            const chainCategory = mapRetailAccountToChain(retailAccount);
             const totalCases = row["12 Months 8/1/2024 thru 7/23/2025  Case Equivs"];
             const casesNum = typeof totalCases === 'number' ? totalCases : 
                            typeof totalCases === 'string' && totalCases !== '' ? parseFloat(totalCases) : 0;
             
             if (!isNaN(casesNum) && casesNum > 0) {
-              chainSalesMap[normalizedChain] = (chainSalesMap[normalizedChain] || 0) + casesNum;
+              chainSalesMap[chainCategory] = (chainSalesMap[chainCategory] || 0) + casesNum;
             }
           }
         });
         
+        console.log('Chain sales data:', chainSalesMap);
         setSalesData(chainSalesMap);
       } catch (error) {
         console.error('Error fetching sales data:', error);
@@ -51,13 +52,26 @@ export const ChainSpendAnalysis = ({
     fetchSalesData();
   }, []);
 
-  // Helper function to normalize chain names
-  const normalizeChainName = (chainName: string): string => {
-    return chainName.toLowerCase()
-      .replace(/[^a-z0-9]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
+  // Helper function to map retail accounts to broader chain categories
+  const mapRetailAccountToChain = (retailAccount: string): string => {
+    const account = retailAccount.toLowerCase();
+    
+    // Map specific retailers to broader chain categories
+    if (account.includes('giant eagle') || account.includes('eagle')) return 'Giant Eagle';
+    if (account.includes('kroger') || account.includes('king soopers') || account.includes('smith')) return 'Kroger';
+    if (account.includes('walmart') || account.includes('sams club')) return 'Walmart';
+    if (account.includes('target')) return 'Target';
+    if (account.includes('costco')) return 'Costco';
+    if (account.includes('safeway') || account.includes('albertsons')) return 'Safeway';
+    if (account.includes('meijer')) return 'Meijer';
+    if (account.includes('publix')) return 'Publix';
+    if (account.includes('heb') || account.includes('h-e-b')) return 'HEB';
+    if (account.includes('whole foods')) return 'Whole Foods';
+    
+    // For other retailers, try to extract a reasonable chain name
+    return retailAccount.split(' ')[0] || 'Other';
   };
+
 
   // First pass: calculate base spend and impressions for each chain (excluding General)
   const baseChainSpend = {} as Record<string, number>;
@@ -242,25 +256,26 @@ export const ChainSpendAnalysis = ({
               <h4 className="font-semibold mb-2">High Performing Chains</h4>
               <div className="space-y-2">
                 {chartData.slice(0, 5).map((chain, index) => {
-                  // Find cases sold for this chain
-                  const normalizedChainName = normalizeChainName(chain.chain);
-                  const casesSold = salesData[normalizedChainName] || 0;
+                  // Find cases sold for this chain using direct chain name match
+                  const casesSold = salesData[chain.chain] || 0;
                   
                   return (
-                    <div key={chain.chain} className="flex justify-between items-center">
-                      <span className="text-sm">{index + 1}. {chain.chain}</span>
+                    <div key={chain.chain} className="flex justify-between items-center p-3 border rounded-lg bg-card">
+                      <span className="text-sm font-medium">{index + 1}. {chain.chain}</span>
                       <div className="text-right">
-                        <div className="flex items-center gap-4">
-                          <div className="text-right">
-                            <div className="text-sm font-medium">${chain.spend.toLocaleString()}</div>
+                        <div className="grid grid-cols-2 gap-6 text-right">
+                          <div>
+                            <div className="text-sm font-bold text-primary">${chain.spend.toLocaleString()}</div>
                             <div className="text-xs text-muted-foreground">Ad Spend</div>
                           </div>
-                          <div className="text-right">
-                            <div className="text-sm font-medium">{Math.round(casesSold).toLocaleString()}</div>
+                          <div>
+                            <div className="text-sm font-bold text-success">{Math.round(casesSold).toLocaleString()}</div>
                             <div className="text-xs text-muted-foreground">Cases Sold</div>
                           </div>
                         </div>
-                        <div className="text-xs text-muted-foreground mt-1">{chain.impressions.toLocaleString()} impressions</div>
+                        <div className="text-xs text-muted-foreground mt-2 pt-2 border-t">
+                          {chain.impressions.toLocaleString()} impressions
+                        </div>
                       </div>
                     </div>
                   );
