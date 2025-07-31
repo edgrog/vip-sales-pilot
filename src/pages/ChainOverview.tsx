@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Store, TrendingUp, TrendingDown, AlertCircle, Users, Target, Filter, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Header from "@/components/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -230,17 +231,11 @@ const ChainOverview = () => {
     return (
       <div className="min-h-screen bg-background p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-4 mb-8">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => navigate('/home')}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Home
-            </Button>
-          </div>
+          <Header 
+            showBackButton={true}
+            backButtonText="Back to Home"
+            backButtonPath="/home"
+          />
           
           <div className="text-center py-16">
             <AlertCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
@@ -255,23 +250,13 @@ const ChainOverview = () => {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => navigate('/home')}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Home
-          </Button>
-          
-          <div>
-            <h1 className="text-3xl font-bold">{chainData.chainName}</h1>
-            <p className="text-muted-foreground">Chain Performance Overview</p>
-          </div>
-        </div>
+        <Header 
+          title={chainData.chainName}
+          subtitle="Chain Performance Overview"
+          showBackButton={true}
+          backButtonText="Back to Home"
+          backButtonPath="/home"
+        />
 
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">

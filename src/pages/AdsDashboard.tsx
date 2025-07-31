@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, DollarSign, TrendingUp, Target, BarChart3 } from "lucide-react";
+import Header from "@/components/Header";
 import { AdsDashboardTable } from "@/components/AdsDashboardTable";
 import { AdsDashboardChart } from "@/components/AdsDashboardChart";
 import { AdsPerformanceMetrics } from "@/components/AdsPerformanceMetrics";
@@ -47,14 +48,12 @@ const AdsDashboard = () => {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/home")} className="flex items-center gap-2">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Home
-          </Button>
-          <h1 className="text-3xl font-bold">Ads Performance Dashboard</h1>
-        </div>
+        <Header 
+          title="Ads Performance Dashboard" 
+          showBackButton={true}
+          backButtonText="Back to Home"
+          backButtonPath="/home"
+        />
 
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

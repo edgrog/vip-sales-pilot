@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, BarChart, MapPin, TrendingUp, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Header from "@/components/Header";
 import { useMetaAdsData } from "@/hooks/useMetaAdsData";
 import { MetaAdsTable } from "@/components/MetaAdsTable";
 import { MetaAdsSummaryCards } from "@/components/MetaAdsSummaryCards";
@@ -32,22 +33,13 @@ const Marketing = () => {
   });
   return <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/home')} className="flex items-center gap-2">
-              <ArrowLeft className="w-4 h-4" />
-              Back to Home
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Marketing Platform</h1>
-              <p className="text-muted-foreground">Manage your Meta Ads campaigns and performance</p>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            
-            
-          </div>
-        </div>
+        <Header 
+          title="Marketing Platform" 
+          subtitle="Manage your Meta Ads campaigns and performance"
+          showBackButton={true}
+          backButtonText="Back to Home"
+          backButtonPath="/home"
+        />
 
         <Tabs defaultValue="campaigns" className="space-y-6">
           <TabsList className="grid w-full lg:w-auto lg:grid-cols-4">

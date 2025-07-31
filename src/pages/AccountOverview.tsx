@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ArrowLeft, MapPin, Phone, Mail, Calendar, TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Header from "@/components/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -138,17 +139,11 @@ const AccountOverview = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
         <div className="container mx-auto px-6 py-8">
-          <div className="flex items-center gap-4 mb-8">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => navigate('/')}
-              className="gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Dashboard
-            </Button>
-          </div>
+          <Header 
+            showBackButton={true}
+            backButtonText="Back to Dashboard"
+            backButtonPath="/"
+          />
           
           <div className="text-center py-16">
             <AlertCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
@@ -163,23 +158,13 @@ const AccountOverview = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <div className="container mx-auto px-6 py-8">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => navigate('/')}
-            className="gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Dashboard
-          </Button>
-          
-          <div>
-            <h1 className="text-3xl font-bold">{accountData.name}</h1>
-            <p className="text-muted-foreground">{accountData.normalized_chain}</p>
-          </div>
-        </div>
+        <Header 
+          title={accountData.name}
+          subtitle={accountData.normalized_chain}
+          showBackButton={true}
+          backButtonText="Back to Dashboard"
+          backButtonPath="/"
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}
