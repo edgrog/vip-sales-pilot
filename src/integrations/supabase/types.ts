@@ -38,45 +38,90 @@ export type Database = {
         }
         Relationships: []
       }
+      ig_analytics_followers: {
+        Row: {
+          date: string
+          fetched_at: string
+          id: string
+          metric: string
+          title: string | null
+          value: number
+        }
+        Insert: {
+          date: string
+          fetched_at: string
+          id?: string
+          metric: string
+          title?: string | null
+          value: number
+        }
+        Update: {
+          date?: string
+          fetched_at?: string
+          id?: string
+          metric?: string
+          title?: string | null
+          value?: number
+        }
+        Relationships: []
+      }
+      ig_clicks: {
+        Row: {
+          date: string
+          fetched_at: string | null
+          id: string
+          metric: string
+          title: string | null
+          value: number | null
+        }
+        Insert: {
+          date: string
+          fetched_at?: string | null
+          id?: string
+          metric: string
+          title?: string | null
+          value?: number | null
+        }
+        Update: {
+          date?: string
+          fetched_at?: string | null
+          id?: string
+          metric?: string
+          title?: string | null
+          value?: number | null
+        }
+        Relationships: []
+      }
       ig_organic_insights: {
         Row: {
           created_at: string | null
           date: string | null
           fetched_at: string | null
-          followers_count: number | null
           id: string
+          metric: string | null
           name: string | null
-          profile_views: number | null
-          reach: number | null
           title: string | null
           value: number | null
-          website_clicks: number | null
         }
         Insert: {
           created_at?: string | null
           date?: string | null
           fetched_at?: string | null
-          followers_count?: number | null
           id?: string
+          metric?: string | null
           name?: string | null
-          profile_views?: number | null
-          reach?: number | null
           title?: string | null
           value?: number | null
-          website_clicks?: number | null
         }
         Update: {
           created_at?: string | null
           date?: string | null
           fetched_at?: string | null
-          followers_count?: number | null
           id?: string
+          metric?: string | null
           name?: string | null
-          profile_views?: number | null
-          reach?: number | null
           title?: string | null
           value?: number | null
-          website_clicks?: number | null
         }
         Relationships: []
       }
