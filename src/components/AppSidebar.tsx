@@ -7,9 +7,7 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar";
 
 const items = [
@@ -21,7 +19,6 @@ const items = [
 ];
 
 export function AppSidebar() {
-  const { open } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
 
@@ -46,12 +43,10 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} end className={getNavCls}>
-                      <item.icon className="h-4 w-4" />
-                      <span className="ml-2">{item.title}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
+                  <NavLink to={item.url} end className={`flex items-center w-full px-3 py-2 rounded-md transition-colors ${getNavCls({ isActive: isActive(item.url) })}`}>
+                    <item.icon className="h-4 w-4" />
+                    <span className="ml-2">{item.title}</span>
+                  </NavLink>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
