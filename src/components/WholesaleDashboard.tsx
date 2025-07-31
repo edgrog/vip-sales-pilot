@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
-import { TrendingUp, Package, DollarSign, Store } from "lucide-react";
+import { TrendingUp, Package, DollarSign, Store, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
 interface MonthlyData {
@@ -24,10 +25,19 @@ interface StateData {
   chains: number;
 }
 
+interface StoreBreakdown {
+  storeName: string;
+  state: string;
+  totalCases: number;
+  recentCases: number;
+}
+
 export const WholesaleDashboard = () => {
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [chainData, setChainData] = useState<ChainPerformance[]>([]);
   const [stateData, setStateData] = useState<StateData[]>([]);
+  const [selectedChain, setSelectedChain] = useState<string | null>(null);
+  const [chainBreakdown, setChainBreakdown] = useState<StoreBreakdown[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCases, setTotalCases] = useState(0);
   const [totalStores, setTotalStores] = useState(0);
@@ -182,6 +192,60 @@ export const WholesaleDashboard = () => {
     }
   };
 
+  const fetchChainBreakdown = async (chainName: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("VIP_RAW_12MO")
+        .select(`
+          *,
+          normalized_chain:normalize_chain_name("Retail Accounts")
+        `);
+
+      if (error) throw error;
+
+      // Filter by normalized chain name on the client side
+      const filteredData = data?.filter(row => row.normalized_chain === chainName) || [];
+
+      const breakdown: StoreBreakdown[] = filteredData.map(row => {
+        const totalVal = row["12 Months 8/1/2024 thru 7/23/2025  Case Equivs"];
+        const totalCases = typeof totalVal === 'number' ? totalVal : 
+                          (typeof totalVal === 'string' && totalVal !== '' && totalVal !== null ? parseFloat(totalVal) : 0);
+        
+        const recentCases = [
+          "1 Month 5/1/2025 thru 5/31/2025  Case Equivs",
+          "1 Month 6/1/2025 thru 6/30/2025  Case Equivs", 
+          "1 Month 7/1/2025 thru 7/23/2025  Case Equivs"
+        ].reduce((sum, monthCol) => {
+          const val = row[monthCol];
+          const numVal = typeof val === 'number' ? val : 
+                        (typeof val === 'string' && val !== '' && val !== null ? parseFloat(val) : 0);
+          return sum + (isNaN(numVal) || numVal === null ? 0 : numVal);
+        }, 0);
+
+        return {
+          storeName: row["Retail Accounts"] || "Unknown",
+          state: row["State"] || "Unknown", 
+          totalCases: Math.round(isNaN(totalCases) ? 0 : totalCases),
+          recentCases: Math.round(recentCases)
+        };
+      }).sort((a, b) => b.totalCases - a.totalCases);
+
+      setChainBreakdown(breakdown);
+    } catch (error) {
+      console.error("Error fetching chain breakdown:", error);
+    }
+  };
+
+  const handleChainClick = (chainName: string) => {
+    setSelectedChain(chainName);
+    fetchChainBreakdown(chainName);
+  };
+
+  const handleBackToChains = () => {
+    setSelectedChain(null);
+    setChainBreakdown([]);
+  };
+
   const recentMonth = monthlyData[monthlyData.length - 1];
   const previousMonth = monthlyData[monthlyData.length - 2];
   const monthlyGrowth = previousMonth && recentMonth ? 
@@ -302,24 +366,57 @@ export const WholesaleDashboard = () => {
             </Card>
 
             <Card>
-              <CardHeader>
-                <CardTitle>Chain Performance Details</CardTitle>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>
+                  {selectedChain ? (
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="sm" onClick={handleBackToChains}>
+                        <ArrowLeft className="w-4 h-4" />
+                      </Button>
+                      {selectedChain} - Store Breakdown
+                    </div>
+                  ) : (
+                    "Chain Performance Details"
+                  )}
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4 max-h-96 overflow-y-auto">
-                  {chainData.map((chain, index) => (
-                    <div key={chain.chain} className="flex items-center justify-between p-3 border rounded">
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{chain.chain.substring(0, 40)}...</p>
-                        <p className="text-xs text-muted-foreground">{chain.stores} stores</p>
+                {selectedChain ? (
+                  <div className="space-y-4 max-h-96 overflow-y-auto">
+                    {chainBreakdown.map((store, index) => (
+                      <div key={`${store.storeName}-${store.state}`} className="flex items-center justify-between p-3 border rounded">
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{store.storeName}</p>
+                          <p className="text-xs text-muted-foreground">{store.state}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold">{store.totalCases.toLocaleString()}</p>
+                          <p className="text-xs text-muted-foreground">total cases</p>
+                          <p className="text-xs text-muted-foreground">{store.recentCases.toLocaleString()} recent</p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold">{chain.totalCases.toLocaleString()}</p>
-                        <p className="text-xs text-muted-foreground">cases</p>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-4 max-h-96 overflow-y-auto">
+                    {chainData.map((chain, index) => (
+                      <div 
+                        key={chain.chain} 
+                        className="flex items-center justify-between p-3 border rounded cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => handleChainClick(chain.chain)}
+                      >
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{chain.chain}</p>
+                          <p className="text-xs text-muted-foreground">{chain.stores} stores</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold">{chain.totalCases.toLocaleString()}</p>
+                          <p className="text-xs text-muted-foreground">cases</p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
