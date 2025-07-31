@@ -2,26 +2,12 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { Calendar, TrendingUp, Eye, MousePointer, ArrowUp, ArrowDown, RefreshCw } from "lucide-react";
+import { TrendingUp, Eye, MousePointer, ArrowUp, ArrowDown, RefreshCw } from "lucide-react";
 import { useIGOrganicData } from "@/hooks/useIGOrganicData";
 
 const IGOrganicTrends = () => {
-  const { data, summary, loading, error, refetch } = useIGOrganicData();
-  const [selectedMetrics, setSelectedMetrics] = useState({
-    reach: true,
-    followers: true,
-    website_clicks: true
-  });
+  const { summary, loading, error, refetch } = useIGOrganicData();
   const [dateRange, setDateRange] = useState(30);
-
-  const handleMetricToggle = (metric: string) => {
-    setSelectedMetrics(prev => ({
-      ...prev,
-      [metric]: !prev[metric as keyof typeof prev]
-    }));
-  };
 
   const handleDateRangeChange = (days: number) => {
     setDateRange(days);
@@ -50,7 +36,7 @@ const IGOrganicTrends = () => {
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5" />
               IG Organic Performance
-              <Badge variant="secondary">{data.length} data points</Badge>
+              <Badge variant="secondary">Latest {dateRange}d</Badge>
             </CardTitle>
             <CardDescription>
               Instagram organic reach, profile views, and website clicks over time
@@ -146,93 +132,6 @@ const IGOrganicTrends = () => {
           </div>
         </div>
 
-        {/* Metric Filters */}
-        <div className="flex flex-wrap items-center gap-4 mb-6">
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="reach"
-              checked={selectedMetrics.reach}
-              onCheckedChange={() => handleMetricToggle('reach')}
-            />
-            <label htmlFor="reach" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Reach
-            </label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="followers"
-              checked={selectedMetrics.followers}
-              onCheckedChange={() => handleMetricToggle('followers')}
-            />
-            <label htmlFor="followers" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Followers
-            </label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="website_clicks"
-              checked={selectedMetrics.website_clicks}
-              onCheckedChange={() => handleMetricToggle('website_clicks')}
-            />
-            <label htmlFor="website_clicks" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Website Clicks
-            </label>
-          </div>
-        </div>
-        
-        {/* Chart */}
-        <div className="border rounded-lg">
-          <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="date" 
-                tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-              />
-              <YAxis />
-              <Tooltip 
-                labelFormatter={(value) => new Date(value).toLocaleDateString('en-US', { 
-                  weekday: 'short',
-                  month: 'short', 
-                  day: 'numeric',
-                  year: 'numeric'
-                })}
-                formatter={(value: number, name: string) => [formatNumber(value), name]}
-              />
-              <Legend />
-              {selectedMetrics.reach && (
-                <Line 
-                  type="monotone" 
-                  dataKey="reach" 
-                  stroke="#8b5cf6" 
-                  name="Reach"
-                  strokeWidth={2}
-                  dot={{ r: 4 }}
-                />
-              )}
-              {selectedMetrics.followers && (
-                <Line 
-                  type="monotone" 
-                  dataKey="followers" 
-                  stroke="#06b6d4" 
-                  name="Followers"
-                  strokeWidth={2}
-                  dot={{ r: 4 }}
-                />
-              )}
-              {selectedMetrics.website_clicks && (
-                <Line 
-                  type="monotone" 
-                  dataKey="website_clicks" 
-                  stroke="#f59e0b" 
-                  name="Website Clicks"
-                  strokeWidth={2}
-                  dot={{ r: 4 }}
-                />
-              )}
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
       </CardContent>
     </Card>
   );
