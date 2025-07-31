@@ -158,7 +158,8 @@ export const WholesaleDashboard = () => {
           recentCases: Math.round(info.recent),
           stores: info.stores.size
         }))
-        .sort((a, b) => b.totalCases - a.totalCases);
+        .sort((a, b) => b.totalCases - a.totalCases)
+        .slice(0, 10);
 
       setChainData(chainResults);
 
@@ -373,7 +374,7 @@ export const WholesaleDashboard = () => {
           <div className="grid lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>All Retail Chains</CardTitle>
+                <CardTitle>Top 10 Retail Chains</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={400}>
