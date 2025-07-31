@@ -75,13 +75,30 @@ export const WholesaleDashboard = () => {
     try {
       setLoading(true);
       
-      const { data, error } = await supabase
-        .from("VIP_RAW_12MO")
-        .select("*")
-        .limit(5000); // Much higher limit
-
+      // Fetch all records using pagination to bypass 1000 record limit
+      let allRecords: any[] = [];
+      let from = 0;
+      const pageSize = 1000;
+      
+      while (true) {
+        const { data: pageData, error } = await supabase
+          .from("VIP_RAW_12MO")
+          .select("*")
+          .range(from, from + pageSize - 1);
+          
+        if (error) throw error;
+        
+        if (!pageData || pageData.length === 0) break;
+        
+        allRecords = [...allRecords, ...pageData];
+        
+        if (pageData.length < pageSize) break; // Last page
+        
+        from += pageSize;
+      }
+      
+      const data = allRecords;
       console.log(`Raw data length: ${data?.length}`);
-      if (error) throw error;
 
       // Process monthly data for the last 12 months
       const monthlyColumns = [
