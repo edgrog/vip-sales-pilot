@@ -1,5 +1,5 @@
-import { MainAIChat } from "./MainAIChat";
+import { WholesaleDashboard } from "./WholesaleDashboard";
 
 export const Dashboard = () => {
-  return <MainAIChat />;
+  return <WholesaleDashboard />;
 };
