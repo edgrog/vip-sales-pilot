@@ -78,8 +78,9 @@ export const WholesaleDashboard = () => {
       const { data, error } = await supabase
         .from("VIP_RAW_12MO")
         .select("*")
-        .limit(2000);
+        .limit(5000); // Much higher limit
 
+      console.log(`Raw data length: ${data?.length}`);
       if (error) throw error;
 
       // Process monthly data for the last 12 months
