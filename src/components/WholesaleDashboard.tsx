@@ -78,6 +78,15 @@ export const WholesaleDashboard = () => {
         .from("VIP_RAW_12MO")
         .select("*");
 
+      // Get accurate count of active stores (more than 1 case in last 3 months)
+      const { data: activeStoresData } = await supabase
+        .from("VIP_RAW_12MO")
+        .select(`
+          "1 Month 7/1/2025 thru 7/23/2025  Case Equivs",
+          "1 Month 6/1/2025 thru 6/30/2025  Case Equivs", 
+          "1 Month 5/1/2025 thru 5/31/2025  Case Equivs"
+        `);
+
       if (error) throw error;
 
       // Process monthly data for the last 12 months
@@ -203,8 +212,8 @@ export const WholesaleDashboard = () => {
         return sum + (isNaN(totalNumVal) || totalNumVal === null ? 0 : totalNumVal);
       }, 0) || 0;
       
-      // Calculate active stores (sold more than 1 case in last 3 months)
-      const activeStoresCount = data?.filter(row => {
+      // Calculate active stores from the accurate full dataset
+      const activeStoresCount = activeStoresData?.filter(row => {
         const july2025 = parseFloat(String(row["1 Month 7/1/2025 thru 7/23/2025  Case Equivs"] || 0));
         const june2025 = parseFloat(String(row["1 Month 6/1/2025 thru 6/30/2025  Case Equivs"] || 0));
         const may2025 = parseFloat(String(row["1 Month 5/1/2025 thru 5/31/2025  Case Equivs"] || 0));
