@@ -54,7 +54,7 @@ const normalizeChainName = (retailAccount: string): string => {
 
   // Extract first word for other chains, but skip common generic words
   const firstWord = account.split(' ')[0];
-  const genericWords = ['LIQUOR', 'WINE', 'BEER', 'SPIRITS', 'MARKET', 'STORE', 'SHOP'];
+  const genericWords = ['LIQUOR', 'WINE', 'BEER', 'SPIRITS', 'MARKET', 'STORE', 'SHOP', 'THE', 'SUPER', 'CHRIS'];
   
   if (genericWords.includes(firstWord)) {
     // For generic words, try to find a more specific identifier or use full name
