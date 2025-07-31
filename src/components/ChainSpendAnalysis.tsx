@@ -10,6 +10,7 @@ export const ChainSpendAnalysis = ({
   data
 }: ChainSpendAnalysisProps) => {
   const [salesData, setSalesData] = useState<Record<string, number>>({});
+  const [accountCounts, setAccountCounts] = useState<Record<string, number>>({});
 
   // Fetch sales data for chains
   useEffect(() => {
@@ -26,6 +27,7 @@ export const ChainSpendAnalysis = ({
         
         // Process sales data by chain, grouping by broader chain categories
         const chainSalesMap: Record<string, number> = {};
+        const chainAccountsMap: Record<string, number> = {};
         
         vipData?.forEach(row => {
           const retailAccount = row["Retail Accounts"];
@@ -36,6 +38,9 @@ export const ChainSpendAnalysis = ({
             const casesNum = typeof totalCases === 'number' ? totalCases : 
                            typeof totalCases === 'string' && totalCases !== '' ? parseFloat(totalCases) : 0;
             
+            // Count accounts per chain
+            chainAccountsMap[chainCategory] = (chainAccountsMap[chainCategory] || 0) + 1;
+            
             if (!isNaN(casesNum) && casesNum > 0) {
               chainSalesMap[chainCategory] = (chainSalesMap[chainCategory] || 0) + casesNum;
             }
@@ -43,7 +48,9 @@ export const ChainSpendAnalysis = ({
         });
         
         console.log('Chain sales data:', chainSalesMap);
+        console.log('Chain accounts count:', chainAccountsMap);
         setSalesData(chainSalesMap);
+        setAccountCounts(chainAccountsMap);
       } catch (error) {
         console.error('Error fetching sales data:', error);
       }
@@ -248,14 +255,15 @@ export const ChainSpendAnalysis = ({
               <h4 className="font-semibold mb-2">High Performing Chains</h4>
               <div className="space-y-2">
                 {chartData.slice(0, 5).map((chain, index) => {
-                  // Find cases sold for this chain using direct chain name match
+                  // Find cases sold and account count for this chain using direct chain name match
                   const casesSold = salesData[chain.chain] || 0;
+                  const accountCount = accountCounts[chain.chain] || 0;
                   
                   return (
                     <div key={chain.chain} className="flex justify-between items-center p-3 border rounded-lg bg-card">
                       <span className="text-sm font-medium">{index + 1}. {chain.chain}</span>
                       <div className="text-right">
-                        <div className="grid grid-cols-2 gap-6 text-right">
+                        <div className="grid grid-cols-3 gap-4 text-right">
                           <div>
                             <div className="text-sm font-bold text-primary">${chain.spend.toLocaleString()}</div>
                             <div className="text-xs text-muted-foreground">Ad Spend</div>
@@ -263,6 +271,10 @@ export const ChainSpendAnalysis = ({
                           <div>
                             <div className="text-sm font-bold text-success">{Math.round(casesSold).toLocaleString()}</div>
                             <div className="text-xs text-muted-foreground">Cases Sold</div>
+                          </div>
+                          <div>
+                            <div className="text-sm font-bold text-info">{accountCount.toLocaleString()}</div>
+                            <div className="text-xs text-muted-foreground">Accounts</div>
                           </div>
                         </div>
                         <div className="text-xs text-muted-foreground mt-2 pt-2 border-t">
