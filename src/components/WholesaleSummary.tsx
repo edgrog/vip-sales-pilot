@@ -2,14 +2,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, Package, DollarSign, Store } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-
 interface WholesaleSummary {
   totalCases: number;
   activeStores: number;
   topChain: string;
   monthlyGrowth: number;
 }
-
 export const WholesaleSummary = () => {
   const [summary, setSummary] = useState<WholesaleSummary>({
     totalCases: 0,
@@ -18,46 +16,40 @@ export const WholesaleSummary = () => {
     monthlyGrowth: 0
   });
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     fetchWholesaleSummary();
   }, []);
-
   const fetchWholesaleSummary = async () => {
     try {
       // Fetch all records using pagination to bypass 1000 record limit
       let allRecords: any[] = [];
       let from = 0;
       const pageSize = 1000;
-      
       while (true) {
-        const { data: pageData, error } = await supabase
-          .from("VIP_RAW_12MO")
-          .select(`
+        const {
+          data: pageData,
+          error
+        } = await supabase.from("VIP_RAW_12MO").select(`
             "Retail Accounts",
             "State",
             "12 Months 8/1/2024 thru 7/23/2025  Case Equivs",
             "1 Month 7/1/2025 thru 7/23/2025  Case Equivs",
             "1 Month 6/1/2025 thru 6/30/2025  Case Equivs",
             "1 Month 5/1/2025 thru 5/31/2025  Case Equivs"
-          `)
-          .range(from, from + pageSize - 1);
-
+          `).range(from, from + pageSize - 1);
         if (error) throw error;
         if (!pageData || pageData.length === 0) break;
-        
         allRecords = [...allRecords, ...pageData];
         if (pageData.length < pageSize) break; // Last page
-        
+
         from += pageSize;
       }
-      
       const data = allRecords;
 
       // Calculate recent month total cases (July)
       const recentMonthCases = data?.reduce((sum, row) => {
         const val = row["1 Month 7/1/2025 thru 7/23/2025  Case Equivs"];
-        const numVal = typeof val === 'number' ? val : (typeof val === 'string' && val !== '' ? parseFloat(val) : 0);
+        const numVal = typeof val === 'number' ? val : typeof val === 'string' && val !== '' ? parseFloat(val) : 0;
         return sum + (isNaN(numVal) ? 0 : numVal);
       }, 0) || 0;
 
@@ -77,9 +69,7 @@ export const WholesaleSummary = () => {
         const cases = parseFloat(String(row["12 Months 8/1/2024 thru 7/23/2025  Case Equivs"] || 0));
         chainMap.set(normalizedChain, (chainMap.get(normalizedChain) || 0) + cases);
       });
-
-      const topChain = Array.from(chainMap.entries())
-        .sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
+      const topChain = Array.from(chainMap.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
 
       // Calculate monthly growth (July vs June)
       const julyTotal = data?.reduce((sum, row) => {
@@ -87,15 +77,12 @@ export const WholesaleSummary = () => {
         const numVal = parseFloat(String(val || 0));
         return sum + (isNaN(numVal) ? 0 : numVal);
       }, 0) || 0;
-
       const juneTotal = data?.reduce((sum, row) => {
         const val = row["1 Month 6/1/2025 thru 6/30/2025  Case Equivs"];
         const numVal = parseFloat(String(val || 0));
         return sum + (isNaN(numVal) ? 0 : numVal);
       }, 0) || 0;
-
-      const monthlyGrowth = juneTotal > 0 ? ((julyTotal - juneTotal) / juneTotal) * 100 : 0;
-
+      const monthlyGrowth = juneTotal > 0 ? (julyTotal - juneTotal) / juneTotal * 100 : 0;
       setSummary({
         totalCases: Math.round(recentMonthCases),
         activeStores,
@@ -108,7 +95,6 @@ export const WholesaleSummary = () => {
       setLoading(false);
     }
   };
-
   const normalizeChain = (chain: string): string => {
     if (!chain) return "Unknown";
     const c = chain.toUpperCase();
@@ -118,23 +104,18 @@ export const WholesaleSummary = () => {
     if (c.includes('HEB')) return 'HEB';
     return chain.split(' ')[0];
   };
-
   if (loading) {
-    return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i}>
+    return <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {Array.from({
+        length: 4
+      }).map((_, i) => <Card key={i}>
             <CardContent className="p-4">
               <div className="h-16 bg-muted animate-pulse rounded"></div>
             </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
+          </Card>)}
+      </div>;
   }
-
-  return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+  return <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm flex items-center gap-2">
@@ -174,19 +155,6 @@ export const WholesaleSummary = () => {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm flex items-center gap-2">
-            <TrendingUp className="h-4 w-4" />
-            Monthly Growth
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pb-4">
-          <div className={`text-2xl font-bold ${summary.monthlyGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {summary.monthlyGrowth >= 0 ? '+' : ''}{summary.monthlyGrowth.toFixed(1)}%
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
+      
+    </div>;
 };
