@@ -114,16 +114,6 @@ const Marketing = () => {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Audience Insights</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
-                    Understand your target audience with detailed demographic and behavioral data from Meta Ads.
-                  </p>
-                </CardContent>
-              </Card>
             </div>
           </TabsContent>
 
