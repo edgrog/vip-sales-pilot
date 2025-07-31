@@ -1,12 +1,64 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { MetaAd } from '@/hooks/useMetaAdsData';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 interface ChainSpendAnalysisProps {
   data: MetaAd[];
 }
 export const ChainSpendAnalysis = ({
   data
 }: ChainSpendAnalysisProps) => {
+  const [salesData, setSalesData] = useState<Record<string, number>>({});
+
+  // Fetch sales data for chains
+  useEffect(() => {
+    const fetchSalesData = async () => {
+      try {
+        const { data: vipData, error } = await supabase
+          .from("VIP_RAW_12MO")
+          .select(`
+            "Retail Accounts",
+            "12 Months 8/1/2024 thru 7/23/2025  Case Equivs"
+          `);
+        
+        if (error) throw error;
+        
+        // Process sales data by chain
+        const chainSalesMap: Record<string, number> = {};
+        
+        vipData?.forEach(row => {
+          const retailAccount = row["Retail Accounts"];
+          if (retailAccount && retailAccount !== 'Total') {
+            // Normalize chain name to match what's in ads data
+            const normalizedChain = normalizeChainName(retailAccount);
+            const totalCases = row["12 Months 8/1/2024 thru 7/23/2025  Case Equivs"];
+            const casesNum = typeof totalCases === 'number' ? totalCases : 
+                           typeof totalCases === 'string' && totalCases !== '' ? parseFloat(totalCases) : 0;
+            
+            if (!isNaN(casesNum) && casesNum > 0) {
+              chainSalesMap[normalizedChain] = (chainSalesMap[normalizedChain] || 0) + casesNum;
+            }
+          }
+        });
+        
+        setSalesData(chainSalesMap);
+      } catch (error) {
+        console.error('Error fetching sales data:', error);
+      }
+    };
+
+    fetchSalesData();
+  }, []);
+
+  // Helper function to normalize chain names
+  const normalizeChainName = (chainName: string): string => {
+    return chainName.toLowerCase()
+      .replace(/[^a-z0-9]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
   // First pass: calculate base spend and impressions for each chain (excluding General)
   const baseChainSpend = {} as Record<string, number>;
   const baseChainImpressions = {} as Record<string, number>;
@@ -189,13 +241,30 @@ export const ChainSpendAnalysis = ({
             <div>
               <h4 className="font-semibold mb-2">High Performing Chains</h4>
               <div className="space-y-2">
-                {chartData.slice(0, 5).map((chain, index) => <div key={chain.chain} className="flex justify-between items-center">
-                    <span className="text-sm">{index + 1}. {chain.chain}</span>
-                    <div className="text-right">
-                      <div className="text-sm font-medium">${chain.spend.toLocaleString()}</div>
-                      <div className="text-xs text-muted-foreground">{chain.impressions.toLocaleString()} impressions</div>
+                {chartData.slice(0, 5).map((chain, index) => {
+                  // Find cases sold for this chain
+                  const normalizedChainName = normalizeChainName(chain.chain);
+                  const casesSold = salesData[normalizedChainName] || 0;
+                  
+                  return (
+                    <div key={chain.chain} className="flex justify-between items-center">
+                      <span className="text-sm">{index + 1}. {chain.chain}</span>
+                      <div className="text-right">
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <div className="text-sm font-medium">${chain.spend.toLocaleString()}</div>
+                            <div className="text-xs text-muted-foreground">Ad Spend</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-medium">{Math.round(casesSold).toLocaleString()}</div>
+                            <div className="text-xs text-muted-foreground">Cases Sold</div>
+                          </div>
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">{chain.impressions.toLocaleString()} impressions</div>
+                      </div>
                     </div>
-                  </div>)}
+                  );
+                })}
               </div>
             </div>
             
