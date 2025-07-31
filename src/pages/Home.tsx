@@ -15,9 +15,6 @@ const Home = () => {
               alt="Grog One" 
               className="h-24 w-auto mx-auto mb-6"
             />
-            <p className="text-xl text-muted-foreground">
-              Choose your platform to get started
-            </p>
           </div>
         
         <div className="grid md:grid-cols-3 gap-6">
