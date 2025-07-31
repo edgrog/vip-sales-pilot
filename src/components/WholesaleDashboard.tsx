@@ -50,6 +50,7 @@ const normalizeChainName = (retailAccount: string): string => {
   if (account.includes('CVS')) return 'CVS';
   if (account.includes('WALGREENS')) return 'Walgreens';
   if (account.includes('7 ELEVEN') || account.includes('7-ELEVEN')) return '7-Eleven';
+  if (account.includes('BEVERAGES')) return 'BevMo';
   
   // Extract first word for other chains
   return account.split(' ')[0];
