@@ -42,6 +42,7 @@ const normalizeChainName = (retailAccount: string): string => {
   if (account.includes('WALMART')) return 'Walmart';
   if (account.includes('TARGET')) return 'Target';
   if (account.includes('KROGER')) return 'Kroger';
+  if (account.includes('BINNY') || account.includes('BINNYS')) return 'Binny\'s';
   if (account.includes('SAFEWAY')) return 'Safeway';
   if (account.includes('PUBLIX')) return 'Publix';
   if (account.includes('COSTCO')) return 'Costco';
