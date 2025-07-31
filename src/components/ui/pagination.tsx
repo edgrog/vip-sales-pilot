@@ -1,5 +1,6 @@
 import * as React from "react"
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react"
+import { Link } from "react-router-dom"
 
 import { cn } from "@/lib/utils"
 import { ButtonProps, buttonVariants } from "@/components/ui/button"
@@ -36,27 +37,51 @@ PaginationItem.displayName = "PaginationItem"
 
 type PaginationLinkProps = {
   isActive?: boolean
-} & Pick<ButtonProps, "size"> &
-  React.ComponentProps<"a">
+  to?: string
+} & Pick<ButtonProps, "size"> & (
+  | ({ to: string } & Omit<React.ComponentProps<typeof Link>, "to">)
+  | ({ to?: never } & React.ComponentProps<"button">)
+)
 
 const PaginationLink = ({
   className,
   isActive,
   size = "icon",
+  to,
+  children,
   ...props
-}: PaginationLinkProps) => (
-  <a
-    aria-current={isActive ? "page" : undefined}
-    className={cn(
-      buttonVariants({
-        variant: isActive ? "outline" : "ghost",
-        size,
-      }),
-      className
-    )}
-    {...props}
-  />
-)
+}: PaginationLinkProps) => {
+  const baseClassName = cn(
+    buttonVariants({
+      variant: isActive ? "outline" : "ghost",
+      size,
+    }),
+    className
+  )
+  
+  if (to) {
+    return (
+      <Link
+        to={to}
+        aria-current={isActive ? "page" : undefined}
+        className={baseClassName}
+        {...(props as Omit<React.ComponentProps<typeof Link>, "to" | "className">)}
+      >
+        {children}
+      </Link>
+    )
+  }
+  
+  return (
+    <button
+      aria-current={isActive ? "page" : undefined}
+      className={baseClassName}
+      {...(props as React.ComponentProps<"button">)}
+    >
+      {children}
+    </button>
+  )
+}
 PaginationLink.displayName = "PaginationLink"
 
 const PaginationPrevious = ({
