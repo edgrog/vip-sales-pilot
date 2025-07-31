@@ -146,11 +146,7 @@ export const useAdsDashboardData = () => {
       // Calculate monthly metrics starting with all months that have sales data
       const { data: salesByMonth, error: salesError } = await supabase
         .from("VIP_RAW_12MO")
-        .select(`
-          "1 Month 5/1/2025 thru 5/31/2025  Case Equivs",
-          "1 Month 6/1/2025 thru 6/30/2025  Case Equivs", 
-          "1 Month 7/1/2025 thru 7/23/2025  Case Equivs"
-        `);
+        .select("*");
 
       if (salesError) {
         console.error("Sales data error:", salesError);
