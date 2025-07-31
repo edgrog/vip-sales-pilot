@@ -203,10 +203,17 @@ export const WholesaleDashboard = () => {
         return sum + (isNaN(totalNumVal) || totalNumVal === null ? 0 : totalNumVal);
       }, 0) || 0;
       
-      const totalStoresSum = data?.length || 0; // Total number of store records
+      // Calculate active stores (sold more than 1 case in last 3 months)
+      const activeStoresCount = data?.filter(row => {
+        const july2025 = parseFloat(String(row["1 Month 7/1/2025 thru 7/23/2025  Case Equivs"] || 0));
+        const june2025 = parseFloat(String(row["1 Month 6/1/2025 thru 6/30/2025  Case Equivs"] || 0));
+        const may2025 = parseFloat(String(row["1 Month 5/1/2025 thru 5/31/2025  Case Equivs"] || 0));
+        const last3MonthsCases = july2025 + june2025 + may2025;
+        return last3MonthsCases > 1;
+      }).length || 0;
       
       setTotalCases(Math.round(totalCasesSum));
-      setTotalStores(totalStoresSum);
+      setTotalStores(activeStoresCount);
 
     } catch (error) {
       console.error("Error fetching wholesale data:", error);
