@@ -23,6 +23,7 @@ interface StateData {
   state: string;
   totalCases: number;
   chains: number;
+  stores: number;
 }
 interface StoreBreakdown {
   storeName: string;
@@ -247,19 +248,23 @@ export const WholesaleDashboard = () => {
       const stateMap = new Map<string, {
         total: number;
         chains: Set<string>;
+        stores: Set<string>;
       }>();
       data?.forEach(row => {
         const state = row["State"] || "Unknown";
         const rawChain = row["Retail Accounts"] || "Unknown";
         const normalizedChain = normalizeChainName(rawChain);
+        const storeKey = `${rawChain}-${state}`;
         if (!stateMap.has(state)) {
           stateMap.set(state, {
             total: 0,
-            chains: new Set()
+            chains: new Set(),
+            stores: new Set()
           });
         }
         const stateInfo = stateMap.get(state)!;
         stateInfo.chains.add(normalizedChain);
+        stateInfo.stores.add(storeKey);
         const totalVal = row["12 Months 8/1/2024 thru 7/23/2025  Case Equivs"];
         const totalNumVal = typeof totalVal === 'number' ? totalVal : typeof totalVal === 'string' && totalVal !== '' && totalVal !== null ? parseFloat(totalVal) : 0;
         stateInfo.total += isNaN(totalNumVal) || totalNumVal === null ? 0 : totalNumVal;
@@ -267,7 +272,8 @@ export const WholesaleDashboard = () => {
       const stateResults: StateData[] = Array.from(stateMap.entries()).map(([state, info]) => ({
         state,
         totalCases: Math.round(info.total),
-        chains: info.chains.size
+        chains: info.chains.size,
+        stores: info.stores.size
       })).sort((a, b) => b.totalCases - a.totalCases).slice(0, 15);
       setStateData(stateResults);
 
@@ -606,19 +612,25 @@ export const WholesaleDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {stateData.map((state, index) => <div key={state.state} className="flex items-center justify-between p-2 border rounded">
+                  {stateData.map((state, index) => (
+                    <div key={state.state} className="flex items-center justify-between p-3 border rounded">
                       <div className="flex items-center gap-3">
                         <span className="text-sm font-bold w-6">#{index + 1}</span>
                         <div>
                           <p className="font-medium">{state.state}</p>
-                          <p className="text-xs text-muted-foreground">{state.chains} chains</p>
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                            <span>{state.chains} chains</span>
+                            <span>•</span>
+                            <span>{state.stores} stores</span>
+                          </div>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className="font-bold">{state.totalCases.toLocaleString()}</p>
                         <p className="text-xs text-muted-foreground">cases</p>
                       </div>
-                    </div>)}
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
