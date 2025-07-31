@@ -30,10 +30,7 @@ export function AppSidebar() {
     isActive ? "bg-primary text-primary-foreground font-medium" : "hover:bg-muted/50";
 
   return (
-    <Sidebar
-      className="w-60"
-      collapsible="icon"
-    >
+    <Sidebar className="w-60">
       <SidebarContent>
         {/* Logo Section */}
         <div className="p-4 border-b">
