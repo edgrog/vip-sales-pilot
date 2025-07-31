@@ -77,6 +77,9 @@ const Marketing = () => {
           </TabsContent>
 
           <TabsContent value="campaign-analysis" className="space-y-6">
+            {/* Campaign Performance Breakdown */}
+            <MetaAdsTable data={data} loading={loading} error={error} onRefresh={refetch} onAdUpdate={updateAd} />
+
             {/* Fatigued Ads Analysis */}
             <Card>
               <CardHeader>
@@ -132,9 +135,6 @@ const Marketing = () => {
                 )}
               </CardContent>
             </Card>
-
-            {/* Campaign Performance Breakdown */}
-            <MetaAdsTable data={data} loading={loading} error={error} onRefresh={refetch} onAdUpdate={updateAd} />
           </TabsContent>
 
           <TabsContent value="chains" className="space-y-6">
