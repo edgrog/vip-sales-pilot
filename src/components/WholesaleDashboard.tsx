@@ -52,8 +52,25 @@ const normalizeChainName = (retailAccount: string): string => {
   if (account.includes('7 ELEVEN') || account.includes('7-ELEVEN')) return '7-Eleven';
   if (account.includes('BEVERAGES')) return 'BevMo';
 
-  // Extract first word for other chains
-  return account.split(' ')[0];
+  // Extract first word for other chains, but skip common generic words
+  const firstWord = account.split(' ')[0];
+  const genericWords = ['LIQUOR', 'WINE', 'BEER', 'SPIRITS', 'MARKET', 'STORE', 'SHOP'];
+  
+  if (genericWords.includes(firstWord)) {
+    // For generic words, try to find a more specific identifier or use full name
+    const words = account.split(' ');
+    if (words.length > 1) {
+      // Look for a more specific second word or use the first two words
+      const secondWord = words[1];
+      if (secondWord && !genericWords.includes(secondWord)) {
+        return `${firstWord} ${secondWord}`;
+      }
+    }
+    // If no better identifier, use the full name (truncated if too long)
+    return account.length > 20 ? account.substring(0, 20) + '...' : account;
+  }
+  
+  return firstWord;
 };
 export const WholesaleDashboard = () => {
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
