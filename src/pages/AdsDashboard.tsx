@@ -7,12 +7,36 @@ import { ArrowLeft, DollarSign, TrendingUp, Target, BarChart3 } from "lucide-rea
 import { AdsDashboardTable } from "@/components/AdsDashboardTable";
 import { AdsDashboardChart } from "@/components/AdsDashboardChart";
 import { AdsPerformanceMetrics } from "@/components/AdsPerformanceMetrics";
+import { useAdsDashboardData } from "@/hooks/useAdsDashboardData";
 
 const AdsDashboard = () => {
   const navigate = useNavigate();
+  const { monthlyMetrics, loading } = useAdsDashboardData();
   const [selectedMonth, setSelectedMonth] = useState<string>("");
   const [selectedChain, setSelectedChain] = useState<string>("");
   const [sortBy, setSortBy] = useState<"spend" | "sales" | "cost_per_case">("spend");
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-center h-64">
+            Loading ads dashboard data...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Calculate totals from real data
+  const totalSpend = monthlyMetrics.reduce((sum, month) => sum + month.total_spend, 0);
+  const totalCases = monthlyMetrics.reduce((sum, month) => sum + month.total_cases, 0);
+  const avgCostPerCase = totalCases > 0 ? totalSpend / totalCases : 0;
+  
+  // Calculate ROAS (Return on Ad Spend) - assuming $50 average selling price per case
+  const avgSellingPrice = 50; // You can adjust this based on your actual product pricing
+  const totalRevenue = totalCases * avgSellingPrice;
+  const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0;
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -34,9 +58,9 @@ const AdsDashboard = () => {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">$125,480</div>
+              <div className="text-2xl font-bold">${totalSpend.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
               <p className="text-xs text-muted-foreground">
-                Last 90 days
+                All-time campaign spend
               </p>
             </CardContent>
           </Card>
@@ -47,7 +71,7 @@ const AdsDashboard = () => {
               <Target className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">$8.42</div>
+              <div className="text-2xl font-bold">${avgCostPerCase.toFixed(2)}</div>
               <p className="text-xs text-muted-foreground">
                 Average efficiency
               </p>
@@ -60,9 +84,9 @@ const AdsDashboard = () => {
               <BarChart3 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">14,908</div>
+              <div className="text-2xl font-bold">{totalCases.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">
-                From ad campaigns
+                Total cases influenced by ads
               </p>
             </CardContent>
           </Card>
@@ -73,7 +97,7 @@ const AdsDashboard = () => {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">3.2x</div>
+              <div className="text-2xl font-bold">{roas.toFixed(1)}x</div>
               <p className="text-xs text-muted-foreground">
                 Return on ad spend
               </p>
