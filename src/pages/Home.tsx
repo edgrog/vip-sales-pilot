@@ -2,18 +2,46 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { ShoppingCart, Megaphone, BarChart3 } from "lucide-react";
+import { WholesaleSummary } from "@/components/WholesaleSummary";
+import { MarketingSummary } from "@/components/MarketingSummary";
 
 const Home = () => {
   const navigate = useNavigate();
-  return <div className="max-w-4xl mx-auto flex items-center justify-center min-h-[calc(100vh-200px)]">
-        <div className="w-full">
-          <div className="text-center mb-12">
-            <img 
-              src="/lovable-uploads/16b7eb00-ca19-4bc1-96c7-0ea3abc83cb2.png" 
-              alt="Grog One" 
-              className="h-24 w-auto mx-auto mb-6"
-            />
-          </div>
+  return <div className="max-w-7xl mx-auto space-y-8">
+    <div className="text-center">
+      <img 
+        src="/lovable-uploads/16b7eb00-ca19-4bc1-96c7-0ea3abc83cb2.png" 
+        alt="Grog One" 
+        className="h-20 w-auto mx-auto mb-4"
+      />
+      <h1 className="text-3xl font-bold mb-2">Grog One Dashboard</h1>
+      <p className="text-muted-foreground">Your business performance at a glance</p>
+    </div>
+
+    {/* Wholesale Summary */}
+    <div>
+      <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+        <ShoppingCart className="h-5 w-5" />
+        Wholesale Overview
+      </h2>
+      <WholesaleSummary />
+    </div>
+
+    {/* Marketing Summary */}
+    <div>
+      <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+        <Megaphone className="h-5 w-5" />
+        Marketing Overview
+      </h2>
+      <MarketingSummary />
+    </div>
+
+    {/* Navigation Cards */}
+    <div>
+      <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+        <BarChart3 className="h-5 w-5" />
+        Quick Access
+      </h2>
         
         <div className="grid md:grid-cols-3 gap-6">
           <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer" onClick={() => navigate('/wholesale')}>
@@ -61,7 +89,8 @@ const Home = () => {
             </CardContent>
           </Card>
         </div>
-        </div>
-      </div>;
+    </div>
+  </div>;
 };
+
 export default Home;
