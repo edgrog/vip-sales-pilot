@@ -30,12 +30,13 @@ export function AppSidebar() {
     <Sidebar className="w-60">
       <SidebarContent>
         {/* Logo Section */}
-        <div className="p-4 border-b">
+        <div className="p-4 border-b flex items-center gap-3">
           <img 
             src="/lovable-uploads/35335937-5c7f-4001-b9f4-0aee06feaf2f.png" 
             alt="Grog One Logo" 
             className="h-8 w-auto"
           />
+          <span className="text-lg font-semibold">Grog One</span>
         </div>
 
         <SidebarGroup>
