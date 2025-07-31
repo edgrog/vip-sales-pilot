@@ -33,6 +33,12 @@ const AdsDashboard = () => {
   const totalCases = monthlyMetrics.reduce((sum, month) => sum + month.total_cases, 0);
   const avgCostPerCase = totalCases > 0 ? totalSpend / totalCases : 0;
   
+  // Calculate monthly spend per case sold (most recent month)
+  const currentMonth = monthlyMetrics.length > 0 
+    ? monthlyMetrics.sort((a, b) => b.month.localeCompare(a.month))[0]
+    : { total_spend: 0, total_cases: 0, avg_spend_per_case: 0 };
+  const monthlySpendPerCase = currentMonth.total_cases > 0 ? currentMonth.total_spend / currentMonth.total_cases : 0;
+  
   // Calculate ROAS (Return on Ad Spend) - assuming $50 average selling price per case
   const avgSellingPrice = 50; // You can adjust this based on your actual product pricing
   const totalRevenue = totalCases * avgSellingPrice;
@@ -80,13 +86,13 @@ const AdsDashboard = () => {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Cases Sold</CardTitle>
+              <CardTitle className="text-sm font-medium">Monthly Spend per Case</CardTitle>
               <BarChart3 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalCases.toLocaleString()}</div>
+              <div className="text-2xl font-bold">${monthlySpendPerCase.toFixed(2)}</div>
               <p className="text-xs text-muted-foreground">
-                Total cases influenced by ads
+                Current month efficiency
               </p>
             </CardContent>
           </Card>

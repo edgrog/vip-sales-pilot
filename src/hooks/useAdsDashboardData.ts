@@ -162,62 +162,42 @@ export const useAdsDashboardData = () => {
         console.log("Sample values:", salesByMonth[0]);
       }
 
-      // Initialize monthly data with sales data for May, June, July
+      // Initialize monthly data with sales data for all 12 months (Aug 2024 - Jul 2025)
+      const monthlyColumns = [
+        { col: "1 Month 8/1/2024 thru 8/31/2024  Case Equivs", month: "2024-08", name: "Aug 2024" },
+        { col: "1 Month 9/1/2024 thru 9/30/2024  Case Equivs", month: "2024-09", name: "Sep 2024" },
+        { col: "1 Month 10/1/2024 thru 10/31/2024  Case Equivs", month: "2024-10", name: "Oct 2024" },
+        { col: "1 Month 11/1/2024 thru 11/30/2024  Case Equivs", month: "2024-11", name: "Nov 2024" },
+        { col: "1 Month 12/1/2024 thru 12/31/2024  Case Equivs", month: "2024-12", name: "Dec 2024" },
+        { col: "1 Month 1/1/2025 thru 1/31/2025  Case Equivs", month: "2025-01", name: "Jan 2025" },
+        { col: "1 Month 2/1/2025 thru 2/28/2025  Case Equivs", month: "2025-02", name: "Feb 2025" },
+        { col: "1 Month 3/1/2025 thru 3/31/2025  Case Equivs", month: "2025-03", name: "Mar 2025" },
+        { col: "1 Month 4/1/2025 thru 4/30/2025  Case Equivs", month: "2025-04", name: "Apr 2025" },
+        { col: "1 Month 5/1/2025 thru 5/31/2025  Case Equivs", month: "2025-05", name: "May 2025" },
+        { col: "1 Month 6/1/2025 thru 6/30/2025  Case Equivs", month: "2025-06", name: "Jun 2025" },
+        { col: "1 Month 7/1/2025 thru 7/23/2025  Case Equivs", month: "2025-07", name: "Jul 2025" }
+      ];
+
       const monthlyData: { [key: string]: MonthlyMetrics } = {};
       
-      // Add May data (sales but no spend)
-      const maySales = salesByMonth?.reduce((sum, row) => {
-        const val = row["1 Month 5/1/2025 thru 5/31/2025  Case Equivs"];
-        console.log("May value for row:", val, typeof val);
-        const numVal = typeof val === 'number' ? val : (typeof val === 'string' && val !== '' && val !== null ? parseFloat(val) : 0);
-        return sum + (isNaN(numVal) || numVal === null ? 0 : numVal);
-      }, 0) || 0;
-      
-      console.log("May sales total:", maySales);
-      
-      monthlyData["2025-05"] = {
-        month: "2025-05",
-        total_spend: 0,
-        total_cases: maySales,
-        avg_spend_per_case: 0,
-        ad_count: 0
-      };
-
-      // Add June data (sales but no spend initially)
-      const juneSales = salesByMonth?.reduce((sum, row) => {
-        const val = row["1 Month 6/1/2025 thru 6/30/2025  Case Equivs"];
-        console.log("June value for row:", val, typeof val);
-        const numVal = typeof val === 'number' ? val : (typeof val === 'string' && val !== '' && val !== null ? parseFloat(val) : 0);
-        return sum + (isNaN(numVal) || numVal === null ? 0 : numVal);
-      }, 0) || 0;
-      
-      console.log("June sales total:", juneSales);
-      
-      monthlyData["2025-06"] = {
-        month: "2025-06",
-        total_spend: 0,
-        total_cases: juneSales,
-        avg_spend_per_case: 0,
-        ad_count: 0
-      };
-
-      // Add July data (sales but no spend initially)
-      const julySales = salesByMonth?.reduce((sum, row) => {
-        const val = row["1 Month 7/1/2025 thru 7/23/2025  Case Equivs"];
-        console.log("July value for row:", val, typeof val);
-        const numVal = typeof val === 'number' ? val : (typeof val === 'string' && val !== '' && val !== null ? parseFloat(val) : 0);
-        return sum + (isNaN(numVal) || numVal === null ? 0 : numVal);
-      }, 0) || 0;
-      
-      console.log("July sales total:", julySales);
-      
-      monthlyData["2025-07"] = {
-        month: "2025-07",
-        total_spend: 0,
-        total_cases: julySales,
-        avg_spend_per_case: 0,
-        ad_count: 0
-      };
+      // Initialize all 12 months with sales data
+      monthlyColumns.forEach(({ col, month, name }) => {
+        const monthlySales = salesByMonth?.reduce((sum, row) => {
+          const val = row[col];
+          const numVal = typeof val === 'number' ? val : (typeof val === 'string' && val !== '' && val !== null ? parseFloat(val) : 0);
+          return sum + (isNaN(numVal) || numVal === null ? 0 : numVal);
+        }, 0) || 0;
+        
+        console.log(`${name} sales total:`, monthlySales);
+        
+        monthlyData[month] = {
+          month,
+          total_spend: 0,
+          total_cases: monthlySales,
+          avg_spend_per_case: 0,
+          ad_count: 0
+        };
+      });
 
       // Now add ad spend data to existing months
       monthlyAdData.forEach(item => {
