@@ -32,9 +32,9 @@ export function AppSidebar() {
         {/* Logo Section */}
         <div className="p-4 border-b">
           <img 
-            src="/lovable-uploads/16b7eb00-ca19-4bc1-96c7-0ea3abc83cb2.png" 
+            src="/lovable-uploads/35335937-5c7f-4001-b9f4-0aee06feaf2f.png" 
             alt="Grog One Logo" 
-            className="h-12 w-auto"
+            className="h-8 w-auto"
           />
         </div>
 
