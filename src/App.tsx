@@ -13,7 +13,7 @@ import AdsDashboard from "./pages/AdsDashboard";
 import AccountOverview from "./pages/AccountOverview";
 import ChainOverview from "./pages/ChainOverview";
 import Settings from "./pages/Settings";
-import Auth from "./pages/Auth";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,7 +26,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/auth" element={<Auth />} />
+            
             <Route path="/" element={<ProtectedRoute><Layout><Home /></Layout></ProtectedRoute>} />
             <Route path="/home" element={<ProtectedRoute><Layout><Home /></Layout></ProtectedRoute>} />
             <Route path="/wholesale" element={<Layout><Index /></Layout>} />
